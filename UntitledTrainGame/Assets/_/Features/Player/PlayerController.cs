@@ -14,13 +14,18 @@ namespace Player.Runtime
         
         #region Private
         // Private Variables
+        
+        // References
         private CharacterController _characterController;
-
         private GDControlPanel _controlPanel;
+        private Transform _cameraTransform;
         
+        // Movement Variables
         private float _turnSmoothVelocity;
-        
         private Vector2 _inputMove;
+        private float _moveSpeed;
+        private float _turnSmoothTime;
+        
         // Private Variables
         #endregion
         
@@ -37,6 +42,10 @@ namespace Player.Runtime
         {
             _characterController = GetComponent<CharacterController>();
             _controlPanel = GDControlPanel.Instance;
+            _cameraTransform = Camera.main.transform;
+            _inputMove = Vector2.zero;
+            _moveSpeed = _controlPanel.PlayerMoveSpeed;
+            _turnSmoothTime = _controlPanel.TurnSmoothTime;
         }
 
         // Update is called once per frame
@@ -55,17 +64,28 @@ namespace Player.Runtime
 
         private void HandleMovement()
         {
-            var speed = _controlPanel.PlayerMoveSpeed;
-            var turnSmoothTime = _controlPanel.TurnSmoothTime;
+            // var speed = _controlPanel.PlayerMoveSpeed;
+            // var turnSmoothTime = _controlPanel.TurnSmoothTime;
             var direction = new Vector3(_inputMove.x, 0f, _inputMove.y).normalized;
+            
+            var forward = _cameraTransform.forward;
+            var right = _cameraTransform.right;
+            
+            forward.y = 0f;
+            right.y = 0f;
+            forward.Normalize();
+            right.Normalize();
+            
+            direction = right * _inputMove.x + forward * _inputMove.y;
+            direction = direction.normalized;
 
             if (!(direction.magnitude >= 0.1f)) return;
             float targetAngle = Mathf.Atan2(direction.x, direction.z) * Mathf.Rad2Deg;
-            float angle = Mathf.SmoothDampAngle(transform.eulerAngles.y, targetAngle, ref _turnSmoothVelocity, turnSmoothTime);
+            float angle = Mathf.SmoothDampAngle(transform.eulerAngles.y, targetAngle, ref _turnSmoothVelocity, _turnSmoothTime);
                 
             transform.rotation = Quaternion.Euler(0f, angle, 0f);
 
-            _characterController.Move(direction * (speed * Time.deltaTime));
+            _characterController.Move(direction * (_moveSpeed * Time.deltaTime));
         }
 
         #endregion
