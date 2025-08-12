@@ -10,12 +10,20 @@ namespace SharedData.Runtime
         #region Private
         // Private Variables
         
+        [Header("Player Movement")]
+        [SerializeField] private float _playerMoveSpeed = 3f;
+        
+        [SerializeField, Range(0,1)] private float _turnSmoothTime = .1f;
+        
         // Private Variables
         #endregion
 
         #region Public
         // Public Variables
         public static GDControlPanel Instance { get; private set; } 
+        
+        public float PlayerMoveSpeed => _playerMoveSpeed;
+        public float TurnSmoothTime => _turnSmoothTime;
         // Public Variables
         #endregion
         
