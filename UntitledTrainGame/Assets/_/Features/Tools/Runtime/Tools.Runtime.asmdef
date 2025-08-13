@@ -1,0 +1,18 @@
+{
+    "name": "Tools.Runtime",
+    "rootNamespace": "Tools.Runtime",
+    "references": [
+        "GUID:0c859d0963fcc454baed7e047bb40422",
+        "GUID:70ee7783ecf9646f99ae250415f2a80b",
+        "GUID:4307f53044263cf4b835bd812fc161a4"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
