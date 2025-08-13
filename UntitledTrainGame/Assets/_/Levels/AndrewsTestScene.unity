@@ -238,7 +238,6 @@ GameObject:
   - component: {fileID: 57333214}
   - component: {fileID: 57333216}
   - component: {fileID: 57333217}
-  - component: {fileID: 57333218}
   m_Layer: 0
   m_Name: CM VirtualCam
   m_TagString: Untagged
@@ -333,25 +332,6 @@ MonoBehaviour:
     Time: 0
     Smoothing: 0
     IgnoreY: 0
---- !u!114 &57333218
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 57333213}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0544e7b14d134a1449e61175446cfb95, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  ApplyAfter: 3
-  Tilt: 0
-  Pan: 0
-  Dutch: 0
-  ZoomScale: 1
-  FollowAttachment: 1
-  LookAtAttachment: 1
 --- !u!1 &330585543
 GameObject:
   m_ObjectHideFlags: 0

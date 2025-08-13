@@ -85,6 +85,8 @@ namespace Player.Runtime
                 
             transform.rotation = Quaternion.Euler(0f, angle, 0f);
 
+            // Apply gravity to player
+            direction.y = -2f;
             _characterController.Move(direction * (_moveSpeed * Time.deltaTime));
         }
 
