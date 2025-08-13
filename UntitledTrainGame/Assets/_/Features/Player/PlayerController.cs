@@ -1,3 +1,4 @@
+using System;
 using Foundation.Runtime;
 using SharedData.Runtime;
 using UnityEngine;
@@ -37,6 +38,12 @@ namespace Player.Runtime
         #endregion
         
         #region Unity API
+
+        private void Awake()
+        {
+            SetFact("playerTransform", transform, false);
+        }
+
         // Start is called once before the first execution of Update after the MonoBehaviour is created
         void Start()
         {
@@ -46,6 +53,7 @@ namespace Player.Runtime
             _inputMove = Vector2.zero;
             _moveSpeed = _controlPanel.PlayerMoveSpeed;
             _turnSmoothTime = _controlPanel.TurnSmoothTime;
+            
         }
 
         // Update is called once per frame
