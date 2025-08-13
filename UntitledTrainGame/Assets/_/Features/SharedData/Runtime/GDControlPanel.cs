@@ -18,6 +18,7 @@ namespace SharedData.Runtime
         [Header("Camera Settings")]
         [SerializeField, Range(0,1f)] private float _edgeThresholdY = 0.1f; 
         [SerializeField, Range(0,1f)] private float _edgeThresholdX = 0.1f;
+        [SerializeField, Range(0,10f)] private float _markerDistanceThreshold = 5f;
         [SerializeField, Range(0,45f)] private float _maxRotationAngle = 10f;
         [SerializeField, Range(0,10f)] private float _rotationSpeed = 2f;
         
@@ -32,6 +33,7 @@ namespace SharedData.Runtime
         public float TurnSmoothTime => _turnSmoothTime;
         public float EdgeThresholdY => _edgeThresholdY;
         public float EdgeThresholdX => _edgeThresholdX;
+        public float MarkerDistanceThreshold => _markerDistanceThreshold;
         public float MaxRotationAngle => _maxRotationAngle;
         public float RotationSpeed => _rotationSpeed;
         // Public Variables

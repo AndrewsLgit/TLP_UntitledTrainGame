@@ -10,6 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1337632031483756321}
   - component: {fileID: 6582457916932893155}
+  - component: {fileID: 1011655273124440827}
   m_Layer: 0
   m_Name: p_GameManager
   m_TagString: Untagged
@@ -49,5 +50,19 @@ MonoBehaviour:
   _turnSmoothTime: 0.1
   _edgeThresholdY: 0.05
   _edgeThresholdX: 0.2
+  _markerDistanceThreshold: 2
   _maxRotationAngle: 10
   _rotationSpeed: 0.3
+--- !u!114 &1011655273124440827
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1013627989509777286}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5b80e0f61907471f96f9b717daacecef, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_isVerbose: 0
