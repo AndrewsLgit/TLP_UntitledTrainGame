@@ -213,7 +213,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1473515850565564644}
   - component: {fileID: 8055168800424694023}
-  - component: {fileID: 628259421859550838}
+  - component: {fileID: 1194035894143503703}
   m_Layer: 0
   m_Name: CM VirtualCam
   m_TagString: Untagged
@@ -279,7 +279,7 @@ MonoBehaviour:
       BarrelClipping: 0.25
       Anamorphism: 0
   BlendHint: 0
---- !u!114 &628259421859550838
+--- !u!114 &1194035894143503703
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -288,23 +288,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 7894005049182909373}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f38bda98361e1de48a4ca2bd86ea3c17, type: 3}
+  m_Script: {fileID: 11500000, guid: 0c5037ed171e145fd880dc4ac2fa001a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Composition:
-    ScreenPosition: {x: 0.00000016391277, y: 0.000000029802322}
-    DeadZone:
-      Enabled: 1
-      Size: {x: 0.7, y: 0.9181816}
-    HardLimits:
-      Enabled: 0
-      Size: {x: 1.45, y: 0.9181816}
-      Offset: {x: 0, y: 0}
-  CenterOnActivate: 1
-  TargetOffset: {x: 0.1, y: 0, z: 0}
-  Damping: {x: 0.5, y: 0.5}
-  Lookahead:
-    Enabled: 0
-    Time: 0
-    Smoothing: 0
-    IgnoreY: 0
+  m_isVerbose: 1

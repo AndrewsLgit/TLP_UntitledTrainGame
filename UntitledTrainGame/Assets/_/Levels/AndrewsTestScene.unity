@@ -348,11 +348,6 @@ MonoBehaviour:
   m_LightCookieSize: {x: 1, y: 1}
   m_LightCookieOffset: {x: 0, y: 0}
   m_SoftShadowQuality: 1
---- !u!4 &668510904 stripped
-Transform:
-  m_CorrespondingSourceObject: {fileID: 6131279136529223855, guid: 8c805c8124b7d45ad8710bb3004271f3, type: 3}
-  m_PrefabInstance: {fileID: 8359763119126900059}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1 &832575517
 GameObject:
   m_ObjectHideFlags: 0
@@ -563,10 +558,6 @@ PrefabInstance:
       propertyPath: m_Name
       value: ---- Cinemachine ----
       objectReference: {fileID: 0}
-    - target: {fileID: 8055168800424694023, guid: 82d03e6e8734d46a69cac0fe5e2f0bed, type: 3}
-      propertyPath: Target.TrackingTarget
-      value: 
-      objectReference: {fileID: 668510904}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -640,22 +631,6 @@ PrefabInstance:
     - target: {fileID: 5092453341363809159, guid: 8c805c8124b7d45ad8710bb3004271f3, type: 3}
       propertyPath: m_Name
       value: Player
-      objectReference: {fileID: 0}
-    - target: {fileID: 6020351398471558277, guid: 8c805c8124b7d45ad8710bb3004271f3, type: 3}
-      propertyPath: m_ActionEvents.Array.data[0].m_PersistentCalls.m_Calls.Array.data[0].m_Mode
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 6020351398471558277, guid: 8c805c8124b7d45ad8710bb3004271f3, type: 3}
-      propertyPath: m_ActionEvents.Array.data[0].m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
-      value: Move
-      objectReference: {fileID: 0}
-    - target: {fileID: 6020351398471558277, guid: 8c805c8124b7d45ad8710bb3004271f3, type: 3}
-      propertyPath: m_ActionEvents.Array.data[0].m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
-      value: Player.Runtime.PlayerController, Player.Runtime
-      objectReference: {fileID: 0}
-    - target: {fileID: 6020351398471558277, guid: 8c805c8124b7d45ad8710bb3004271f3, type: 3}
-      propertyPath: m_ActionEvents.Array.data[0].m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_ObjectArgumentAssemblyTypeName
-      value: UnityEngine.Object, UnityEngine
       objectReference: {fileID: 0}
     - target: {fileID: 6131279136529223855, guid: 8c805c8124b7d45ad8710bb3004271f3, type: 3}
       propertyPath: m_LocalPosition.x

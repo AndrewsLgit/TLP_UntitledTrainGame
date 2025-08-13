@@ -47,3 +47,7 @@ MonoBehaviour:
   m_isVerbose: 0
   _playerMoveSpeed: 6
   _turnSmoothTime: 0.1
+  _edgeThresholdY: 0.05
+  _edgeThresholdX: 0.2
+  _maxRotationAngle: 10
+  _rotationSpeed: 0.3
