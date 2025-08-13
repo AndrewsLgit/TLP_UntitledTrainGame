@@ -46,13 +46,13 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_isVerbose: 0
-  _playerMoveSpeed: 6
-  _turnSmoothTime: 0.1
+  _playerMoveSpeed: 5
+  _turnSmoothTime: 0.08
   _edgeThresholdY: 0.05
   _edgeThresholdX: 0.2
   _markerDistanceThreshold: 2
   _maxRotationAngle: 10
-  _rotationSpeed: 0.3
+  _rotationSpeed: 0.5
 --- !u!114 &1011655273124440827
 MonoBehaviour:
   m_ObjectHideFlags: 0
