@@ -64,6 +64,7 @@ namespace Tools.Runtime
         
         #region Main Methods
 
+        // TODO: Add animation curve to GDControlPanel and use it on camera rotation for smoother effect
         private void RotateCameraBasedOnMarker()
         {
             if (_sceneLimitsManager == null || _playerPos == null) return;
