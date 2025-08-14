@@ -27,6 +27,10 @@ namespace SharedData.Runtime
             new Keyframe(0, 0),
             new Keyframe(1, 1)
             );
+
+        [SerializeField] private AnimationCurve _cameraReturnCurve = new AnimationCurve(
+            new Keyframe(0,1),
+            new Keyframe(1,0));
         
         // Private Variables
         #endregion
@@ -44,6 +48,7 @@ namespace SharedData.Runtime
         public float RotationSpeed => _rotationSpeed;
         public float SmoothTime => _smoothTime;
         public AnimationCurve CameraRotationCurve => _cameraRotationCurve;
+        public AnimationCurve CameraReturnCurve => _cameraReturnCurve;
         // Public Variables
         #endregion
         

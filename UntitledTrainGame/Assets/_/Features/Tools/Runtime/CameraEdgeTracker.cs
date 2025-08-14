@@ -47,7 +47,8 @@ namespace Tools.Runtime
             _rotationSpeed = _controlPanel.RotationSpeed;
             _smoothTime = _controlPanel.SmoothTime;
             _rotationCurve = _controlPanel.CameraRotationCurve;
-            _rotationCurveBackwards = CreateInvertedAnimationCurve(_rotationCurve);
+            _rotationCurveBackwards = _controlPanel.CameraReturnCurve;
+            //_rotationCurveBackwards = CreateInvertedAnimationCurve(_rotationCurve);
             
             _playerPos = GetFact<Transform>("playerTransform");
 
@@ -68,6 +69,8 @@ namespace Tools.Runtime
             _maxRotationAngle = _controlPanel.MaxRotationAngle;
             _rotationSpeed = _controlPanel.RotationSpeed;
             _smoothTime = _controlPanel.SmoothTime;
+            _rotationCurve = _controlPanel.CameraRotationCurve;
+            _rotationCurveBackwards = _controlPanel.CameraReturnCurve;
             
             // RotateCameraBasedOnEdge();
             RotateCameraBasedOnMarker();
