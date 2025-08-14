@@ -911,6 +911,14 @@ PrefabInstance:
       propertyPath: m_LocalRotation.z
       value: 0.0112656085
       objectReference: {fileID: 0}
+    - target: {fileID: 1194035894143503703, guid: 82d03e6e8734d46a69cac0fe5e2f0bed, type: 3}
+      propertyPath: _smoothTime
+      value: 0.7
+      objectReference: {fileID: 0}
+    - target: {fileID: 1194035894143503703, guid: 82d03e6e8734d46a69cac0fe5e2f0bed, type: 3}
+      propertyPath: m_isVerbose
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 1473515850565564644, guid: 82d03e6e8734d46a69cac0fe5e2f0bed, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0.09490356

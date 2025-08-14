@@ -782,6 +782,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 1194035894143503703, guid: 82d03e6e8734d46a69cac0fe5e2f0bed, type: 3}
+      propertyPath: m_isVerbose
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 3410369350799889330, guid: 82d03e6e8734d46a69cac0fe5e2f0bed, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
@@ -841,7 +845,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 1011655273124440827, guid: 916e0f57e34f64487b1d346445668a23, type: 3}
       propertyPath: m_isVerbose
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 1013627989509777286, guid: 916e0f57e34f64487b1d346445668a23, type: 3}
       propertyPath: m_Name
@@ -886,6 +890,54 @@ PrefabInstance:
     - target: {fileID: 1337632031483756321, guid: 916e0f57e34f64487b1d346445668a23, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6582457916932893155, guid: 916e0f57e34f64487b1d346445668a23, type: 3}
+      propertyPath: _cameraRotationCurve.m_Curve.Array.size
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 6582457916932893155, guid: 916e0f57e34f64487b1d346445668a23, type: 3}
+      propertyPath: _cameraRotationCurve.m_Curve.Array.data[1].time
+      value: 0.5045539
+      objectReference: {fileID: 0}
+    - target: {fileID: 6582457916932893155, guid: 916e0f57e34f64487b1d346445668a23, type: 3}
+      propertyPath: _cameraRotationCurve.m_Curve.Array.data[2].time
+      value: 1.0000142
+      objectReference: {fileID: 0}
+    - target: {fileID: 6582457916932893155, guid: 916e0f57e34f64487b1d346445668a23, type: 3}
+      propertyPath: _cameraRotationCurve.m_Curve.Array.data[1].value
+      value: 1.0229259
+      objectReference: {fileID: 0}
+    - target: {fileID: 6582457916932893155, guid: 916e0f57e34f64487b1d346445668a23, type: 3}
+      propertyPath: _cameraRotationCurve.m_Curve.Array.data[2].value
+      value: -0.0000017993152
+      objectReference: {fileID: 0}
+    - target: {fileID: 6582457916932893155, guid: 916e0f57e34f64487b1d346445668a23, type: 3}
+      propertyPath: _cameraRotationCurve.m_Curve.Array.data[1].inSlope
+      value: 1.495033
+      objectReference: {fileID: 0}
+    - target: {fileID: 6582457916932893155, guid: 916e0f57e34f64487b1d346445668a23, type: 3}
+      propertyPath: _cameraRotationCurve.m_Curve.Array.data[2].inSlope
+      value: -0.000009813684
+      objectReference: {fileID: 0}
+    - target: {fileID: 6582457916932893155, guid: 916e0f57e34f64487b1d346445668a23, type: 3}
+      propertyPath: _cameraRotationCurve.m_Curve.Array.data[1].inWeight
+      value: 0.33333334
+      objectReference: {fileID: 0}
+    - target: {fileID: 6582457916932893155, guid: 916e0f57e34f64487b1d346445668a23, type: 3}
+      propertyPath: _cameraRotationCurve.m_Curve.Array.data[1].outSlope
+      value: 1.495033
+      objectReference: {fileID: 0}
+    - target: {fileID: 6582457916932893155, guid: 916e0f57e34f64487b1d346445668a23, type: 3}
+      propertyPath: _cameraRotationCurve.m_Curve.Array.data[2].inWeight
+      value: 0.31008247
+      objectReference: {fileID: 0}
+    - target: {fileID: 6582457916932893155, guid: 916e0f57e34f64487b1d346445668a23, type: 3}
+      propertyPath: _cameraRotationCurve.m_Curve.Array.data[2].outSlope
+      value: -0.000009813684
+      objectReference: {fileID: 0}
+    - target: {fileID: 6582457916932893155, guid: 916e0f57e34f64487b1d346445668a23, type: 3}
+      propertyPath: _cameraRotationCurve.m_Curve.Array.data[1].outWeight
+      value: 0.33333334
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

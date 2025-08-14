@@ -53,6 +53,31 @@ MonoBehaviour:
   _markerDistanceThreshold: 2
   _maxRotationAngle: 10
   _rotationSpeed: 0.5
+  _smoothTime: 0.8
+  _cameraRotationCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0.013156891
+      value: 0.36102295
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 0.9955932
+      value: 0.9970596
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
 --- !u!114 &1011655273124440827
 MonoBehaviour:
   m_ObjectHideFlags: 0

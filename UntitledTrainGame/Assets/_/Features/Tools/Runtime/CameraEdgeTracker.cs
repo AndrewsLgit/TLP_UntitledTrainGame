@@ -14,6 +14,13 @@ namespace Tools.Runtime
         private float _markerDistanceThreshold = 5f;
         private float _maxRotationAngle = 10f;
         private float _rotationSpeed = 2f;
+        
+        private float _smoothedDistanceFactor = 0f;
+        private float _smoothVelocity;
+        private float _smoothTime = .3f;
+        
+        private AnimationCurve _rotationCurve = new AnimationCurve();
+        private AnimationCurve _rotationCurveBackwards = new AnimationCurve();
 
         // References
         private GDControlPanel _controlPanel;
@@ -38,6 +45,9 @@ namespace Tools.Runtime
             _markerDistanceThreshold = _controlPanel.MarkerDistanceThreshold;
             _maxRotationAngle = _controlPanel.MaxRotationAngle;
             _rotationSpeed = _controlPanel.RotationSpeed;
+            _smoothTime = _controlPanel.SmoothTime;
+            _rotationCurve = _controlPanel.CameraRotationCurve;
+            _rotationCurveBackwards = CreateInvertedAnimationCurve(_rotationCurve);
             
             _playerPos = GetFact<Transform>("playerTransform");
 
@@ -45,6 +55,8 @@ namespace Tools.Runtime
             //_rotationComposer = GetComponent<CinemachineRotationComposer>();
             _originalRotation = transform.rotation;
         }
+
+        
 
         // Update is called once per frame
         void Update()
@@ -55,6 +67,7 @@ namespace Tools.Runtime
             _markerDistanceThreshold = _controlPanel.MarkerDistanceThreshold;
             _maxRotationAngle = _controlPanel.MaxRotationAngle;
             _rotationSpeed = _controlPanel.RotationSpeed;
+            _smoothTime = _controlPanel.SmoothTime;
             
             // RotateCameraBasedOnEdge();
             RotateCameraBasedOnMarker();
@@ -68,30 +81,53 @@ namespace Tools.Runtime
         private void RotateCameraBasedOnMarker()
         {
             if (_sceneLimitsManager == null || _playerPos == null) return;
-            InfoInProgress($"PlayerPos: {_playerPos.position}");
+            //InfoInProgress($"PlayerPos: {_playerPos.position}");
             
             Vector3 closestMarker = _sceneLimitsManager.GetClosestLimitPoint(_playerPos.position);
             float distanceToMarker = Vector3.Distance(_playerPos.position, closestMarker);
             
+            // When player is at marker, distance = 0, factor should be 1
+            // When player is at threshold, distance = threshold, factor should be 0
+            float distanceFactor = Mathf.Clamp01(1f - (distanceToMarker / _markerDistanceThreshold));
+            _smoothedDistanceFactor = Mathf.SmoothDamp(_smoothedDistanceFactor, distanceFactor, ref _smoothVelocity, _smoothTime);
+            
+            
+            // if (distanceFactor < 0f || distanceFactor > 0f) InfoInProgress($"DistanceFactor: {distanceFactor}");
             bool isNearMarker = distanceToMarker < _markerDistanceThreshold;
+
+            Quaternion targetRotation = _originalRotation;
 
             if (isNearMarker)
             {
                 // Direction from camera to closest limit marker
                 Vector3 directionToMarker = (closestMarker - transform.position).normalized;
-                Quaternion targetRotation = Quaternion.LookRotation(directionToMarker);
+                targetRotation = Quaternion.LookRotation(directionToMarker);
                 
                 // Limit rotation angle
                 var angle = Quaternion.Angle(_originalRotation, targetRotation);
                 if (angle > _maxRotationAngle)
                     targetRotation = Quaternion.RotateTowards(_originalRotation, targetRotation, _maxRotationAngle);
-                transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, Time.deltaTime * _rotationSpeed);
+                
+                // float curveValue = _rotationCurve.Evaluate(distanceFactor);
+                // InfoDone($"Curve value near: {curveValue:F2} || Distance factor: {distanceFactor}");
+                // transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, curveValue * Time.deltaTime * _rotationSpeed);
             }
+            // Set animation curve progress to distanceFactor value
+            // float curveValue = _rotationCurve.Evaluate(isNearMarker? _smoothedDistanceFactor : 1f - _smoothedDistanceFactor);
+            float curveValue = isNearMarker ? 
+                _rotationCurve.Evaluate(_smoothedDistanceFactor) : 
+                _rotationCurveBackwards.Evaluate(_smoothedDistanceFactor);
+            
+            InfoDone($"Curve value: {curveValue} || Distance factor: {distanceFactor}");
+            transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, curveValue * Time.deltaTime * _rotationSpeed);
 
-            else
-            {
-                transform.rotation = Quaternion.Slerp(transform.rotation, _originalRotation, Time.deltaTime * _rotationSpeed);
-            }
+            // else
+            // {
+            //     float curveValue = Mathf.Max(_rotationCurve.Evaluate(distanceFactor), .8f);
+            //     // InfoDone($"Curve Value outside marker: {curveValue:F2}");
+            //     InfoDone($"Curve value far: {curveValue:F2} || Distance factor: {distanceFactor}");
+            //     transform.rotation = Quaternion.Slerp(transform.rotation, _originalRotation,  Time.deltaTime * _rotationSpeed);
+            // }
         }
 
         private void RotateCameraBasedOnEdge()
@@ -119,6 +155,26 @@ namespace Tools.Runtime
                 transform.rotation = Quaternion.Slerp(transform.rotation, _originalRotation, Time.deltaTime * _rotationSpeed);
             }
         }
+        #endregion
+        
+        #region Utils
+        
+        private AnimationCurve CreateInvertedAnimationCurve(AnimationCurve originalCurve)
+        {
+            AnimationCurve invertedCurve = new AnimationCurve();
+            foreach (var keyframe in originalCurve.keys)
+            {
+                invertedCurve.AddKey(new Keyframe(
+                    keyframe.time, 
+                    1f - keyframe.value,
+                    -keyframe.inTangent,
+                    -keyframe.outTangent
+                ));
+            }
+
+            return invertedCurve;
+        }
+        
         #endregion
     }
 }
