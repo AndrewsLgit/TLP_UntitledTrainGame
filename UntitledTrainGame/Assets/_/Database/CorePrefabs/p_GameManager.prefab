@@ -51,7 +51,7 @@ MonoBehaviour:
   _edgeThresholdY: 0.05
   _edgeThresholdX: 0.2
   _markerDistanceThreshold: 2
-  _maxRotationAngle: 10
+  _maxRotationAngle: 6
   _rotationSpeed: 0.5
   _smoothTime: 0.6
   _cameraRotationCurve:
