@@ -11,6 +11,7 @@ namespace SharedData.Runtime
         #region Variables
         
         public string Name;
+        public StationPrefix LinePrefix;
         //public Station_Data[] Stations; // StationDB Reference
         public StationNode[] Connections;
         
@@ -37,12 +38,12 @@ namespace SharedData.Runtime
             while (queue.Count > 0)
             {
                 var currentStation = queue.Dequeue();
-                Debug.Log($"Processing {currentStation.DisplayName}");
+                //Debug.Log($"Processing {currentStation.DisplayName}");
                 
                 // If destination reached
                 if (currentStation == to)
                 {
-                    Debug.Log($"Path found: {ReconstructPath(previousStation, from, to)}");
+                    //Debug.Log($"Path found: {ReconstructPath(previousStation, from, to)}");
                     return ReconstructPath(previousStation, from, to);
                 }
                 
@@ -55,18 +56,18 @@ namespace SharedData.Runtime
                     if (connection.From == currentStation)
                     {
                         nextStation = connection.To;
-                        Debug.Log($"Found connection: {connection.From.DisplayName} -> {connection.To.DisplayName}");
+                        //Debug.Log($"Found connection: {connection.From.DisplayName} -> {connection.To.DisplayName}");
                     }
                     // check backward direction
                     else if (connection.To == currentStation)
                     {
                         nextStation = connection.From;
-                        Debug.Log($"Found connection: {connection.To.DisplayName} -> {connection.From.DisplayName}");   
+                        //Debug.Log($"Found connection: {connection.To.DisplayName} -> {connection.From.DisplayName}");   
                     }
                     
                     // if connection found and next station hasn't been visited
                     if (nextStation == null || visited.Contains(nextStation)) continue;
-                    Debug.Log($"Adding {nextStation.DisplayName} to queue (came from {currentStation.DisplayName})");
+                    //Debug.Log($"Adding {nextStation.DisplayName} to queue (came from {currentStation.DisplayName})");
                     visited.Add(nextStation);
                     previousStation[nextStation] = currentStation;
                     queue.Enqueue(nextStation);
@@ -128,5 +129,13 @@ namespace SharedData.Runtime
             To = to;
             TravelTime = travelTime;
         }
+    }
+
+    public enum StationPrefix
+    {
+        A,
+        B,
+        C,
+        D,
     }
 }
