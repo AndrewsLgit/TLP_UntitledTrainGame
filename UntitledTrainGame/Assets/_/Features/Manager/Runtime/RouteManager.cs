@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Foundation.Runtime;
+using Game.Runtime;
 using SharedData.Runtime;
 using Tools.Runtime;
 using UnityEngine;
@@ -23,6 +24,7 @@ namespace Manager.Runtime
         private List<Station_Data> _segments = new List<Station_Data>();
         private int _currentStationIndex = 0;
         private float _compressionFactor = 0.05f;
+        private CountdownTimer _currentSegmentTimer;
 
         // Private Variables
         #endregion
@@ -67,6 +69,11 @@ namespace Manager.Runtime
         {
             //todo: remove update variable assignment
             _compressionFactor = _controlPanel.CompressionFactor;
+
+            if (_currentSegmentTimer != null && _currentSegmentTimer.IsRunning)
+            {
+                _currentSegmentTimer.Tick(Time.deltaTime);
+            }
         }
         #endregion
         
@@ -93,6 +100,10 @@ namespace Manager.Runtime
             _sceneLoader.PreloadScene(trainRoute.EndStation.StationScene);
             
             Info($"Starting journey from {_segments[0].GetStationName()} to {_segments[^1].GetStationName()}");
+            
+            // test
+            UIManager.Instance?.CreateProgressBarsForRoute(_segments, _stationNetwork, _compressionFactor);
+            //test
             StartSegment(_currentStationIndex);
         }
 
@@ -112,8 +123,16 @@ namespace Manager.Runtime
             var uiTime = realTime * _compressionFactor;
             Info($"UI time: {uiTime}");
             
+            //test
+            _currentSegmentTimer = new CountdownTimer(uiTime);
+            _currentSegmentTimer.OnTimerStop += EndSegment;
             
-            EndSegment();
+            UIManager.Instance?.StartSegmentProgress(index, _currentSegmentTimer);
+            
+            _currentSegmentTimer.Start();
+            //test
+            
+            //EndSegment();
         }
         
         private void EndSegment()
@@ -125,7 +144,10 @@ namespace Manager.Runtime
         private void EndJourney()
         {
             InfoDone($"Journey ended.");
-            _sceneLoader.ActivateScene();
+            //test
+            //UIManager.Instance?.HideProgressBars();
+            //test
+            // _sceneLoader.ActivateScene();
         }
         
         #endregion
