@@ -12,8 +12,8 @@ namespace Tools.Runtime
         #region Private
         // Private Variables
         
-        [SerializeField] private string _sceneName;
-        [SerializeField] private string _scenePath = "_/Levels/";
+        [SerializeField] private string _scenePath = $"_/Levels/";
+        private string _sceneName;
         private AsyncOperation _loadedScene;
         private Scene _sceneToUnload;
         
@@ -56,7 +56,7 @@ namespace Tools.Runtime
             _sceneName = sceneName;
             // _sceneToUnload = SceneManager.GetActiveScene();
             _sceneToUnload = GetCurrentLevelScene();
-            _loadedScene = SceneManager.LoadSceneAsync($"_{_scenePath}{_sceneName}", LoadSceneMode.Additive);
+            _loadedScene = SceneManager.LoadSceneAsync($"{_scenePath}{_sceneName}", LoadSceneMode.Additive);
             _loadedScene.allowSceneActivation = false;
         }
 

@@ -17,7 +17,7 @@ namespace Manager.Runtime
         // References
         [SerializeField] private StationNetwork_Data _stationNetwork;
         [SerializeField] private TrainRoute_Data _testTrainRoute;
-        [SerializeField] private GDControlPanel _controlPanel;
+        private GDControlPanel _controlPanel;
         private SceneLoader _sceneLoader;
 
         private List<Station_Data> _segments = new List<Station_Data>();

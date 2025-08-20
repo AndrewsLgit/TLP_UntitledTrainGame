@@ -946,49 +946,8 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents:
-    - targetCorrespondingSourceObject: {fileID: 1013627989509777286, guid: 916e0f57e34f64487b1d346445668a23, type: 3}
-      insertIndex: 2
-      addedObject: {fileID: 5137917946142121860}
-    - targetCorrespondingSourceObject: {fileID: 1013627989509777286, guid: 916e0f57e34f64487b1d346445668a23, type: 3}
-      insertIndex: 3
-      addedObject: {fileID: 5137917946142121864}
+    m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 916e0f57e34f64487b1d346445668a23, type: 3}
---- !u!1 &5137917946142121859 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 1013627989509777286, guid: 916e0f57e34f64487b1d346445668a23, type: 3}
-  m_PrefabInstance: {fileID: 5137917946142121858}
-  m_PrefabAsset: {fileID: 0}
---- !u!114 &5137917946142121860
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5137917946142121859}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 24f88dbf7be214c26a07581ea103a906, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_isVerbose: 1
-  _stationNetwork: {fileID: 11400000, guid: 4b1d1bb3fd4124fa6abab7bbdc21e905, type: 2}
-  _testTrainRoute: {fileID: 11400000, guid: fef0cef1e8d4745018cd26ce5bc61358, type: 2}
-  _controlPanel: {fileID: 0}
---- !u!114 &5137917946142121864
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5137917946142121859}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f70e99970bece495eb73100e87e1f58c, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_isVerbose: 0
-  _sceneName: 
 --- !u!1001 &8359763119126900059
 PrefabInstance:
   m_ObjectHideFlags: 0
