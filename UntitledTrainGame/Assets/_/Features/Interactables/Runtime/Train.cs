@@ -3,7 +3,7 @@ using Foundation.Runtime;
 using SharedData.Runtime;
 using UnityEngine;
 
-namespace _.Features.Manager.TrainObjects
+namespace Interactables.Runtime
 {
     public class Train : FMono, IInteractable
     {
