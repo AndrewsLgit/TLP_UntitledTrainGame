@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: SO_ArtStation2
   m_EditorClassIdentifier: 
   LinePrefix: 0
-  Id: 3
+  Id: 2
   StationScene: Art-Test2
   DisplayName: Art Station 2
   Icon: {fileID: 0}

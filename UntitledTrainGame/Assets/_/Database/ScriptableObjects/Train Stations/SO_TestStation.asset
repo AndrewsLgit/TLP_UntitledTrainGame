@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: SO_TestStation
   m_EditorClassIdentifier: 
   LinePrefix: 0
-  Id: 1
+  Id: 0
   StationScene: AndrewsTestScene
   DisplayName: Test Station
   Icon: {fileID: 0}

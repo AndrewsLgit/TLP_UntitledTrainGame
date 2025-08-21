@@ -1,7 +1,9 @@
 using System;
 using Foundation.Runtime;
 using SharedData.Runtime;
+using Tools.Runtime;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 namespace Interactable.Runtime
 {
@@ -13,6 +15,8 @@ namespace Interactable.Runtime
         // Private Variables
         
         private float _timeToInteract;
+        private SceneLoader _sceneLoader;
+        [SerializeField] private string _sceneToLoad;
         
         // Private Variables
         #endregion
@@ -31,7 +35,7 @@ namespace Interactable.Runtime
 
         private void Start()
         {
-            // throw new NotImplementedException();
+            _sceneLoader = SceneLoader.Instance;
         }
 
         #endregion
@@ -39,7 +43,10 @@ namespace Interactable.Runtime
         #region Main Methods
         public void Interact()
         {
-            throw new System.NotImplementedException();
+            Info($"Interacting with Train Station");
+            // SceneManager.LoadScene(_sceneToLoad);
+            _sceneLoader.PreloadScene(_sceneToLoad);
+            _sceneLoader.ActivateScene();
         }
         #endregion
     }

@@ -2,6 +2,7 @@ using Foundation.Runtime;
 using SharedData.Runtime;
 using Unity.Cinemachine;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 namespace Tools.Runtime
 {
@@ -55,9 +56,14 @@ namespace Tools.Runtime
             _mainCam = Camera.main;
             //_rotationComposer = GetComponent<CinemachineRotationComposer>();
             _originalRotation = transform.rotation;
+
+            SceneManager.sceneLoaded += OnSceneLoaded;
         }
 
-        
+        private void OnDestroy()
+        {
+            SceneManager.sceneLoaded -= OnSceneLoaded;
+        }
 
         // Update is called once per frame
         void Update()
@@ -83,7 +89,13 @@ namespace Tools.Runtime
         // TODO: Add animation curve to GDControlPanel and use it on camera rotation for smoother effect
         private void RotateCameraBasedOnMarker()
         {
-            if (_sceneLimitsManager == null || _playerPos == null) return;
+            // if (_sceneLimitsManager == null || _playerPos == null) return;
+            
+            if (_sceneLimitsManager == null || _playerPos == null)
+            {
+                //_sceneLimitsManager = FindAnyObjectByType<SceneLimitsManager>();
+                if (_playerPos == null) GetFact<Transform>("playerTransform");
+            }
             //InfoInProgress($"PlayerPos: {_playerPos.position}");
             
             Vector3 closestMarker = _sceneLimitsManager.GetClosestLimitPoint(_playerPos.position);
@@ -110,7 +122,7 @@ namespace Tools.Runtime
                 var angle = Quaternion.Angle(_originalRotation, targetRotation);
                 if (angle > _maxRotationAngle)
                     targetRotation = Quaternion.RotateTowards(_originalRotation, targetRotation, _maxRotationAngle);
-                
+
                 // float curveValue = _rotationCurve.Evaluate(distanceFactor);
                 // InfoDone($"Curve value near: {curveValue:F2} || Distance factor: {distanceFactor}");
                 // transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, curveValue * Time.deltaTime * _rotationSpeed);
@@ -176,6 +188,51 @@ namespace Tools.Runtime
             }
 
             return invertedCurve;
+        }
+
+        private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+        {
+            RefreshSceneLimitsManager();
+            RefreshControlPanelReference();
+        }
+
+        private void RefreshSceneLimitsManager()
+        {
+            _sceneLimitsManager = FindAnyObjectByType<SceneLimitsManager>();
+            if (_sceneLimitsManager == null)
+            {
+                Warning($"SceneLimitsManager not found! Camera rotation will not be available");
+            }
+        }
+
+        private void RefreshControlPanelReference()
+        {
+            _controlPanel = GDControlPanel.Instance;
+            if (_controlPanel == null)
+            {
+                Warning($"ControlPanel not found! Please add it to the GameManager object!");
+            }
+
+            RefreshValues();
+        }
+
+        private void RefreshValues()
+        {
+            _edgeThresholdY = _controlPanel.EdgeThresholdY;
+            _edgeThresholdX = _controlPanel.EdgeThresholdX;
+            _markerDistanceThreshold = _controlPanel.MarkerDistanceThreshold;
+            _maxRotationAngle = _controlPanel.MaxRotationAngle;
+            _rotationSpeed = _controlPanel.RotationSpeed;
+            _smoothTime = _controlPanel.SmoothTime;
+            _rotationCurve = _controlPanel.CameraRotationCurve;
+            _rotationCurveBackwards = _controlPanel.CameraReturnCurve;
+            //_rotationCurveBackwards = CreateInvertedAnimationCurve(_rotationCurve);
+            
+            _playerPos = GetFact<Transform>("playerTransform");
+
+            _mainCam = Camera.main;
+            //_rotationComposer = GetComponent<CinemachineRotationComposer>();
+            _originalRotation = transform.rotation;
         }
         
         #endregion

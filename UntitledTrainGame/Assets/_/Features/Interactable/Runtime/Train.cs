@@ -1,6 +1,8 @@
 using System;
 using Foundation.Runtime;
+using Manager.Runtime;
 using SharedData.Runtime;
+using Tools.Runtime;
 using UnityEngine;
 
 namespace Interactable.Runtime
@@ -13,6 +15,10 @@ namespace Interactable.Runtime
         // Private Variables
         
         private float _timeToInteract;
+        private SceneLoader _sceneLoader;
+        private RouteManager _routeManager;
+        [SerializeField] private TrainRoute_Data _trainRoute;
+        
         
         // Private Variables
         #endregion
@@ -31,7 +37,8 @@ namespace Interactable.Runtime
 
         private void Start()
         {
-            throw new NotImplementedException();
+            _sceneLoader = SceneLoader.Instance;
+            _routeManager = RouteManager.Instance;
         }
 
         #endregion
@@ -39,7 +46,7 @@ namespace Interactable.Runtime
         #region Main Methods
         public void Interact()
         {
-            throw new System.NotImplementedException();
+            _routeManager.StartJourney(_trainRoute);
         }
         #endregion
     }

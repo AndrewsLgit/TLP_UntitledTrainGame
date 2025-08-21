@@ -74,6 +74,8 @@ namespace SharedData.Runtime
             // Find instance of this class, if existent -> destroy that instance
             if (Instance != null && Instance != this)
             {
+                // Update values from new scene
+                Instance.UpdateValues(this);
                 Destroy(gameObject);
                 Error("There is already an instance of this class! Destroying this one!");
                 return;
@@ -82,6 +84,28 @@ namespace SharedData.Runtime
             // Assign instance as this current object
             Instance = this;
             DontDestroyOnLoad(gameObject);
+        }
+        
+        #endregion
+        
+        #region Utils
+
+        private void UpdateValues(GDControlPanel newControlPanel)
+        {
+            _playerMoveSpeed = newControlPanel._playerMoveSpeed;
+            _turnSmoothTime = newControlPanel._turnSmoothTime;
+            _detectionDistance = newControlPanel._detectionDistance;
+            _detectionAngle = newControlPanel._detectionAngle;
+            _edgeThresholdY = newControlPanel._edgeThresholdY;
+            _edgeThresholdX = newControlPanel._edgeThresholdX;
+            _markerDistanceThreshold = newControlPanel._markerDistanceThreshold;
+            _maxRotationAngle = newControlPanel._maxRotationAngle;
+            _rotationSpeed = newControlPanel._rotationSpeed;
+            _smoothTime = newControlPanel._smoothTime;
+            _cameraRotationCurve = newControlPanel._cameraRotationCurve;
+            _cameraReturnCurve = newControlPanel._cameraReturnCurve;
+            _compressionFactor = newControlPanel._compressionFactor;
+
         }
         
         #endregion

@@ -18,9 +18,14 @@ namespace Player.Runtime
         // Private Variables
         
         // References
+        [Header("UI References")]
+        [SerializeField] private GameObject _interactionPopup;
+        [SerializeField] private float _popupOffsetY = 1f;
+        
         private CharacterController _characterController;
         private GDControlPanel _controlPanel;
         private Transform _cameraTransform;
+        private Camera _camera;
         
         // Player Interaction
         private IInteractable _interactable;
@@ -39,7 +44,7 @@ namespace Player.Runtime
         private float _interactionDistance = 10f;
         private float _interactionAngle = 45f;
         private Vector3 _directionToInteractable;
-        
+
         // Private Variables
         #endregion
         
@@ -63,10 +68,11 @@ namespace Player.Runtime
         // Start is called once before the first execution of Update after the MonoBehaviour is created
         void Start()
         {
+            _camera = Camera.main;
             _characterController = GetComponent<CharacterController>();
             _detectionCollider = GetComponent<SphereCollider>();
             _controlPanel = GDControlPanel.Instance;
-            _cameraTransform = Camera.main.transform;
+            _cameraTransform = _camera.transform;
             _inputMove = Vector2.zero;
             _moveSpeed = _controlPanel.PlayerMoveSpeed;
             _turnSmoothTime = _controlPanel.TurnSmoothTime;
@@ -109,7 +115,7 @@ namespace Player.Runtime
             //var interactable = other.GetComponent<IInteractable>();
             // if (interactable == null) return;
             // _interactable = interactable;
-            Info($"Passed interactable: {interactable.GetType()} to player");
+            // Info($"Passed interactable: {interactable.GetType()} to player");
             // _canInteract = true;
         }
         private void OnTriggerExit(Collider other)
@@ -121,6 +127,7 @@ namespace Player.Runtime
             // if (interactable == null || interactable != _interactable) return;
             _interactable = null;
             _canInteract = false;
+            ShowInteractionPopup(false);
             // _canInteract = false;
         }
         #endregion
@@ -131,9 +138,21 @@ namespace Player.Runtime
         {
             _inputMove = context.ReadValue<Vector2>();
         }
+        
+        public void InteractWith(InputAction.CallbackContext context)
+        {
+            if (context.phase != InputActionPhase.Canceled) return;
+            if (!_canInteract || _interactable == null) return;
+            _interactable.Interact();
+        }
 
         private void HandleMovement()
         {
+            if (_camera == null)
+            {
+                _camera = Camera.main;
+                _cameraTransform = _camera.transform;
+            }
             // var speed = _controlPanel.PlayerMoveSpeed;
             // var turnSmoothTime = _controlPanel.TurnSmoothTime;
             var direction = new Vector3(_inputMove.x, 0f, _inputMove.y).normalized;
@@ -165,6 +184,7 @@ namespace Player.Runtime
             if (_interactable == null)
             {
                 _canInteract = false;
+                ShowInteractionPopup(false);
                 return;
             }
             
@@ -173,16 +193,40 @@ namespace Player.Runtime
             // calculate angle between player's forward and the interactable gameObject
             float angle = Vector3.Angle(transform.forward, _directionToInteractable);
             
+            bool wasInteracting = _canInteract;
             _canInteract = angle <= _interactionAngle;
+            
+            if(_canInteract != wasInteracting) ShowInteractionPopup(_canInteract);
+            //if (_canInteract && _interactionPopup.activeInHierarchy) UpdatePopupPosition();
             
             if (_canInteract) Info($"Found interactable: Dir({_directionToInteractable}) Angle({angle})");
         }
 
-        public void InteractWith()
+        #endregion
+        
+        #region Utils
+
+        private void ShowInteractionPopup(bool enable)
         {
-            if (!_canInteract || _interactable == null) return;
-            _interactable.Interact();
+            if (_interactionPopup == null) return;
+            _interactionPopup.SetActive(enable);
+            //if (enable) UpdatePopupPosition();
         }
+
+        private void UpdatePopupPosition()
+        {
+            if(_interactionPopup == null || _camera == null) return;
+
+            Vector3 playerScreenPos = _camera.WorldToScreenPoint(transform.position);
+            
+            var dirToCamera = (_camera.transform.position - transform.position).normalized;
+            var popupPos = playerScreenPos + dirToCamera * .5f;
+
+            // playerScreenPos.y += _popupOffsetY;
+            _interactionPopup.transform.position = playerScreenPos;
+        }
+        
+        #endregion
         
         #region Debug
         // Debug
@@ -213,8 +257,6 @@ namespace Player.Runtime
             angleInDegrees += transform.eulerAngles.y;
             return new Vector3(Mathf.Sin(angleInDegrees * Mathf.Deg2Rad), 0, Mathf.Cos(angleInDegrees * Mathf.Deg2Rad));
         }
-        #endregion
-
         #endregion
     }
 }

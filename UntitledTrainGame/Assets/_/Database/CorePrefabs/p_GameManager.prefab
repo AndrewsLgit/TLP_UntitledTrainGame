@@ -50,7 +50,7 @@ MonoBehaviour:
   m_isVerbose: 0
   _playerMoveSpeed: 5
   _turnSmoothTime: 0.08
-  _detectionDistance: 2
+  _detectionDistance: 3
   _detectionAngle: 65
   _edgeThresholdY: 0.05
   _edgeThresholdX: 0.2
@@ -121,7 +121,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_isVerbose: 0
   _stationNetwork: {fileID: 11400000, guid: 4b1d1bb3fd4124fa6abab7bbdc21e905, type: 2}
-  _testTrainRoute: {fileID: 11400000, guid: fef0cef1e8d4745018cd26ce5bc61358, type: 2}
+  _testTrainRoute: {fileID: 11400000, guid: 4720cb66be72148cd8acc8e6cb0359f0, type: 2}
 --- !u!114 &4641961287730845090
 MonoBehaviour:
   m_ObjectHideFlags: 0

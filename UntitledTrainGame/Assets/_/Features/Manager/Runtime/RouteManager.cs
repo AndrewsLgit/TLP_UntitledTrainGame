@@ -83,11 +83,13 @@ namespace Manager.Runtime
         private void StartJourney()
         {
             _currentStationIndex = 0;
+            _segments.Clear();
             StartJourney(_testTrainRoute);
         }
         // calculate segments and start traveling through them
-        private void StartJourney(TrainRoute_Data trainRoute)
+        public void StartJourney(TrainRoute_Data trainRoute)
         {
+            CleanupCurrentJourney();
             // get all stations from route.start to route.end from StationGraphSO
             _segments = _stationNetwork.CalculatePath(trainRoute.StartStation, trainRoute.EndStation);
             if (_segments == null)
@@ -145,7 +147,10 @@ namespace Manager.Runtime
         {
             InfoDone($"Journey ended.");
             //test
-            //UIManager.Instance?.HideProgressBars();
+            UIManager.Instance?.ClearProgressBars();
+            // _currentSegmentTimer.Stop();
+            // timer stop is done in the uiManager
+            _currentSegmentTimer = null;
             //test
             _sceneLoader.ActivateScene();
         }
@@ -162,6 +167,21 @@ namespace Manager.Runtime
                 if(_sceneLoader == null) Error("SceneLoader not found!");
             }
             return _sceneLoader;
+        }
+
+        private void CleanupCurrentJourney()
+        {
+            if (_currentSegmentTimer != null)
+            {
+                _currentSegmentTimer.OnTimerStop -= EndSegment;
+                _currentSegmentTimer.Stop();
+                _currentSegmentTimer = null;
+            }
+            
+            UIManager.Instance?.ClearProgressBars();
+            
+            _segments.Clear();
+            _currentStationIndex = 0;
         }
 
         #endregion

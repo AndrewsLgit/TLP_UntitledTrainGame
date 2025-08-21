@@ -53,6 +53,7 @@ namespace Game.Runtime
                 return;
             }
             Instance = this;
+            DontDestroyOnLoad(gameObject);
             // pause game on awake (optional, can put inside Start() method
             //_isPaused = true;
             
@@ -155,7 +156,7 @@ namespace Game.Runtime
             return colors[segmentIndex % colors.Length];
         }
 
-        private void ClearProgressBars()
+        public void ClearProgressBars()
         {
             foreach (var bar in _progressBars)
             {
@@ -165,11 +166,14 @@ namespace Game.Runtime
             _progressBarsSliders.Clear();
             _currentSegmentIndex = -1;
             
-            if (_currentTimer != null)
-            {
-                _currentTimer.OnTimerTick -= UpdateCurrentProgress;
-                _currentTimer = null;
-            }
+            // if (_currentTimer != null)
+            // {
+            //     _currentTimer.OnTimerTick -= UpdateCurrentProgress;
+            //     _currentTimer.Stop();
+            //     _currentTimer = null;
+            // }
+            
+            _currentTimer = null;
         }
 
         #endregion

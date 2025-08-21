@@ -13,10 +13,11 @@ MonoBehaviour:
   m_Name: SO_TestNetwork
   m_EditorClassIdentifier: 
   Name: Test Network
+  LinePrefix: 0
   Connections:
-  - From: {fileID: 11400000, guid: b66222ea4d9b244cbaa3a3574c0109e0, type: 2}
-    To: {fileID: 11400000, guid: 3743b17eb972c41b1b366e0becb97e3f, type: 2}
-    TravelTime: 5
   - From: {fileID: 11400000, guid: 3743b17eb972c41b1b366e0becb97e3f, type: 2}
     To: {fileID: 11400000, guid: dcf17a6b77af842b98accde5a0ba94a6, type: 2}
+    TravelTime: 5
+  - From: {fileID: 11400000, guid: dcf17a6b77af842b98accde5a0ba94a6, type: 2}
+    To: {fileID: 11400000, guid: edb083116b2f7444ba06b7166269ac92, type: 2}
     TravelTime: 5

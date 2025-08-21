@@ -67,10 +67,11 @@ namespace Tools.Runtime
                 Error($"No scene loaded!");
                 return;
             }
-            _loadedScene.allowSceneActivation = true;
 
             if (_sceneToUnload.IsValid()) StartCoroutine(UnloadPreviousSceneWhenReady());
-            SceneManager.UnloadSceneAsync(_sceneToUnload);
+            // SceneManager.UnloadSceneAsync(_sceneToUnload);
+            _loadedScene.allowSceneActivation = true;
+ 
         }
         
         #endregion
@@ -95,6 +96,7 @@ namespace Tools.Runtime
             {
                 Info($"Unloading previous scene: {_sceneToUnload.name}");
                 AsyncOperation unloadOperation = SceneManager.UnloadSceneAsync(_sceneToUnload);
+                // _loadedScene.allowSceneActivation = true;
                 yield return unloadOperation;
                 InfoDone($"Scene unloaded: {_sceneToUnload.name}");
             }
