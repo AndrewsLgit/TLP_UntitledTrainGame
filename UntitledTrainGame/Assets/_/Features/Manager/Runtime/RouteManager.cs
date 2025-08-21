@@ -131,7 +131,7 @@ namespace Manager.Runtime
             
             _currentSegmentTimer.Start();
             //test
-            
+            // Removed because now the timer triggers the end of the segment
             //EndSegment();
         }
         
@@ -147,7 +147,7 @@ namespace Manager.Runtime
             //test
             //UIManager.Instance?.HideProgressBars();
             //test
-            // _sceneLoader.ActivateScene();
+            _sceneLoader.ActivateScene();
         }
         
         #endregion

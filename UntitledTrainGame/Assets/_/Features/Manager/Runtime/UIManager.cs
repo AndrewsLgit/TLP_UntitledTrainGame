@@ -96,13 +96,16 @@ namespace Game.Runtime
                     var fillImage = slider.fillRect.GetComponent<Image>();
                     if (fillImage != null)
                     {
-                        fillImage.color = GetSegmentColor(i);
+                        // fillImage.color = GetSegmentColor(i);
+                        fillImage.color = Color.green;
                     }
                 }
 
-                progressBarObj.SetActive(false);
+                progressBarObj.SetActive(true);
                 _progressBars.Add(progressBarObj);
                 _progressBarsSliders.Add(slider);
+                
+                Info($"Created progress bar for segment {segments[i].GetStationName()} -> {segments[i + 1].GetStationName()}");
 
                 //_trainTravelUI.SetActive(true);
             }
@@ -110,30 +113,36 @@ namespace Game.Runtime
 
         public void StartSegmentProgress(int segmentIndex, CountdownTimer timer)
             {
-                // Hide previous segment
-                if (_currentSegmentIndex >= 0 && _currentSegmentIndex < _progressBars.Count)
-                {
-                    _progressBars[_currentSegmentIndex].SetActive(false);
-                }
+                // Unsub from previous timer
+                if(_currentTimer != null) _currentTimer.OnTimerTick -= UpdateCurrentProgress;
             
                 _currentSegmentIndex = segmentIndex;
                 _currentTimer = timer;
             
-                // Show current segment
-                if (segmentIndex < _progressBars.Count)
-                {
-                    _progressBars[segmentIndex].SetActive(true);
+                if(_currentTimer != null) _currentTimer.OnTimerTick += UpdateCurrentProgress;
                 
-                    // Subscribe to timer updates
-                    _currentTimer.OnTimerTick += UpdateCurrentProgress;
-                }
+                Info($"Started progress tracking for segment {segmentIndex}");
             }
         
         private void UpdateCurrentProgress(float progress)
         {
+            // Update current segment progress (0 -> 1)
             if (_currentSegmentIndex >= 0 && _currentSegmentIndex < _progressBarsSliders.Count)
             {
                 _progressBarsSliders[_currentSegmentIndex].value = 1f- progress;
+            }
+
+            MarkCompletedSegments();
+        }
+
+        private void MarkCompletedSegments()
+        {
+            for (int i = 0; i < _currentSegmentIndex; i++)
+            {
+                if (i < _progressBarsSliders.Count)
+                {
+                    _progressBarsSliders[i].value = 1f;
+                }
             }
         }
 
@@ -146,12 +155,6 @@ namespace Game.Runtime
             return colors[segmentIndex % colors.Length];
         }
 
-        public void HideProgressBars()
-        {
-            //_trainTravelUI.SetActive(false);
-            ClearProgressBars();
-        }
-        
         private void ClearProgressBars()
         {
             foreach (var bar in _progressBars)
@@ -211,14 +214,6 @@ namespace Game.Runtime
             _gameOverMenu.SetActive(true);
         }
         
-        /*
-        private void SetScoreTexts()
-        {
-            // get text from ScriptableObject (the SO manages round value increase internally)
-           _scoreText.text = $"Round {_roundSystemSO.GetCurrentRound()}";
-           _highScoreText.text = $"HighScore: {_roundSystemSO.m_highScore}";           }
-         */
-
         #endregion 
     }
 }
