@@ -3,13 +3,16 @@ using Foundation.Runtime;
 using SharedData.Runtime;
 using UnityEngine;
 
-namespace Interactables.Runtime
+namespace Interactable.Runtime
 {
     public class Train : FMono, IInteractable
     {
         #region Variables
+        
         #region Private
         // Private Variables
+        
+        private float _timeToInteract;
         
         // Private Variables
         #endregion
@@ -17,8 +20,11 @@ namespace Interactables.Runtime
         #region Public
         // Public Variables
         
+        public float TimeToInteract => _timeToInteract;
+        
         // Public Variables
         #endregion
+        
         #endregion
         
         #region Unity API

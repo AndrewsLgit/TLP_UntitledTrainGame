@@ -50,6 +50,8 @@ MonoBehaviour:
   m_isVerbose: 0
   _playerMoveSpeed: 5
   _turnSmoothTime: 0.08
+  _detectionDistance: 2
+  _detectionAngle: 65
   _edgeThresholdY: 0.05
   _edgeThresholdX: 0.2
   _markerDistanceThreshold: 2
@@ -104,7 +106,7 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
-  _compressionFactor: 0.5
+  _compressionFactor: 0.513
 --- !u!114 &864954686524741014
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -10,6 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 6131279136529223855}
   - component: {fileID: -7561028645449774875}
+  - component: {fileID: 7104388444984602249}
   - component: {fileID: 6020351398471558277}
   - component: {fileID: 7000478002477096855}
   - component: {fileID: 8400131081262846548}
@@ -50,7 +51,28 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 07953bef3f3d248be87e7101ec491aca, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_isVerbose: 0
+  m_isVerbose: 1
+--- !u!135 &7104388444984602249
+SphereCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5092453341363809159}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 1
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Radius: 2
+  m_Center: {x: 0, y: 0, z: 0}
 --- !u!114 &6020351398471558277
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -101,7 +123,19 @@ MonoBehaviour:
     m_ActionId: 6c2ab1b8-8984-453a-af3d-a3c78ae1679a
     m_ActionName: 'Player/Attack[/Mouse/leftButton,/Keyboard/enter]'
   - m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: -7561028645449774875}
+        m_TargetAssemblyTypeName: Player.Runtime.PlayerController, Player.Runtime
+        m_MethodName: InteractWith
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
     m_ActionId: 852140f2-7766-474d-8707-702459ba45f3
     m_ActionName: 'Player/Interact[/Keyboard/e]'
   - m_PersistentCalls:

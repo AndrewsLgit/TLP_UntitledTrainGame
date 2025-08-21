@@ -14,6 +14,10 @@ namespace SharedData.Runtime
         [SerializeField] private float _playerMoveSpeed = 3f;
         [SerializeField, Range(0,1)] private float _turnSmoothTime = .1f;
         
+        [Header("Player Detection")]
+        [SerializeField, Range(0f,20f)] private float _detectionDistance = 10f;
+        [SerializeField, Range(0,180)] private float _detectionAngle = 45f;
+        
         [Header("Camera Settings")]
         [SerializeField, Range(0,1f)] private float _edgeThresholdY = 0.1f; 
         [SerializeField, Range(0,1f)] private float _edgeThresholdX = 0.1f;
@@ -43,6 +47,8 @@ namespace SharedData.Runtime
         
         public float PlayerMoveSpeed => _playerMoveSpeed;
         public float TurnSmoothTime => _turnSmoothTime;
+        public float DetectionDistance => _detectionDistance;
+        public float DetectionAngle => _detectionAngle;
         
         public float EdgeThresholdY => _edgeThresholdY;
         public float EdgeThresholdX => _edgeThresholdX;
