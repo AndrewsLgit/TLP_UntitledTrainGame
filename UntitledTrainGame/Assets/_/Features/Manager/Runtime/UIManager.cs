@@ -88,7 +88,7 @@ namespace Game.Runtime
 
                 if (label != null)
                 {
-                    label.text = $"{from.GetStationName()} -> {to.GetStationName()}";
+                    label.text = $"Station {from.GetStationName()} -> Station {to.GetStationName()}";
                 }
 
                 if (slider != null)

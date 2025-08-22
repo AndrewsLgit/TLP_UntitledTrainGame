@@ -20,11 +20,14 @@ namespace Manager.Runtime
         [SerializeField] private TrainRoute_Data _testTrainRoute;
         private GDControlPanel _controlPanel;
         private SceneLoader _sceneLoader;
+        private string _sceneToLoad;
 
         private List<Station_Data> _segments = new List<Station_Data>();
         private int _currentStationIndex = 0;
         private float _compressionFactor = 0.05f;
         private CountdownTimer _currentSegmentTimer;
+        private bool _isExpress = false;
+        private bool _stopEarly = false;
 
         // Private Variables
         #endregion
@@ -89,6 +92,7 @@ namespace Manager.Runtime
         // calculate segments and start traveling through them
         public void StartJourney(TrainRoute_Data trainRoute)
         {
+            if (_currentSegmentTimer is { IsRunning: true }) return;
             CleanupCurrentJourney();
             // get all stations from route.start to route.end from StationGraphSO
             _segments = _stationNetwork.CalculatePath(trainRoute.StartStation, trainRoute.EndStation);
@@ -98,8 +102,9 @@ namespace Manager.Runtime
                 return;
             }
             Info($"Preloading Scene: {trainRoute.EndStation.StationScene}");
+            _sceneToLoad = trainRoute.EndStation.StationScene;
             _sceneLoader = GetSceneLoader();
-            _sceneLoader.PreloadScene(trainRoute.EndStation.StationScene);
+            _sceneLoader.PreloadScene(_sceneToLoad);
             
             Info($"Starting journey from {_segments[0].GetStationName()} to {_segments[^1].GetStationName()}");
             
@@ -140,7 +145,21 @@ namespace Manager.Runtime
         private void EndSegment()
         {
             _currentStationIndex++;
+            if (!_isExpress && _stopEarly)
+            {
+                ChangeDestination(_currentStationIndex);
+                _stopEarly = false;
+                return;
+            }
             StartSegment(_currentStationIndex);
+        }
+
+        private void ChangeDestination(int index)
+        {
+            // _sceneLoader.UnloadScene(_sceneToLoad);
+            _sceneToLoad = _segments[index].StationScene;
+            _sceneLoader.PreloadScene(_sceneToLoad);
+            EndJourney();
         }
 
         private void EndJourney()
@@ -153,6 +172,13 @@ namespace Manager.Runtime
             _currentSegmentTimer = null;
             //test
             _sceneLoader.ActivateScene();
+        }
+
+        public void StopJourneyEarly()
+        {
+            if (_currentSegmentTimer == null) return;
+            if(_currentSegmentTimer.IsRunning)
+                _stopEarly = true;
         }
         
         #endregion

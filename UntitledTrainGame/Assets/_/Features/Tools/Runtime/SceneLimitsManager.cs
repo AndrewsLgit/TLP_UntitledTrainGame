@@ -53,16 +53,23 @@ namespace Tools.Runtime
         
         public Vector3 GetClosestLimitPoint(Vector3 target)
         {
-            // if (_sceneLimits.Count == 0 || (_sceneLimits[0]) is not SceneLimitMarker)
-            // {
-            //     _sceneLimits.AddRange(FindObjectsByType<SceneLimitMarker>(FindObjectsSortMode.None));
-            //     return target;
-            // }
+            if (_sceneLimits.Count == 0 || _sceneLimits.Any(x => x == null))
+            {
+                _sceneLimits.Clear();
+                var markers = FindObjectsByType<SceneLimitMarker>(FindObjectsSortMode.None);
+                _sceneLimits.AddRange(markers.Where(x => x != null));
+                
+                if (_sceneLimits.Count == 0)
+                    return target;
+            }
+            
             Vector3 closestPoint = target;
             float closestDistance = float.MaxValue;
 
             foreach (var sceneLimitMarker in _sceneLimits)
             {
+                if (sceneLimitMarker == null) continue;
+                
                 var collider = sceneLimitMarker.GetComponent<Collider>();
                 if (collider == null) continue;
                 

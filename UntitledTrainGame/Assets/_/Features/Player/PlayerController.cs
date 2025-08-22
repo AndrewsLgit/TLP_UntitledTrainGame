@@ -2,6 +2,7 @@ using System;
 using Foundation.Runtime;
 using SharedData.Runtime;
 using UnityEngine;
+using UnityEngine.Events;
 using UnityEngine.InputSystem;
 
 namespace Player.Runtime
@@ -21,6 +22,9 @@ namespace Player.Runtime
         [Header("UI References")]
         [SerializeField] private GameObject _interactionPopup;
         [SerializeField] private float _popupOffsetY = 1f;
+        
+        [Header("Player Stop")]
+        [SerializeField] private UnityEvent _onPlayerStop;
         
         private CharacterController _characterController;
         private GDControlPanel _controlPanel;
@@ -144,6 +148,12 @@ namespace Player.Runtime
             if (context.phase != InputActionPhase.Canceled) return;
             if (!_canInteract || _interactable == null) return;
             _interactable.Interact();
+        }
+        
+        public void StopTrain(InputAction.CallbackContext context)
+        {
+            if (context.phase != InputActionPhase.Canceled) return;
+            _onPlayerStop.Invoke();
         }
 
         private void HandleMovement()

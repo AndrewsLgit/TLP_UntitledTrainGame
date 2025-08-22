@@ -912,7 +912,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 1011655273124440827, guid: 916e0f57e34f64487b1d346445668a23, type: 3}
       propertyPath: m_isVerbose
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 1013627989509777286, guid: 916e0f57e34f64487b1d346445668a23, type: 3}
       propertyPath: m_Name
