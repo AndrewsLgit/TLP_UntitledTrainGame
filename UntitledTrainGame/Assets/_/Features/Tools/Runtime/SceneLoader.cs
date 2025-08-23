@@ -14,8 +14,8 @@ namespace Tools.Runtime
         
         [SerializeField] private string _scenePath = $"_/Levels/";
         private string _sceneName;
-        private AsyncOperation _loadedScene;
-        private Scene _sceneToUnload;
+        private AsyncOperation _preloadedScene;
+        private Scene _currentActiveScene;
         
         // Private Variables
         #endregion
@@ -53,24 +53,44 @@ namespace Tools.Runtime
 
         public void PreloadScene(string sceneName)
         {
+            if (_preloadedScene != null)
+            {
+                Scene previousLoadedScene = SceneManager.GetSceneByName($"{_sceneName}");
+                if (previousLoadedScene.IsValid() && previousLoadedScene.isLoaded)
+                {
+                    SceneManager.UnloadSceneAsync(previousLoadedScene);
+                    Info($"Previous scene unloaded: {previousLoadedScene.name}");
+                }
+                _preloadedScene = null;
+            }
+            
             _sceneName = sceneName;
-            // _sceneToUnload = SceneManager.GetActiveScene();
-            _sceneToUnload = GetCurrentLevelScene();
-            _loadedScene = SceneManager.LoadSceneAsync($"{_scenePath}{_sceneName}", LoadSceneMode.Additive);
-            _loadedScene.allowSceneActivation = false;
+            // _currentActiveScene = SceneManager.GetActiveScene();
+            _currentActiveScene = GetCurrentLevelScene();
+            _preloadedScene = SceneManager.LoadSceneAsync($"{_scenePath}{_sceneName}", LoadSceneMode.Additive);
+            _preloadedScene.allowSceneActivation = false;
+            Info($"Starting to preload scene: {_sceneName}");
         }
 
         public void ActivateScene()
         {
-            if (_loadedScene == null)
+            if (_preloadedScene == null)
             {
                 Error($"No scene loaded!");
                 return;
             }
+            
+            Scene preloadedScene = SceneManager.GetSceneByName($"{_sceneName}");
+            if (!preloadedScene.IsValid() || !preloadedScene.isLoaded)
+            {
+                Error($"Scene not loaded!");
+                _preloadedScene = null;
+                return;           
+            }
 
-            if (_sceneToUnload.IsValid()) StartCoroutine(UnloadPreviousSceneWhenReady());
-            // SceneManager.UnloadSceneAsync(_sceneToUnload);
-            _loadedScene.allowSceneActivation = true;
+            if (_currentActiveScene.IsValid()) StartCoroutine(UnloadPreviousSceneWhenReady());
+            // SceneManager.UnloadSceneAsync(_currentActiveScene);
+            _preloadedScene.allowSceneActivation = true;
  
         }
         
@@ -81,7 +101,7 @@ namespace Tools.Runtime
         private IEnumerator UnloadPreviousSceneWhenReady()
         {
             // wait for new scene
-            yield return _loadedScene;
+            yield return _preloadedScene;
             
             // Set new scene as active
             Scene newScene = SceneManager.GetSceneByName($"{_sceneName}");
@@ -92,17 +112,17 @@ namespace Tools.Runtime
             }
             
             // Unload old scene
-            if (_sceneToUnload.IsValid())
+            if (_currentActiveScene.IsValid())
             {
-                Info($"Unloading previous scene: {_sceneToUnload.name}");
-                AsyncOperation unloadOperation = SceneManager.UnloadSceneAsync(_sceneToUnload);
-                // _loadedScene.allowSceneActivation = true;
+                Info($"Unloading previous scene: {_currentActiveScene.name}");
+                AsyncOperation unloadOperation = SceneManager.UnloadSceneAsync(_currentActiveScene);
+                // _preloadedScene.allowSceneActivation = true;
                 yield return unloadOperation;
-                InfoDone($"Scene unloaded: {_sceneToUnload.name}");
+                InfoDone($"Scene unloaded: {_currentActiveScene.name}");
             }
             
-            _loadedScene = null;
-            _sceneToUnload = default;
+            _preloadedScene = null;
+            _currentActiveScene = default;
         }
 
         private Scene GetCurrentLevelScene()
