@@ -9,17 +9,16 @@ namespace SharedData.Runtime
     [CreateAssetMenu(fileName = "SceneReference", menuName = "Game/SceneReference", order = 1)]
     public class SceneReference : ScriptableObject
     {
-        [SerializeField] private string _sceneName;
-        public string SceneName;
+        [SerializeField] public string SceneName;
         
         #if UNITY_EDITOR
-        [SerializeField] SceneAsset _sceneAsset;
+        [SerializeField] public SceneAsset SceneAsset;
 
         private static List<SceneAsset> _missingSceneAssets = new List<SceneAsset>();
 
         private void OnValidate()
         {
-            if (_sceneAsset != null) _sceneName = _sceneAsset.name;
+            if (SceneAsset != null) SceneName = SceneAsset.name;
 
             var guids = AssetDatabase.FindAssets($"t:{typeof(SceneAsset)}");
             var seen = new HashSet<string>();
@@ -51,9 +50,9 @@ namespace SharedData.Runtime
             {
                 var refPath = AssetDatabase.GUIDToAssetPath(refGuid);
                 var sceneRef = AssetDatabase.LoadAssetAtPath<SceneReference>(refPath);
-                if (sceneRef != null && sceneRef._sceneAsset != null)
+                if (sceneRef != null && sceneRef.SceneAsset != null)
                 {
-                    referencedSceneNames.Add(sceneRef._sceneAsset.name);
+                    referencedSceneNames.Add(sceneRef.SceneAsset.name);
                 }
             }
 
@@ -79,9 +78,9 @@ namespace SharedData.Runtime
 
                 serializedObject.Update();
 
-                EditorGUILayout.PropertyField(serializedObject.FindProperty("_sceneAsset"));
+                EditorGUILayout.PropertyField(serializedObject.FindProperty("SceneAsset"));
 
-                if (sceneReference._sceneAsset == null)
+                if (sceneReference.SceneAsset == null)
                 {
                     if (_missingSceneAssets.Count == 0)
                     {
@@ -99,8 +98,8 @@ namespace SharedData.Runtime
                         if (_selectedIndex >= 0 && _selectedIndex < _missingSceneAssets.Count)
                         {
                             Undo.RecordObject(sceneReference, "Assign Scene Asset");
-                            sceneReference._sceneAsset = _missingSceneAssets[_selectedIndex];
-                            sceneReference._sceneName = sceneReference._sceneAsset.name;
+                            sceneReference.SceneAsset = _missingSceneAssets[_selectedIndex];
+                            sceneReference.SceneName = sceneReference.SceneAsset.name;
                             EditorUtility.SetDirty(sceneReference);
                             _selectedIndex = -1;
                         }

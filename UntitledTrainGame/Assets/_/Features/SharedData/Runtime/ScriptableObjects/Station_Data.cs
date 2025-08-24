@@ -40,7 +40,8 @@ namespace SharedData.Runtime
                 var station = AssetDatabase.LoadAssetAtPath<Station_Data>(path);
                 if (station == null || station == this) continue;
                 
-                Assert.IsTrue(station.StationScene != StationScene, $"Duplicate StationScene found: {name} and {station.name} both reference {StationScene?.name}");
+                if (station.StationScene != null)
+                    Assert.IsTrue(station.StationScene != StationScene, $"Duplicate StationScene found: {name} and {station.name} both reference {StationScene?.name}");
             }
         }
        
@@ -207,15 +208,43 @@ namespace SharedData.Runtime
                 .ToHashSet(StringComparer.OrdinalIgnoreCase);
 
             var created = new List<string>();
-            foreach (var sceneName in allSceneNames)
+            foreach (var scene in allSceneNames)
             {
-                if (existingSceneRefs.Contains(sceneName)) continue;
+                if (existingSceneRefs.Contains(scene)) continue;
                 
                 var asset = ScriptableObject.CreateInstance<SceneReference>();
-                asset.SceneName = sceneName;
+                asset.SceneName = scene;
                 
+                var sceneAssetGuid = AssetDatabase.FindAssets($"t:SceneAsset {scene}").FirstOrDefault();
+                if (!string.IsNullOrEmpty(sceneAssetGuid))
+                {
+                    var sceneAssetPath = AssetDatabase.GUIDToAssetPath(sceneAssetGuid);
+                    asset.SceneAsset = AssetDatabase.LoadAssetAtPath<SceneAsset>(sceneAssetPath);
+                }
                 
+                Assert.IsNotNull(asset, $"Failed to create SceneReference for scene {scene}");
+
+                var dir = "Assets/_/Database/ScriptableObjects/SceneReferences";
+                if(!System.IO.Directory.Exists(dir))
+                    System.IO.Directory.CreateDirectory(dir);
+                var path = $"{dir}/{scene}.asset";
+                
+                AssetDatabase.CreateAsset(asset, path);
+                created.Add(scene);
             }
+            
+            AssetDatabase.SaveAssets();
+            AssetDatabase.Refresh();
+            
+            Station_DataEditor.NotifySceneRefsUpdated();
+            
+            EditorApplication.RepaintProjectWindow();
+            EditorApplication.RepaintHierarchyWindow();
+            foreach (var window in Resources.FindObjectsOfTypeAll<EditorWindow>().Where(w => w.GetType().Name == "InspectorWindow"))
+                window.Repaint();
+            
+            if(created.Count == 0) Debug.Log("No missing SceneReferences found. All scenes already referenced.");
+            else Debug.Log($"Created {created.Count} missing SceneReferences: {string.Join(", ", created)}");
         }
     }
     #endif

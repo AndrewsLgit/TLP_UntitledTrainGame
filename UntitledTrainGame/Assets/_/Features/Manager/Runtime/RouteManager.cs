@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using Foundation.Runtime;
 using Game.Runtime;
@@ -20,7 +19,7 @@ namespace Manager.Runtime
         [SerializeField] private TrainRoute_Data _testTrainRoute;
         private GDControlPanel _controlPanel;
         private SceneManager _sceneManager;
-        private string _sceneToLoad;
+        private SceneReference _sceneToLoad;
 
         private List<Station_Data> _segments = new List<Station_Data>();
         private int _currentStationIndex = 0;

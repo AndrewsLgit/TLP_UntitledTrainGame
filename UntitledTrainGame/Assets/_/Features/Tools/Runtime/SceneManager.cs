@@ -76,7 +76,7 @@ namespace Tools.Runtime
                     return;
                 }
                 StartCoroutine(ReplacePreload(sceneName));
-                // Scene previousLoadedScene = SceneManager.GetSceneByName($"{_sceneName}");
+                // Scene previousLoadedScene = SceneManager.GetSceneByName($"{SceneName}");
                 // if (previousLoadedScene.IsValid() && previousLoadedScene.isLoaded)
                 // {
                 //     SceneManager.UnloadSceneAsync(previousLoadedScene);
@@ -89,9 +89,9 @@ namespace Tools.Runtime
             _sceneName = sceneName;
             // _currentActiveScene = SceneManager.GetActiveScene();
             _currentActiveScene = GetCurrentLevelScene();
-            // _preloadedScene = SceneManager.LoadSceneAsync($"{_scenePath}{_sceneName}", LoadSceneMode.Additive);
+            // _preloadedScene = SceneManager.LoadSceneAsync($"{_scenePath}{SceneName}", LoadSceneMode.Additive);
             // _preloadedScene.allowSceneActivation = false;
-            // Info($"Starting to preload scene: {_sceneName}");
+            // Info($"Starting to preload scene: {SceneName}");
             
             StartCoroutine(PreloadRoutine(sceneName));
         }
@@ -122,7 +122,7 @@ namespace Tools.Runtime
             
             _isTransitioning = true;
             
-            // Scene preloadedScene = SceneManager.GetSceneByName($"{_sceneName}");
+            // Scene preloadedScene = SceneManager.GetSceneByName($"{SceneName}");
             // if (!preloadedScene.IsValid() || !preloadedScene.isLoaded)
             // {
             //     Error($"Scene not loaded!");
@@ -215,7 +215,7 @@ namespace Tools.Runtime
                 Info($"Scene unloaded: {s.name}");
             }
             // while (!asyncOp.isDone) yield return null;
-            // SceneManager.UnloadSceneAsync(sceneName);
+            // SceneManager.UnloadSceneAsync(SceneName);
         }
 
         private Scene GetCurrentLevelScene()

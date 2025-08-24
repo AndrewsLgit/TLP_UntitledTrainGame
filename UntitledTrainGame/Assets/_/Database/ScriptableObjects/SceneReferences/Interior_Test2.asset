@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: d05b88686afbc4b009df1d3b2d6e44a4, type: 3}
-  m_Name: SO_Test_01
+  m_Name: Interior_Test2
   m_EditorClassIdentifier: 
-  _sceneName: Art-Test
-  _sceneAsset: {fileID: 102900000, guid: c3aab3fd150b0b6488681a90c12420f6, type: 3}
+  SceneName: Interior_Test2
+  SceneAsset: {fileID: 102900000, guid: cf704966399c9e745b9c2ad99956fe40, type: 3}
