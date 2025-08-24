@@ -57,12 +57,12 @@ namespace Tools.Runtime
             //_rotationComposer = GetComponent<CinemachineRotationComposer>();
             _originalRotation = transform.rotation;
 
-            SceneManager.sceneLoaded += OnSceneLoaded;
+            UnityEngine.SceneManagement.SceneManager.sceneLoaded += OnSceneLoaded;
         }
 
         private void OnDestroy()
         {
-            SceneManager.sceneLoaded -= OnSceneLoaded;
+            UnityEngine.SceneManagement.SceneManager.sceneLoaded -= OnSceneLoaded;
         }
 
         // Update is called once per frame

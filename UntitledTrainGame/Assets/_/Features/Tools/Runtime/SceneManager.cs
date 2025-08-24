@@ -7,7 +7,7 @@ using UnityEngine.SceneManagement;
 
 namespace Tools.Runtime
 {
-    public class SceneLoader : FMono
+    public class SceneManager : FMono
     {
         #region Variables
         
@@ -26,7 +26,7 @@ namespace Tools.Runtime
         #region Public
         // Public Variables
         
-        public static SceneLoader Instance { get; private set; }
+        public static SceneManager Instance { get; private set; }
         
         // Public Variables
         #endregion
@@ -83,6 +83,7 @@ namespace Tools.Runtime
                 //     Info($"Previous scene unloaded: {previousLoadedScene.name}");
                 // }
                 // _preloadedScene = null;
+                return;
             }
             
             _sceneName = sceneName;
@@ -147,10 +148,10 @@ namespace Tools.Runtime
             yield return _preloadedScene;
             
             // Set new scene as active
-            Scene newScene = SceneManager.GetSceneByName($"{_sceneName}");
+            Scene newScene = UnityEngine.SceneManagement.SceneManager.GetSceneByName($"{_sceneName}");
             if (newScene.IsValid())
             {
-                SceneManager.SetActiveScene(newScene);
+                UnityEngine.SceneManagement.SceneManager.SetActiveScene(newScene);
                 Info($"Set active scene to: {newScene.name}");
             }
             
@@ -158,7 +159,7 @@ namespace Tools.Runtime
             if (_currentActiveScene.IsValid() && _currentActiveScene != newScene)
             {
                 Info($"Unloading previous scene: {_currentActiveScene.name}");
-                AsyncOperation unloadOperation = SceneManager.UnloadSceneAsync(_currentActiveScene);
+                AsyncOperation unloadOperation = UnityEngine.SceneManagement.SceneManager.UnloadSceneAsync(_currentActiveScene);
                 // _preloadedScene.allowSceneActivation = true;
                 if (unloadOperation != null) yield return unloadOperation;
                 InfoDone($"Scene unloaded: {_currentActiveScene.name}");
@@ -172,7 +173,7 @@ namespace Tools.Runtime
         private IEnumerator PreloadRoutine(string sceneName)
         {
             Info($"Starting to preload scene: {sceneName}");
-            _preloadedScene = SceneManager.LoadSceneAsync($"{_scenePath}{sceneName}", LoadSceneMode.Additive);
+            _preloadedScene = UnityEngine.SceneManagement.SceneManager.LoadSceneAsync($"{_scenePath}{sceneName}", LoadSceneMode.Additive);
             if (_preloadedScene == null)
             {
                 Error($"Failed to start loading scene '{sceneName}'. Check Build Settings path.");
@@ -206,10 +207,10 @@ namespace Tools.Runtime
             asyncOp.allowSceneActivation = true;
             yield return asyncOp;
             
-            var s = SceneManager.GetSceneByName(sceneName);
+            var s = UnityEngine.SceneManagement.SceneManager.GetSceneByName(sceneName);
             if (s.IsValid() && s.isLoaded)
             {
-                var unloadOp = SceneManager.UnloadSceneAsync(s);
+                var unloadOp = UnityEngine.SceneManagement.SceneManager.UnloadSceneAsync(s);
                 if (unloadOp != null) yield return unloadOp;
                 Info($"Scene unloaded: {s.name}");
             }
@@ -221,13 +222,13 @@ namespace Tools.Runtime
         {
             Scene persistentScene = gameObject.scene;
 
-            for (int i = 0; i < SceneManager.sceneCount; i++)
+            for (int i = 0; i < UnityEngine.SceneManagement.SceneManager.sceneCount; i++)
             {
-                Scene scene = SceneManager.GetSceneAt(i);
+                Scene scene = UnityEngine.SceneManagement.SceneManager.GetSceneAt(i);
                 if(scene.IsValid() && scene.isLoaded) return scene;
             }
 
-            return SceneManager.GetActiveScene();
+            return UnityEngine.SceneManagement.SceneManager.GetActiveScene();
         }
         
         #endregion

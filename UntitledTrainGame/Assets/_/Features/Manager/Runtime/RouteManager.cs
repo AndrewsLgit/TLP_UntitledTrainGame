@@ -19,7 +19,7 @@ namespace Manager.Runtime
         [SerializeField] private StationNetwork_Data _stationNetwork;
         [SerializeField] private TrainRoute_Data _testTrainRoute;
         private GDControlPanel _controlPanel;
-        private SceneLoader _sceneLoader;
+        private SceneManager _sceneManager;
         private string _sceneToLoad;
 
         private List<Station_Data> _segments = new List<Station_Data>();
@@ -63,7 +63,7 @@ namespace Manager.Runtime
         void Start()
         {
             _controlPanel = GDControlPanel.Instance;
-            // _sceneLoader = SceneLoader.Instance;
+            // _sceneManager = SceneManager.Instance;
             _currentStationIndex = 0;
         }
 
@@ -103,8 +103,8 @@ namespace Manager.Runtime
             }
             Info($"Preloading Scene: {trainRoute.EndStation.StationScene}");
             _sceneToLoad = trainRoute.EndStation.StationScene;
-            _sceneLoader = GetSceneLoader();
-            _sceneLoader.PreloadScene(_sceneToLoad);
+            _sceneManager = GetSceneLoader();
+            _sceneManager.PreloadScene(_sceneToLoad);
             
             Info($"Starting journey from {_segments[0].GetStationName()} to {_segments[^1].GetStationName()}");
             
@@ -156,9 +156,9 @@ namespace Manager.Runtime
 
         private void ChangeDestination(int index)
         {
-            // _sceneLoader.UnloadScene(_sceneToLoad);
+            // _sceneManager.UnloadScene(_sceneToLoad);
             _sceneToLoad = _segments[index].StationScene;
-            _sceneLoader.PreloadScene(_sceneToLoad);
+            _sceneManager.PreloadScene(_sceneToLoad);
             EndJourney();
         }
 
@@ -171,7 +171,7 @@ namespace Manager.Runtime
             // timer stop is done in the uiManager
             _currentSegmentTimer = null;
             //test
-            _sceneLoader.ActivateScene();
+            _sceneManager.ActivateScene();
         }
 
         public void StopJourneyEarly()
@@ -185,14 +185,14 @@ namespace Manager.Runtime
 
         #region Utils
 
-        private SceneLoader GetSceneLoader()
+        private SceneManager GetSceneLoader()
         {
-            if (_sceneLoader == null)
+            if (_sceneManager == null)
             {
-                _sceneLoader = SceneLoader.Instance;
-                if(_sceneLoader == null) Error("SceneLoader not found!");
+                _sceneManager = SceneManager.Instance;
+                if(_sceneManager == null) Error("SceneManager not found!");
             }
-            return _sceneLoader;
+            return _sceneManager;
         }
 
         private void CleanupCurrentJourney()
