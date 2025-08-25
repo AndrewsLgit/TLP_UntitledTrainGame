@@ -4,7 +4,6 @@ using SharedData.Runtime;
 using Tools.Runtime;
 using UnityEngine;
 using UnityEngine.SceneManagement;
-using SceneManager = Tools.Runtime.SceneManager;
 
 namespace Interactable.Runtime
 {
@@ -16,7 +15,7 @@ namespace Interactable.Runtime
         // Private Variables
         
         private float _timeToInteract;
-        private SceneManager _sceneManager;
+        private SceneLoader _sceneLoader;
         [SerializeField] private string _sceneToLoad;
         
         // Private Variables
@@ -36,7 +35,7 @@ namespace Interactable.Runtime
 
         private void Start()
         {
-            _sceneManager = SceneManager.Instance;
+            _sceneLoader = SceneLoader.Instance;
         }
 
         #endregion
@@ -46,8 +45,8 @@ namespace Interactable.Runtime
         {
             Info($"Interacting with Train Station");
             // SceneManager.LoadScene(_sceneToLoad);
-            _sceneManager.PreloadScene(_sceneToLoad);
-            _sceneManager.ActivateScene();
+            _sceneLoader.PreloadScene(_sceneToLoad);
+            _sceneLoader.ActivateScene();
         }
         #endregion
     }

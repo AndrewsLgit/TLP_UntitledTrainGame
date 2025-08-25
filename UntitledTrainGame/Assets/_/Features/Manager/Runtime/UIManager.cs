@@ -7,7 +7,6 @@ using Tools.Runtime;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
-using SceneManager = UnityEngine.SceneManagement.SceneManager;
 
 namespace Game.Runtime
 {

@@ -251,7 +251,6 @@ MonoBehaviour:
   _onPlayerStop:
     m_PersistentCalls:
       m_Calls: []
-  _onPlayerJourneyEnd: {fileID: 11400000, guid: a4e88e88e0d1a4770988ea07c0fd3258, type: 2}
 --- !u!135 &7104388444984602249
 SphereCollider:
   m_ObjectHideFlags: 0

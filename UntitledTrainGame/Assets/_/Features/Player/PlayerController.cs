@@ -25,8 +25,6 @@ namespace Player.Runtime
         
         [Header("Player Stop")]
         [SerializeField] private UnityEvent _onPlayerStop;
-
-        [SerializeField] private EmptyEventChannel _onPlayerJourneyEnd;
         
         private CharacterController _characterController;
         private GDControlPanel _controlPanel;
@@ -78,11 +76,12 @@ namespace Player.Runtime
             _characterController = GetComponent<CharacterController>();
             _detectionCollider = GetComponent<SphereCollider>();
             _controlPanel = GDControlPanel.Instance;
-            GDControlPanel.OnValuesUpdated += OnControlPanelUpdated;
-            GetFromControlPanel();
-            
             _cameraTransform = _camera.transform;
             _inputMove = Vector2.zero;
+            _moveSpeed = _controlPanel.PlayerMoveSpeed;
+            _turnSmoothTime = _controlPanel.TurnSmoothTime;
+            _interactionDistance = _controlPanel.DetectionDistance;
+            _interactionAngle = _controlPanel.DetectionAngle;
 
             if (_detectionCollider != null)
             {
@@ -94,16 +93,11 @@ namespace Player.Runtime
             
         }
 
-        private void OnDestroy()
-        {
-            GDControlPanel.OnValuesUpdated -= OnControlPanelUpdated;
-        }
-
-        
-
         // Update is called once per frame
         void Update()
         {
+            _interactionDistance = _controlPanel.DetectionDistance;
+            _interactionAngle = _controlPanel.DetectionAngle;
             HandleMovement();
             InteractionDetection();
         }
@@ -159,8 +153,7 @@ namespace Player.Runtime
         public void StopTrain(InputAction.CallbackContext context)
         {
             if (context.phase != InputActionPhase.Canceled) return;
-            _onPlayerJourneyEnd?.Invoke();
-            // _onPlayerStop.Invoke();
+            _onPlayerStop.Invoke();
         }
 
         private void HandleMovement()
@@ -222,19 +215,6 @@ namespace Player.Runtime
         #endregion
         
         #region Utils
-        
-        private void OnControlPanelUpdated(GDControlPanel controlPanel)
-        {
-            GetFromControlPanel();
-        }
-
-        private void GetFromControlPanel()
-        {
-            _moveSpeed = _controlPanel.PlayerMoveSpeed;
-            _turnSmoothTime = _controlPanel.TurnSmoothTime;
-            _interactionDistance = _controlPanel.DetectionDistance;
-            _interactionAngle = _controlPanel.DetectionAngle;
-        }
 
         private void ShowInteractionPopup(bool enable)
         {

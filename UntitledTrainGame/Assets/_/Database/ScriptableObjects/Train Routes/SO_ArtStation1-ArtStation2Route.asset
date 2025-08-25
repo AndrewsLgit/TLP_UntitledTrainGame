@@ -10,10 +10,10 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 65d2e04f8c8444fcfa68157930a06932, type: 3}
-  m_Name: SO_A1-A2_Route
+  m_Name: SO_ArtStation1-ArtStation2Route
   m_EditorClassIdentifier: 
-  StartStation: {fileID: 11400000, guid: 1f08f5f6349d0474d8dd5fe1b4141ca6, type: 2}
-  EndStation: {fileID: 11400000, guid: 51599d683f97a4d01a759c2579dfc88c, type: 2}
+  StartStation: {fileID: 11400000, guid: 3743b17eb972c41b1b366e0becb97e3f, type: 2}
+  EndStation: {fileID: 11400000, guid: dcf17a6b77af842b98accde5a0ba94a6, type: 2}
   CompressionFactor: 0.411
   IsExpress: 0
   Network: {fileID: 11400000, guid: 4b1d1bb3fd4124fa6abab7bbdc21e905, type: 2}

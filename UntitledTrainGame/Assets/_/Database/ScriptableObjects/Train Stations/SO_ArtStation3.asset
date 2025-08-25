@@ -9,8 +9,12 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d05b88686afbc4b009df1d3b2d6e44a4, type: 3}
-  m_Name: Standard
+  m_Script: {fileID: 11500000, guid: 70727a5f58de243ae8926e14f2459271, type: 3}
+  m_Name: SO_ArtStation3
   m_EditorClassIdentifier: 
-  SceneName: Standard
-  SceneAsset: {fileID: 102900000, guid: 5cae0d87369a2405eaa962b8d920b947, type: 3}
+  LinePrefix: 0
+  Id: 3
+  StationScene: Art-Test3
+  DisplayName: Art Station 3
+  Icon: {fileID: 0}
+  IsDiscovered: 1

@@ -5,7 +5,6 @@ using Game.Runtime;
 using SharedData.Runtime;
 using Tools.Runtime;
 using UnityEngine;
-using UnityEngine.Assertions;
 
 namespace Manager.Runtime
 {
@@ -19,9 +18,9 @@ namespace Manager.Runtime
         // References
         [SerializeField] private StationNetwork_Data _stationNetwork;
         [SerializeField] private TrainRoute_Data _testTrainRoute;
-        private GDControlPanel _controlPanel = null;
-        private SceneManager _sceneManager;
-        private SceneReference _sceneToLoad;
+        private GDControlPanel _controlPanel;
+        private SceneLoader _sceneLoader;
+        private string _sceneToLoad;
 
         private List<Station_Data> _segments = new List<Station_Data>();
         private int _currentStationIndex = 0;
@@ -64,21 +63,16 @@ namespace Manager.Runtime
         void Start()
         {
             _controlPanel = GDControlPanel.Instance;
-            // _sceneManager = SceneManager.Instance;
+            // _sceneLoader = SceneLoader.Instance;
             _currentStationIndex = 0;
-            
-            Assert.IsNotNull(_controlPanel, "ControlPanel not found! Please add it to the GameManager object!");
-            GDControlPanel.OnValuesUpdated += OnControlPanelUpdated;
-        }
-
-        private void OnDestroy()
-        {
-            GDControlPanel.OnValuesUpdated -= OnControlPanelUpdated;
         }
 
         // Update is called once per frame
         void Update()
         {
+            //todo: remove update variable assignment
+            _compressionFactor = _controlPanel.CompressionFactor;
+
             if (_currentSegmentTimer != null && _currentSegmentTimer.IsRunning)
             {
                 _currentSegmentTimer.Tick(Time.deltaTime);
@@ -109,8 +103,8 @@ namespace Manager.Runtime
             }
             Info($"Preloading Scene: {trainRoute.EndStation.StationScene}");
             _sceneToLoad = trainRoute.EndStation.StationScene;
-            _sceneManager = GetSceneLoader();
-            //_sceneManager.PreloadScene(_sceneToLoad);
+            _sceneLoader = GetSceneLoader();
+            _sceneLoader.PreloadScene(_sceneToLoad);
             
             Info($"Starting journey from {_segments[0].GetStationName()} to {_segments[^1].GetStationName()}");
             
@@ -162,23 +156,22 @@ namespace Manager.Runtime
 
         private void ChangeDestination(int index)
         {
-            // _sceneManager.UnloadScene(_sceneToLoad);
+            // _sceneLoader.UnloadScene(_sceneToLoad);
             _sceneToLoad = _segments[index].StationScene;
-            // _sceneManager.PreloadScene(_sceneToLoad);
+            _sceneLoader.PreloadScene(_sceneToLoad);
             EndJourney();
         }
 
         private void EndJourney()
         {
             InfoDone($"Journey ended.");
-            _sceneManager.PreloadScene(_sceneToLoad);
             //test
             UIManager.Instance?.ClearProgressBars();
             // _currentSegmentTimer.Stop();
             // timer stop is done in the uiManager
             _currentSegmentTimer = null;
             //test
-            _sceneManager.ActivateScene();
+            _sceneLoader.ActivateScene();
         }
 
         public void StopJourneyEarly()
@@ -192,14 +185,14 @@ namespace Manager.Runtime
 
         #region Utils
 
-        private SceneManager GetSceneLoader()
+        private SceneLoader GetSceneLoader()
         {
-            if (_sceneManager == null)
+            if (_sceneLoader == null)
             {
-                _sceneManager = SceneManager.Instance;
-                if(_sceneManager == null) Error("SceneManager not found!");
+                _sceneLoader = SceneLoader.Instance;
+                if(_sceneLoader == null) Error("SceneLoader not found!");
             }
-            return _sceneManager;
+            return _sceneLoader;
         }
 
         private void CleanupCurrentJourney()
@@ -215,11 +208,6 @@ namespace Manager.Runtime
             
             _segments.Clear();
             _currentStationIndex = 0;
-        }
-        
-        private void OnControlPanelUpdated(GDControlPanel controlPanel)
-        {
-            _compressionFactor = _controlPanel.CompressionFactor;
         }
 
         #endregion

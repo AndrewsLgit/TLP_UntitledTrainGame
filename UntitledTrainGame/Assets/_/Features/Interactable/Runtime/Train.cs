@@ -15,7 +15,7 @@ namespace Interactable.Runtime
         // Private Variables
         
         private float _timeToInteract;
-        private SceneManager _sceneManager;
+        private SceneLoader _sceneLoader;
         private RouteManager _routeManager;
         [SerializeField] private TrainRoute_Data _trainRoute;
         
@@ -37,7 +37,7 @@ namespace Interactable.Runtime
 
         private void Start()
         {
-            _sceneManager = SceneManager.Instance;
+            _sceneLoader = SceneLoader.Instance;
             _routeManager = RouteManager.Instance;
         }
 

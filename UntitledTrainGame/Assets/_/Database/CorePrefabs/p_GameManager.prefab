@@ -10,6 +10,8 @@ GameObject:
   m_Component:
   - component: {fileID: 1337632031483756321}
   - component: {fileID: 6582457916932893155}
+  - component: {fileID: 864954686524741014}
+  - component: {fileID: 4641961287730845090}
   - component: {fileID: 1011655273124440827}
   m_Layer: 0
   m_Name: p_GameManager
@@ -105,6 +107,35 @@ MonoBehaviour:
     m_PostInfinity: 2
     m_RotationOrder: 4
   _compressionFactor: 0.4
+--- !u!114 &864954686524741014
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1013627989509777286}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 24f88dbf7be214c26a07581ea103a906, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_isVerbose: 0
+  _stationNetwork: {fileID: 11400000, guid: 4b1d1bb3fd4124fa6abab7bbdc21e905, type: 2}
+  _testTrainRoute: {fileID: 11400000, guid: 4720cb66be72148cd8acc8e6cb0359f0, type: 2}
+--- !u!114 &4641961287730845090
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1013627989509777286}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f70e99970bece495eb73100e87e1f58c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_isVerbose: 0
+  _scenePath: _/Levels/
 --- !u!114 &1011655273124440827
 MonoBehaviour:
   m_ObjectHideFlags: 0
