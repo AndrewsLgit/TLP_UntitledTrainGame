@@ -4,6 +4,7 @@ using Game.Runtime;
 using SharedData.Runtime;
 using Tools.Runtime;
 using UnityEngine;
+using UnityEngine.Assertions;
 
 namespace Manager.Runtime
 {
@@ -17,7 +18,7 @@ namespace Manager.Runtime
         // References
         [SerializeField] private StationNetwork_Data _stationNetwork;
         [SerializeField] private TrainRoute_Data _testTrainRoute;
-        private GDControlPanel _controlPanel;
+        private GDControlPanel _controlPanel = null;
         private SceneManager _sceneManager;
         private SceneReference _sceneToLoad;
 
@@ -64,13 +65,16 @@ namespace Manager.Runtime
             _controlPanel = GDControlPanel.Instance;
             // _sceneManager = SceneManager.Instance;
             _currentStationIndex = 0;
+            
+            Assert.IsNotNull(_controlPanel, "ControlPanel not found! Please add it to the GameManager object!");
         }
 
         // Update is called once per frame
         void Update()
         {
             //todo: remove update variable assignment
-            _compressionFactor = _controlPanel.CompressionFactor;
+            if(_controlPanel != null)
+                _compressionFactor = _controlPanel.CompressionFactor;
 
             if (_currentSegmentTimer != null && _currentSegmentTimer.IsRunning)
             {

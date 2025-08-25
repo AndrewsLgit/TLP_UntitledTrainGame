@@ -15,9 +15,11 @@ namespace Tools.Runtime
         // Private Variables
         
         [SerializeField] private string _scenePath = $"_/Levels/";
+        [SerializeField] private SceneReference _startScene;
         private string _sceneName;
         private AsyncOperation _preloadedScene;
         private Scene _currentActiveScene;
+        private Scene _persistentScene;
         private bool _isTransitioning;
         
         // Private Variables
@@ -48,6 +50,18 @@ namespace Tools.Runtime
             // Assign instance as this current object
             Instance = this;
             DontDestroyOnLoad(gameObject);
+            
+            // Store persistent scene reference
+            _persistentScene = gameObject.scene;
+        }
+
+        private void Start()
+        {
+            if (_startScene != null)
+            {
+                PreloadScene(_startScene);
+                ActivateScene();
+            }
         }
         
         #endregion
@@ -88,7 +102,7 @@ namespace Tools.Runtime
             
             _sceneName = sceneName;
             // _currentActiveScene = SceneManager.GetActiveScene();
-            _currentActiveScene = GetCurrentLevelScene();
+            //_currentActiveScene = GetCurrentLevelScene();
             // _preloadedScene = SceneManager.LoadSceneAsync($"{_scenePath}{SceneName}", LoadSceneMode.Additive);
             // _preloadedScene.allowSceneActivation = false;
             // Info($"Starting to preload scene: {SceneName}");
@@ -152,11 +166,12 @@ namespace Tools.Runtime
             if (newScene.IsValid())
             {
                 UnityEngine.SceneManagement.SceneManager.SetActiveScene(newScene);
+                _currentActiveScene = newScene;
                 Info($"Set active scene to: {newScene.name}");
             }
             
             // Unload old scene if existent and different
-            if (_currentActiveScene.IsValid() && _currentActiveScene != newScene)
+            if (_currentActiveScene.IsValid() && _currentActiveScene != newScene && !IsPersistentScene(_currentActiveScene))
             {
                 Info($"Unloading previous scene: {_currentActiveScene.name}");
                 AsyncOperation unloadOperation = UnityEngine.SceneManagement.SceneManager.UnloadSceneAsync(_currentActiveScene);
@@ -164,6 +179,7 @@ namespace Tools.Runtime
                 if (unloadOperation != null) yield return unloadOperation;
                 InfoDone($"Scene unloaded: {_currentActiveScene.name}");
             }
+            else if (IsPersistentScene(_currentActiveScene)) Info($"Skipping unload of persistent scene: {_currentActiveScene.name}");
             
             _preloadedScene = null;
             _currentActiveScene = default;
@@ -208,27 +224,32 @@ namespace Tools.Runtime
             yield return asyncOp;
             
             var s = UnityEngine.SceneManagement.SceneManager.GetSceneByName(sceneName);
-            if (s.IsValid() && s.isLoaded)
+            if (s.IsValid() && s.isLoaded && !IsPersistentScene(s))
             {
                 var unloadOp = UnityEngine.SceneManagement.SceneManager.UnloadSceneAsync(s);
                 if (unloadOp != null) yield return unloadOp;
                 Info($"Scene unloaded: {s.name}");
             }
+            else if (IsPersistentScene(s)) Info($"Skipping unload of persistent scene: {s.name}");
             // while (!asyncOp.isDone) yield return null;
             // SceneManager.UnloadSceneAsync(SceneName);
         }
 
         private Scene GetCurrentLevelScene()
         {
-            Scene persistentScene = gameObject.scene;
 
             for (int i = 0; i < UnityEngine.SceneManagement.SceneManager.sceneCount; i++)
             {
                 Scene scene = UnityEngine.SceneManagement.SceneManager.GetSceneAt(i);
-                if(scene.IsValid() && scene.isLoaded) return scene;
+                if(scene.IsValid() && scene.isLoaded && !IsPersistentScene(scene)) return scene;
             }
 
             return UnityEngine.SceneManagement.SceneManager.GetActiveScene();
+        }
+
+        private bool IsPersistentScene(Scene scene)
+        {
+            return scene.IsValid() && scene == _persistentScene;
         }
         
         #endregion
