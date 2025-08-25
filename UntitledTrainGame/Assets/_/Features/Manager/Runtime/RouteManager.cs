@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Foundation.Runtime;
 using Game.Runtime;
@@ -67,15 +68,17 @@ namespace Manager.Runtime
             _currentStationIndex = 0;
             
             Assert.IsNotNull(_controlPanel, "ControlPanel not found! Please add it to the GameManager object!");
+            GDControlPanel.OnValuesUpdated += OnControlPanelUpdated;
+        }
+
+        private void OnDestroy()
+        {
+            GDControlPanel.OnValuesUpdated -= OnControlPanelUpdated;
         }
 
         // Update is called once per frame
         void Update()
         {
-            //todo: remove update variable assignment
-            if(_controlPanel != null)
-                _compressionFactor = _controlPanel.CompressionFactor;
-
             if (_currentSegmentTimer != null && _currentSegmentTimer.IsRunning)
             {
                 _currentSegmentTimer.Tick(Time.deltaTime);
@@ -211,6 +214,11 @@ namespace Manager.Runtime
             
             _segments.Clear();
             _currentStationIndex = 0;
+        }
+        
+        private void OnControlPanelUpdated(GDControlPanel controlPanel)
+        {
+            _compressionFactor = _controlPanel.CompressionFactor;
         }
 
         #endregion

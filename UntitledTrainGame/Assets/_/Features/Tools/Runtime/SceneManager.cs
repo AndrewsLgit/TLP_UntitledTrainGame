@@ -166,7 +166,7 @@ namespace Tools.Runtime
             if (newScene.IsValid())
             {
                 UnityEngine.SceneManagement.SceneManager.SetActiveScene(newScene);
-                _currentActiveScene = newScene;
+                // _currentActiveScene = newScene;
                 Info($"Set active scene to: {newScene.name}");
             }
             
@@ -182,8 +182,9 @@ namespace Tools.Runtime
             else if (IsPersistentScene(_currentActiveScene)) Info($"Skipping unload of persistent scene: {_currentActiveScene.name}");
             
             _preloadedScene = null;
-            _currentActiveScene = default;
+            _currentActiveScene = newScene;
             _isTransitioning = false;
+            
         }
 
         private IEnumerator PreloadRoutine(string sceneName)

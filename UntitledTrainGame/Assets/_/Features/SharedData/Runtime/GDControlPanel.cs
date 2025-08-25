@@ -44,6 +44,7 @@ namespace SharedData.Runtime
         #region Public
         // Public Variables
         public static GDControlPanel Instance { get; private set; } 
+        public static event System.Action<GDControlPanel> OnValuesUpdated;
         
         public float PlayerMoveSpeed => _playerMoveSpeed;
         public float TurnSmoothTime => _turnSmoothTime;
@@ -106,6 +107,7 @@ namespace SharedData.Runtime
             _cameraReturnCurve = newControlPanel._cameraReturnCurve;
             _compressionFactor = newControlPanel._compressionFactor;
 
+            OnValuesUpdated?.Invoke(this);
         }
         
         #endregion
