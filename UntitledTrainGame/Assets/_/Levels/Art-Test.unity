@@ -970,6 +970,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 6582457916932893155, guid: 916e0f57e34f64487b1d346445668a23, type: 3}
+      propertyPath: m_isVerbose
+      value: 1
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -1594,34 +1598,6 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
-    - target: {fileID: -7561028645449774875, guid: 8c805c8124b7d45ad8710bb3004271f3, type: 3}
-      propertyPath: _onPlayerStop.m_PersistentCalls.m_Calls.Array.size
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: -7561028645449774875, guid: 8c805c8124b7d45ad8710bb3004271f3, type: 3}
-      propertyPath: _onPlayerStop.m_PersistentCalls.m_Calls.Array.data[0].m_Mode
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: -7561028645449774875, guid: 8c805c8124b7d45ad8710bb3004271f3, type: 3}
-      propertyPath: _onPlayerStop.m_PersistentCalls.m_Calls.Array.data[0].m_Target
-      value: 
-      objectReference: {fileID: 0}
-    - target: {fileID: -7561028645449774875, guid: 8c805c8124b7d45ad8710bb3004271f3, type: 3}
-      propertyPath: _onPlayerStop.m_PersistentCalls.m_Calls.Array.data[0].m_CallState
-      value: 2
-      objectReference: {fileID: 0}
-    - target: {fileID: -7561028645449774875, guid: 8c805c8124b7d45ad8710bb3004271f3, type: 3}
-      propertyPath: _onPlayerStop.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
-      value: StopJourneyEarly
-      objectReference: {fileID: 0}
-    - target: {fileID: -7561028645449774875, guid: 8c805c8124b7d45ad8710bb3004271f3, type: 3}
-      propertyPath: _onPlayerStop.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
-      value: Manager.Runtime.RouteManager, Manager.Runtime
-      objectReference: {fileID: 0}
-    - target: {fileID: -7561028645449774875, guid: 8c805c8124b7d45ad8710bb3004271f3, type: 3}
-      propertyPath: _onPlayerStop.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_ObjectArgumentAssemblyTypeName
-      value: UnityEngine.Object, UnityEngine
-      objectReference: {fileID: 0}
     - target: {fileID: 5092453341363809159, guid: 8c805c8124b7d45ad8710bb3004271f3, type: 3}
       propertyPath: m_Name
       value: p_Player

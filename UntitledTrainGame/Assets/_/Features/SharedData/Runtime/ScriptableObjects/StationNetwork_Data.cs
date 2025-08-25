@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace SharedData.Runtime
 {
-    [CreateAssetMenu(fileName = "StationNetwork_Data", menuName = "Scriptable Objects/StationNetwork_Data")]
+    [CreateAssetMenu(fileName = "StationNetwork_Data", menuName = "Data/StationNetwork_Data")]
     public class StationNetwork_Data : ScriptableObject
     {
         #region Variables

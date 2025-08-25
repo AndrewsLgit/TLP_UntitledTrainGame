@@ -190,7 +190,7 @@ namespace Tools.Runtime
         private IEnumerator PreloadRoutine(string sceneName)
         {
             Info($"Starting to preload scene: {sceneName}");
-            _preloadedScene = UnityEngine.SceneManagement.SceneManager.LoadSceneAsync($"{_scenePath}{sceneName}", LoadSceneMode.Additive);
+            _preloadedScene = UnityEngine.SceneManagement.SceneManager.LoadSceneAsync($"{sceneName}", LoadSceneMode.Additive);
             if (_preloadedScene == null)
             {
                 Error($"Failed to start loading scene '{sceneName}'. Check Build Settings path.");
@@ -224,6 +224,7 @@ namespace Tools.Runtime
             asyncOp.allowSceneActivation = true;
             yield return asyncOp;
             
+            //todo: check with setactive scene
             var s = UnityEngine.SceneManagement.SceneManager.GetSceneByName(sceneName);
             if (s.IsValid() && s.isLoaded && !IsPersistentScene(s))
             {
