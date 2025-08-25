@@ -230,8 +230,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_isVerbose: 0
-  _stationNetwork: {fileID: 0}
-  _testTrainRoute: {fileID: 0}
+  _stationNetwork: {fileID: 11400000, guid: 4b1d1bb3fd4124fa6abab7bbdc21e905, type: 2}
+  _testTrainRoute: {fileID: 11400000, guid: 4720cb66be72148cd8acc8e6cb0359f0, type: 2}
 --- !u!1 &1371042366
 GameObject:
   m_ObjectHideFlags: 0
