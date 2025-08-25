@@ -110,7 +110,7 @@ namespace Manager.Runtime
             Info($"Preloading Scene: {trainRoute.EndStation.StationScene}");
             _sceneToLoad = trainRoute.EndStation.StationScene;
             _sceneManager = GetSceneLoader();
-            _sceneManager.PreloadScene(_sceneToLoad);
+            //_sceneManager.PreloadScene(_sceneToLoad);
             
             Info($"Starting journey from {_segments[0].GetStationName()} to {_segments[^1].GetStationName()}");
             
@@ -164,13 +164,14 @@ namespace Manager.Runtime
         {
             // _sceneManager.UnloadScene(_sceneToLoad);
             _sceneToLoad = _segments[index].StationScene;
-            _sceneManager.PreloadScene(_sceneToLoad);
+            // _sceneManager.PreloadScene(_sceneToLoad);
             EndJourney();
         }
 
         private void EndJourney()
         {
             InfoDone($"Journey ended.");
+            _sceneManager.PreloadScene(_sceneToLoad);
             //test
             UIManager.Instance?.ClearProgressBars();
             // _currentSegmentTimer.Stop();
