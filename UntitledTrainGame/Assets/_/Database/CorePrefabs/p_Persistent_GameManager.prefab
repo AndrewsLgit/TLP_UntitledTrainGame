@@ -185,7 +185,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_isVerbose: 0
-  _scenePath: _/Levels/
   _startScene: {fileID: 11400000, guid: 6b9f0f212f0904d27b495fbc93acb60e, type: 2}
 --- !u!1 &8923975466137552106
 GameObject:
@@ -197,6 +196,7 @@ GameObject:
   m_Component:
   - component: {fileID: 5131157449865139392}
   - component: {fileID: 328081566541519197}
+  - component: {fileID: 4306132696753944844}
   m_Layer: 0
   m_Name: Route Manager
   m_TagString: Untagged
@@ -234,6 +234,34 @@ MonoBehaviour:
   m_isVerbose: 0
   _stationNetwork: {fileID: 11400000, guid: 4b1d1bb3fd4124fa6abab7bbdc21e905, type: 2}
   _testTrainRoute: {fileID: 11400000, guid: 4720cb66be72148cd8acc8e6cb0359f0, type: 2}
+--- !u!114 &4306132696753944844
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8923975466137552106}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9eb561087357459bbb420bb1155ec355, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _eventChannel: {fileID: 11400000, guid: a4e88e88e0d1a4770988ea07c0fd3258, type: 2}
+  _unityEvent:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 328081566541519197}
+        m_TargetAssemblyTypeName: Manager.Runtime.RouteManager, Manager.Runtime
+        m_MethodName: StopJourneyEarly
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!1001 &1930168962777760104
 PrefabInstance:
   m_ObjectHideFlags: 0
