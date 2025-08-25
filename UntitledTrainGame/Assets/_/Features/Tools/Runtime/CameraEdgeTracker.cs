@@ -38,46 +38,24 @@ namespace Tools.Runtime
         void Start()
         {
             _controlPanel = GDControlPanel.Instance;
+            GDControlPanel.OnValuesUpdated += OnControlPanelUpdated;
             _sceneLimitsManager = FindAnyObjectByType<SceneLimitsManager>();
             if (_sceneLimitsManager == null) Error("SceneLimitsManager not found! Please add it to the GameManager object!");
             
-            _edgeThresholdY = _controlPanel.EdgeThresholdY;
-            _edgeThresholdX = _controlPanel.EdgeThresholdX;
-            _markerDistanceThreshold = _controlPanel.MarkerDistanceThreshold;
-            _maxRotationAngle = _controlPanel.MaxRotationAngle;
-            _rotationSpeed = _controlPanel.RotationSpeed;
-            _smoothTime = _controlPanel.SmoothTime;
-            _rotationCurve = _controlPanel.CameraRotationCurve;
-            _rotationCurveBackwards = _controlPanel.CameraReturnCurve;
-            //_rotationCurveBackwards = CreateInvertedAnimationCurve(_rotationCurve);
-            
-            _playerPos = GetFact<Transform>("playerTransform");
+            RefreshValues();
 
-            _mainCam = Camera.main;
-            //_rotationComposer = GetComponent<CinemachineRotationComposer>();
-            _originalRotation = transform.rotation;
-
-            SceneManager.sceneLoaded += OnSceneLoaded;
+            UnityEngine.SceneManagement.SceneManager.sceneLoaded += OnSceneLoaded;
         }
 
         private void OnDestroy()
         {
-            SceneManager.sceneLoaded -= OnSceneLoaded;
+            UnityEngine.SceneManagement.SceneManager.sceneLoaded -= OnSceneLoaded;
+            GDControlPanel.OnValuesUpdated -= OnControlPanelUpdated;
         }
 
         // Update is called once per frame
         void Update()
         {
-            //todo: remove variable assignment when done
-            _edgeThresholdY = _controlPanel.EdgeThresholdY;
-            _edgeThresholdX = _controlPanel.EdgeThresholdX;
-            _markerDistanceThreshold = _controlPanel.MarkerDistanceThreshold;
-            _maxRotationAngle = _controlPanel.MaxRotationAngle;
-            _rotationSpeed = _controlPanel.RotationSpeed;
-            _smoothTime = _controlPanel.SmoothTime;
-            _rotationCurve = _controlPanel.CameraRotationCurve;
-            _rotationCurveBackwards = _controlPanel.CameraReturnCurve;
-            
             // RotateCameraBasedOnEdge();
             RotateCameraBasedOnMarker();
         }
@@ -194,6 +172,12 @@ namespace Tools.Runtime
         {
             RefreshSceneLimitsManager();
             RefreshControlPanelReference();
+        }
+
+        private void OnControlPanelUpdated(GDControlPanel controlPanel)
+        {
+            RefreshValues();
+            Info("Camera settings updated");
         }
 
         private void RefreshSceneLimitsManager()
