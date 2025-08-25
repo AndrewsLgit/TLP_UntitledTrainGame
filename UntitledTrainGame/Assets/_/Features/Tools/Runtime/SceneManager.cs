@@ -3,6 +3,7 @@ using Foundation.Runtime;
 using SharedData.Runtime;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnitySceneManager = UnityEngine.SceneManagement.SceneManager;
 
 
 namespace Tools.Runtime
@@ -14,13 +15,18 @@ namespace Tools.Runtime
         #region Private
         // Private Variables
         
-        [SerializeField] private string _scenePath = $"_/Levels/";
+        // [SerializeField] private string _scenePath = $"_/Levels/";
         [SerializeField] private SceneReference _startScene;
-        private string _sceneName;
-        private AsyncOperation _preloadedScene;
+        
+        private string _preloadedSceneName;
+        private AsyncOperation _preloadOp;
+        
         private Scene _currentActiveScene;
         private Scene _persistentScene;
-        private bool _isTransitioning;
+        private bool _isActivating;
+        
+        private Coroutine _preloadCoroutine;
+        private Coroutine _replaceCoroutine;
         
         // Private Variables
         #endregion
@@ -76,15 +82,15 @@ namespace Tools.Runtime
                 return;
             }
 
-            if (_isTransitioning)
+            if (_isActivating)
             {
                 Warning("Transition in progress. Ignoring preload request.");
                 return;
             }
             
-            if (_preloadedScene != null)
+            if (_preloadOp != null)
             {
-                if (_sceneName == sceneName)
+                if (_preloadedSceneName == sceneName)
                 {
                     Info($"Scene {sceneName} already loaded. Ignoring preload request.");
                     return;
@@ -96,15 +102,15 @@ namespace Tools.Runtime
                 //     SceneManager.UnloadSceneAsync(previousLoadedScene);
                 //     Info($"Previous scene unloaded: {previousLoadedScene.name}");
                 // }
-                // _preloadedScene = null;
+                // _preloadOp = null;
                 return;
             }
             
-            _sceneName = sceneName;
+            _preloadedSceneName = sceneName;
             // _currentActiveScene = SceneManager.GetActiveScene();
             //_currentActiveScene = GetCurrentLevelScene();
-            // _preloadedScene = SceneManager.LoadSceneAsync($"{_scenePath}{SceneName}", LoadSceneMode.Additive);
-            // _preloadedScene.allowSceneActivation = false;
+            // _preloadOp = SceneManager.LoadSceneAsync($"{_scenePath}{SceneName}", LoadSceneMode.Additive);
+            // _preloadOp.allowSceneActivation = false;
             // Info($"Starting to preload scene: {SceneName}");
             
             StartCoroutine(PreloadRoutine(sceneName));
@@ -122,31 +128,31 @@ namespace Tools.Runtime
 
         public void ActivateScene()
         {
-            if (_preloadedScene == null)
+            if (_preloadOp == null)
             {
                 Error($"No scene preloaded!");
                 return;
             }
 
-            if (_isTransitioning)
+            if (_isActivating)
             {
                 Warning("Already transitioning.");
                 return;
             }
             
-            _isTransitioning = true;
+            _isActivating = true;
             
             // Scene preloadedScene = SceneManager.GetSceneByName($"{SceneName}");
             // if (!preloadedScene.IsValid() || !preloadedScene.isLoaded)
             // {
             //     Error($"Scene not loaded!");
-            //     _preloadedScene = null;
+            //     _preloadOp = null;
             //     return;
             // }
             //
             // if (_currentActiveScene.IsValid()) StartCoroutine(UnloadPreviousSceneWhenReady());
             // // SceneManager.UnloadSceneAsync(_currentActiveScene);
-            _preloadedScene.allowSceneActivation = true;
+            _preloadOp.allowSceneActivation = true;
             
             StartCoroutine(UnloadPreviousSceneWhenReady());
  
@@ -159,10 +165,10 @@ namespace Tools.Runtime
         private IEnumerator UnloadPreviousSceneWhenReady()
         {
             // wait for new scene
-            yield return _preloadedScene;
+            yield return _preloadOp;
             
             // Set new scene as active
-            Scene newScene = UnityEngine.SceneManagement.SceneManager.GetSceneByName($"{_sceneName}");
+            Scene newScene = UnityEngine.SceneManagement.SceneManager.GetSceneByName($"{_preloadedSceneName}");
             if (newScene.IsValid())
             {
                 UnityEngine.SceneManagement.SceneManager.SetActiveScene(newScene);
@@ -175,44 +181,44 @@ namespace Tools.Runtime
             {
                 Info($"Unloading previous scene: {_currentActiveScene.name}");
                 AsyncOperation unloadOperation = UnityEngine.SceneManagement.SceneManager.UnloadSceneAsync(_currentActiveScene);
-                // _preloadedScene.allowSceneActivation = true;
+                // _preloadOp.allowSceneActivation = true;
                 if (unloadOperation != null) yield return unloadOperation;
                 InfoDone($"Scene unloaded: {_currentActiveScene.name}");
             }
             else if (IsPersistentScene(_currentActiveScene)) Info($"Skipping unload of persistent scene: {_currentActiveScene.name}");
             
-            _preloadedScene = null;
+            _preloadOp = null;
             _currentActiveScene = newScene;
-            _isTransitioning = false;
+            _isActivating = false;
             
         }
 
         private IEnumerator PreloadRoutine(string sceneName)
         {
             Info($"Starting to preload scene: {sceneName}");
-            _preloadedScene = UnityEngine.SceneManagement.SceneManager.LoadSceneAsync($"{sceneName}", LoadSceneMode.Additive);
-            if (_preloadedScene == null)
+            _preloadOp = UnityEngine.SceneManagement.SceneManager.LoadSceneAsync($"{sceneName}", LoadSceneMode.Additive);
+            if (_preloadOp == null)
             {
                 Error($"Failed to start loading scene '{sceneName}'. Check Build Settings path.");
                 yield break;
             }
             
-            _preloadedScene.allowSceneActivation = false;
+            _preloadOp.allowSceneActivation = false;
             
             // park at 90%
-            while(_preloadedScene.progress < 0.9f)
+            while(_preloadOp.progress < 0.9f)
                 yield return null;
             Info($"Preload ready at 90% for: {sceneName}");
         }
 
         private IEnumerator ReplacePreload(string nextSceneName)
         {
-            Info($"Replacing preloaded '{_sceneName}' with '{nextSceneName}'");
+            Info($"Replacing preloaded '{_preloadedSceneName}' with '{nextSceneName}'");
             
-            yield return FinishAndUnload(_sceneName, _preloadedScene);
+            yield return FinishAndUnload(_preloadedSceneName, _preloadOp);
 
-            _preloadedScene = null;
-            _sceneName = nextSceneName;
+            _preloadOp = null;
+            _preloadedSceneName = nextSceneName;
 
             _currentActiveScene = GetCurrentLevelScene();
             yield return PreloadRoutine(nextSceneName);
