@@ -39,12 +39,12 @@ namespace Tools.Runtime
         {
             // find all markers in scene
             _sceneLimits.AddRange(FindObjectsByType<SceneLimitMarker>(FindObjectsSortMode.None));
-            SceneManager.sceneLoaded += OnSceneLoaded;
+            UnityEngine.SceneManagement.SceneManager.sceneLoaded += OnSceneLoaded;
         }
 
         private void OnDestroy()
         {
-            SceneManager.sceneLoaded -= OnSceneLoaded;
+            UnityEngine.SceneManagement.SceneManager.sceneLoaded -= OnSceneLoaded;
         }
         
         #endregion

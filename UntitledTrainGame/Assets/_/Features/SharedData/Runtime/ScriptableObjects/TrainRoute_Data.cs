@@ -2,7 +2,7 @@ using UnityEngine;
 
 namespace SharedData.Runtime
 {
-    [CreateAssetMenu(fileName = "TrainRoute_Data", menuName = "Scriptable Objects/TrainRoute_Data")]
+    [CreateAssetMenu(fileName = "TrainRoute_Data", menuName = "Data/TrainRoute_Data")]
     public class TrainRoute_Data : ScriptableObject
     {
         public Station_Data StartStation;

@@ -9,6 +9,9 @@ namespace SharedData.Runtime
 
         #region Private
         // Private Variables
+        [Header("Control Panel Type")] 
+        [SerializeField] private bool _isMainSceneControlPanel = false;
+        [Space]
         
         [Header("Player Movement")]
         [SerializeField] private float _playerMoveSpeed = 3f;
@@ -44,6 +47,7 @@ namespace SharedData.Runtime
         #region Public
         // Public Variables
         public static GDControlPanel Instance { get; private set; } 
+        public static event System.Action<GDControlPanel> OnValuesUpdated;
         
         public float PlayerMoveSpeed => _playerMoveSpeed;
         public float TurnSmoothTime => _turnSmoothTime;
@@ -74,10 +78,16 @@ namespace SharedData.Runtime
             // Find instance of this class, if existent -> destroy that instance
             if (Instance != null && Instance != this)
             {
+                if (_isMainSceneControlPanel)
+                {
+                    Error("There is already an instance of MainScene GDControlPanel! Destroying this one!");
+                    Destroy(gameObject);
+                    return;
+                }
                 // Update values from new scene
+                Info($"Updating persistent GDControlPanel values from scene: {UnityEngine.SceneManagement.SceneManager.GetActiveScene().name}");
                 Instance.UpdateValues(this);
                 Destroy(gameObject);
-                Error("There is already an instance of this class! Destroying this one!");
                 return;
             }
 
@@ -92,6 +102,13 @@ namespace SharedData.Runtime
 
         private void UpdateValues(GDControlPanel newControlPanel)
         {
+            if (!_isMainSceneControlPanel)
+            {
+                Warning("Attempting to update values from a non-main scene!");
+                return;
+            }
+            
+            Info($"Received new values from scene: {newControlPanel.gameObject.scene.name}");
             _playerMoveSpeed = newControlPanel._playerMoveSpeed;
             _turnSmoothTime = newControlPanel._turnSmoothTime;
             _detectionDistance = newControlPanel._detectionDistance;
@@ -106,6 +123,7 @@ namespace SharedData.Runtime
             _cameraReturnCurve = newControlPanel._cameraReturnCurve;
             _compressionFactor = newControlPanel._compressionFactor;
 
+            OnValuesUpdated?.Invoke(this);
         }
         
         #endregion
