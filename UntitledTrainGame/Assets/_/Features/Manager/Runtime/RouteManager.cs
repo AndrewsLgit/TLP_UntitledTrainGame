@@ -172,6 +172,9 @@ namespace Manager.Runtime
         {
             InfoDone($"Journey ended.");
             _sceneManager.PreloadScene(_sceneToLoad);
+            //todo: make the Station_Data.isDiscovered = true;
+            // once we arrive at the destination
+            _segments[_currentStationIndex].IsDiscovered = true;
             //test
             UIManager.Instance?.ClearProgressBars();
             // _currentSegmentTimer.Stop();

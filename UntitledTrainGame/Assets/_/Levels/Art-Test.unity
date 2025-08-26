@@ -1151,6 +1151,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: 3d_Station-Blockout
       objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: 1002a33d94ea6f24b94b5c64606d076e, type: 3}
+      propertyPath: m_Layer
+      value: 7
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -1598,6 +1602,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: -7561028645449774875, guid: 8c805c8124b7d45ad8710bb3004271f3, type: 3}
+      propertyPath: _interactionMask.m_Bits
+      value: 64
+      objectReference: {fileID: 0}
     - target: {fileID: 5092453341363809159, guid: 8c805c8124b7d45ad8710bb3004271f3, type: 3}
       propertyPath: m_Name
       value: p_Player
@@ -1751,6 +1759,10 @@ PrefabInstance:
     - target: {fileID: 919132149155446097, guid: c689fa843b266fa40b3857fe297ccf28, type: 3}
       propertyPath: m_Name
       value: 3d_Train-Blockout 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: c689fa843b266fa40b3857fe297ccf28, type: 3}
+      propertyPath: m_Layer
+      value: 6
       objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: c689fa843b266fa40b3857fe297ccf28, type: 3}
       propertyPath: m_IsActive

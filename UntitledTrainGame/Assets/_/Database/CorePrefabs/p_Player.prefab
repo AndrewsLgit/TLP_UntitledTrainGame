@@ -245,13 +245,23 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 07953bef3f3d248be87e7101ec491aca, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_isVerbose: 0
+  m_isVerbose: 1
   _interactionPopup: {fileID: 301085527920185685}
   _popupOffsetY: 0
   _onPlayerStop:
     m_PersistentCalls:
       m_Calls: []
   _onPlayerJourneyEnd: {fileID: 11400000, guid: a4e88e88e0d1a4770988ea07c0fd3258, type: 2}
+  _scanRadius: 3
+  _numInteractionRaycasts: 5
+  _numWallRaycasts: 3
+  _maxRayHits: 4
+  _interactionMask:
+    serializedVersion: 2
+    m_Bits: 65
+  _wallMask:
+    serializedVersion: 2
+    m_Bits: 128
 --- !u!135 &7104388444984602249
 SphereCollider:
   m_ObjectHideFlags: 0

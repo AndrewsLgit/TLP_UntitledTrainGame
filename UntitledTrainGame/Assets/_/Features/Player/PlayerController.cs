@@ -1,6 +1,8 @@
 using System;
 using Foundation.Runtime;
 using SharedData.Runtime;
+using Unity.Collections;
+using Unity.Jobs;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.InputSystem;
@@ -38,6 +40,7 @@ namespace Player.Runtime
         private SphereCollider _detectionCollider;
         private bool _canInteract;
         
+        private Ray _wallDetectionRay;
         private RaycastHit _detectionHit;
         
         // Movement Variables
@@ -47,9 +50,27 @@ namespace Player.Runtime
         private float _turnSmoothTime;
         
         // Interaction Variables
-        private float _interactionDistance = 10f;
+        private float _interactionDistance = 5f;
         private float _interactionAngle = 45f;
         private Vector3 _directionToInteractable;
+        
+        //Raycast Command
+        [Header("Raycast Command")]
+        [SerializeField] private float _scanRadius = 3f;
+
+        [SerializeField] private int _numInteractionRaycasts = 5;
+        [SerializeField] private int _numWallRaycasts = 3;
+        [SerializeField] private int _maxRayHits = 4;
+        [SerializeField] private LayerMask _interactionMask;
+        [SerializeField] private LayerMask _wallMask;
+
+        private NativeArray<RaycastCommand> _interactionCommands;
+        private NativeArray<RaycastHit> _interactionResults;
+        private NativeArray<RaycastCommand> _wallCommands;
+        private NativeArray<RaycastHit> _wallResults;
+        
+        private JobHandle _interactionJobHandle;
+        private JobHandle _wallJobHandle;
 
         // Private Variables
         #endregion
@@ -69,6 +90,25 @@ namespace Player.Runtime
         private void Awake()
         {
             SetFact("playerTransform", transform, false);
+        }
+        
+        private void OnEnable()
+        {
+            // Interaction Raycast
+            _interactionCommands = new NativeArray<RaycastCommand>(_numInteractionRaycasts, Allocator.Persistent);
+            _interactionResults = new NativeArray<RaycastHit>(_numInteractionRaycasts * _maxRayHits, Allocator.Persistent);
+            
+            // Wall Raycast
+            _wallCommands = new NativeArray<RaycastCommand>(_numWallRaycasts, Allocator.Persistent);
+            _wallResults = new NativeArray<RaycastHit>(_numWallRaycasts * _maxRayHits, Allocator.Persistent);
+        }
+        private void OnDisable()
+        {
+            if(_interactionCommands.IsCreated) _interactionCommands.Dispose();
+            if (_interactionResults.IsCreated) _interactionResults.Dispose();
+            
+            if (_wallCommands.IsCreated) _wallCommands.Dispose();
+            if (_wallResults.IsCreated) _wallResults.Dispose();
         }
 
         // Start is called once before the first execution of Update after the MonoBehaviour is created
@@ -105,41 +145,48 @@ namespace Player.Runtime
         void Update()
         {
             HandleMovement();
-            InteractionDetection();
-        }
-
-        private void OnTriggerEnter(Collider other)
-        {
-            if (other.transform == transform || other.transform.IsChildOf(transform)) return;
-            Info($"Entering trigger with {other.gameObject.name}");
-
-            if (other.TryGetComponent(out IInteractable interactable))
-            {
-                Info("Found interactable near player");
-                _interactable = interactable;
-            }
-            else
-            {
-                Info($"No interactable found on {other.gameObject.name}");
-            }
-            //var interactable = other.GetComponent<IInteractable>();
-            // if (interactable == null) return;
-            // _interactable = interactable;
-            // Info($"Passed interactable: {interactable.GetType()} to player");
-            // _canInteract = true;
-        }
-        private void OnTriggerExit(Collider other)
-        {
-            if(other.transform == transform || other.transform.IsChildOf(transform)) return;
+            // InteractionDetection();
             
-            Info($"Exiting trigger");
-            // var interactable = other.GetComponent<IInteractable>();
-            // if (interactable == null || interactable != _interactable) return;
-            _interactable = null;
-            _canInteract = false;
-            ShowInteractionPopup(false);
-            // _canInteract = false;
+            HandleInteractionRaycast();
         }
+
+        private void LateUpdate()
+        {
+            CompleteInteractionJob();
+        }
+
+        // private void OnTriggerEnter(Collider other)
+        // {
+        //     if (other.transform == transform || other.transform.IsChildOf(transform)) return;
+        //     Info($"Entering trigger with {other.gameObject.name}");
+        //
+        //     if (other.TryGetComponent(out IInteractable interactable))
+        //     {
+        //         Info("Found interactable near player");
+        //         _interactable = interactable;
+        //     }
+        //     else
+        //     {
+        //         Info($"No interactable found on {other.gameObject.name}");
+        //     }
+        //     //var interactable = other.GetComponent<IInteractable>();
+        //     // if (interactable == null) return;
+        //     // _interactable = interactable;
+        //     // Info($"Passed interactable: {interactable.GetType()} to player");
+        //     // _canInteract = true;
+        // }
+        // private void OnTriggerExit(Collider other)
+        // {
+        //     if(other.transform == transform || other.transform.IsChildOf(transform)) return;
+        //     
+        //     Info($"Exiting trigger");
+        //     // var interactable = other.GetComponent<IInteractable>();
+        //     // if (interactable == null || interactable != _interactable) return;
+        //     _interactable = null;
+        //     _canInteract = false;
+        //     ShowInteractionPopup(false);
+        //     // _canInteract = false;
+        // }
         #endregion
 
         #region Main Methods
@@ -165,6 +212,9 @@ namespace Player.Runtime
 
         private void HandleMovement()
         {
+            var finalMoveSpeed = _moveSpeed;
+            
+            
             if (_camera == null)
             {
                 _camera = Camera.main;
@@ -184,6 +234,18 @@ namespace Player.Runtime
             
             direction = right * _inputMove.x + forward * _inputMove.y;
             direction = direction.normalized;
+            
+            _wallDetectionRay = new Ray(transform.position, direction);
+
+            if (Physics.Raycast(_wallDetectionRay, out _detectionHit, _interactionDistance, _wallMask))
+            {
+                Info($"Finding new direction to glide");
+                var wallNormal = _detectionHit.normal;
+                direction = Vector3.ProjectOnPlane(direction, wallNormal);
+                Info($"New direction: {direction} : normal {wallNormal}");     
+            }
+            
+            
 
             if (!(direction.magnitude >= 0.1f)) return;
             float targetAngle = Mathf.Atan2(direction.x, direction.z) * Mathf.Rad2Deg;
@@ -217,6 +279,74 @@ namespace Player.Runtime
             //if (_canInteract && _interactionPopup.activeInHierarchy) UpdatePopupPosition();
             
             if (_canInteract) Info($"Found interactable: Dir({_directionToInteractable}) Angle({angle})");
+        }
+
+        private void HandleInteractionRaycast()
+        {
+            Vector3 origin = transform.position;
+
+            for (int i = 0; i < _numInteractionRaycasts; i++)
+            {
+                float angle = (_interactionAngle / _numInteractionRaycasts) * i;
+                // float angle = (i / (float)(_numInteractionRaycasts - 1)) * 360f;
+                
+                Vector3 dir = Quaternion.Euler(0,angle,0) * Vector3.forward;
+                // use layer because maybe raycast is getting filled
+                _interactionCommands[i] = new RaycastCommand(origin, dir, _scanRadius, _maxRayHits);
+            }
+            
+            _interactionJobHandle = RaycastCommand.ScheduleBatch(_interactionCommands, _interactionResults, 1);
+        }
+
+        private void CompleteInteractionJob()
+        {
+            _interactionJobHandle.Complete();
+            Vector3 origin = transform.position;
+            for (int i = 0; i < _numInteractionRaycasts * _maxRayHits; i++)
+            {
+                _canInteract = _interactable != null;
+                if (_interactionResults[i].collider == null) continue;
+                if (!_interactionResults[i].collider.TryGetComponent(out _interactable))
+                {
+                    _canInteract = false;
+                    _interactable = null;
+                    continue;
+                }
+                
+                //_canInteract = true;
+                Info($"[INTERACT] Found {_interactionResults[i].collider.name}");
+                Debug.DrawLine(origin, _interactionResults[i].point, Color.cyan, 0.05f);
+                // ShowInteractionPopup(_canInteract);
+                
+                
+                // _interactionResults[i].collider.TryGetComponent(out _interactable);
+                
+                //if (_interactable == null) continue;
+                //_canInteract = (_interactable != null);
+            }
+
+            // _canInteract = false;
+            Info($"Interaction job completed: {_canInteract}");
+            ShowInteractionPopup(_canInteract);
+        }
+        private void HandleWallRaycast()
+        {
+            Vector3 origin = transform.position;
+
+            // forward, left, right
+            Vector3[] wallDirs =
+            {
+                transform.forward,
+                Quaternion.Euler(0, -45, 0) * transform.forward,
+                Quaternion.Euler(0, 45, 0) * transform.forward
+            };
+            
+            for (int i = 0; i < _numWallRaycasts; i++)
+            {
+                _wallCommands[i] = new RaycastCommand(origin, wallDirs[i].normalized, 2f, _wallMask, _maxRayHits);
+            }
+            
+            _wallJobHandle = RaycastCommand.ScheduleBatch(_wallCommands, _wallResults, 1);
         }
 
         #endregion
