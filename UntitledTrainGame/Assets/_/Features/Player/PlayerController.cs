@@ -11,6 +11,7 @@ namespace Player.Runtime
 {
     [RequireComponent(typeof(CharacterController))]
     [RequireComponent(typeof(Input))]
+    
     public class PlayerController : FMono
     {
         
@@ -22,7 +23,7 @@ namespace Player.Runtime
         // References
         [Header("UI References")]
         [SerializeField] private GameObject _interactionPopup;
-        [SerializeField] private float _popupOffsetY = 1f;
+        // [SerializeField] private float _popupOffsetY = 1f;
         
         [Header("Player Stop")]
         [SerializeField] private EmptyEventChannel _onPlayerJourneyEnd;
@@ -147,6 +148,8 @@ namespace Player.Runtime
 
         #region Main Methods
 
+        #region Input
+
         public void Move(InputAction.CallbackContext context)
         {
             _inputMove = context.ReadValue<Vector2>();
@@ -164,6 +167,8 @@ namespace Player.Runtime
             if (context.phase != InputActionPhase.Canceled) return;
             _onPlayerJourneyEnd?.Invoke();
         }
+        
+        #endregion
 
         private void HandleMovement()
         {
@@ -191,11 +196,19 @@ namespace Player.Runtime
             
             _wallDetectionRay = new Ray(transform.position, direction);
 
-            if (Physics.Raycast(_wallDetectionRay, out _detectionHit, _interactionDistance, _obstacleMask))
+            if (Physics.Raycast(_wallDetectionRay, out _detectionHit, 0.5f, _obstacleMask))
             {
+                Debug.DrawLine(transform.position, _detectionHit.point, Color.cyan, 0.05f);
                 Info($"Finding new direction to glide");
                 var wallNormal = _detectionHit.normal;
                 direction = Vector3.ProjectOnPlane(direction, wallNormal);
+                // direction = Vector3.Lerp(
+                //     direction,
+                //     Vector3.ProjectOnPlane(direction, wallNormal),
+                //     _turnSmoothVelocity * Time.deltaTime);
+                // direction.Normalize();
+                // direction = newDirection;
+                // direction = Vector3.RotateTowards(direction, newDirection, _turnSmoothVelocity * Time.deltaTime,0f);
                 Info($"New direction: {direction} : normal {wallNormal}");     
             }
 
@@ -210,27 +223,7 @@ namespace Player.Runtime
             _characterController.Move(direction * (_moveSpeed * Time.deltaTime));
         }
 
-        private void SetupInteractionRaycasts()
-        {
-            Vector3 origin = transform.position;
-
-            var qpInteract = new QueryParameters
-            {
-                layerMask = _interactionMask | _interactableObstacleMask,
-                hitTriggers = QueryTriggerInteraction.Ignore,
-            };
-
-            for (int i = 0; i < _numInteractionRaycasts; i++)
-            {
-                float angle = (_interactionAngle / _numInteractionRaycasts) * i;
-                
-                Vector3 dir = Quaternion.Euler(0,angle,0) * transform.forward;
-                // use layer because maybe raycast is getting filled
-                _interactionCommands[i] = new RaycastCommand(origin, dir, qpInteract, _interactionDistance);
-            }
-            
-            _interactionJob = RaycastCommand.ScheduleBatch(_interactionCommands, _interactionResults, 1);
-        }
+        
 
         private void CompleteInteractionJob()
         {
@@ -261,8 +254,9 @@ namespace Player.Runtime
 
                     var hit = _interactionResults[baseIndex + j];
                     if (hit.collider == null) continue;
-                    Debug.DrawLine(origin, hit.point, Color.red, 0.05f);
 
+                    Debug.DrawLine(origin, hit.point, Color.cyan, 0.05f);
+                    
                     var interactable = hit.collider.GetComponent<IInteractable>();
                     Info($"[INTERACT] Found interactable: {interactable}]");
                     if (interactable == null) continue;
@@ -283,12 +277,45 @@ namespace Player.Runtime
             Info($"Interaction job completed: {_canInteract}");
             ShowInteractionPopup(_canInteract);
         }
-        private void HandleWallRaycast()
+        
+
+        #endregion
+        
+        #region Utils
+        
+        private void SetupInteractionRaycasts()
         {
             Vector3 origin = transform.position;
 
+            var qpInteract = new QueryParameters
+            {
+                layerMask = _interactionMask | _interactableObstacleMask,
+                hitTriggers = QueryTriggerInteraction.Ignore,
+            };
+
+            for (int i = 0; i < _numInteractionRaycasts; i++)
+            {
+                float angle = (_interactionAngle / _numInteractionRaycasts) * i;
+                
+                Vector3 dir = Quaternion.Euler(0,angle,0) * transform.forward;
+                // use layer because maybe raycast is getting filled
+                _interactionCommands[i] = new RaycastCommand(origin, dir, qpInteract, _interactionDistance);
+            }
+            
+            _interactionJob = RaycastCommand.ScheduleBatch(_interactionCommands, _interactionResults, 1);
+        }
+        
+        private void SetupObstacleRaycast()
+        {
+            Vector3 origin = transform.position;
+            var qpObstacle = new QueryParameters
+            {
+                layerMask = _obstacleMask | _interactableObstacleMask,
+                hitTriggers = QueryTriggerInteraction.Ignore,
+            };
+
             // forward, left, right
-            Vector3[] wallDirs =
+            Vector3[] obstacleDirs =
             {
                 transform.forward,
                 Quaternion.Euler(0, -45, 0) * transform.forward,
@@ -297,15 +324,11 @@ namespace Player.Runtime
             
             for (int i = 0; i < _numObstacleRaycasts; i++)
             {
-                _obstacleCommands[i] = new RaycastCommand(origin, wallDirs[i].normalized, 2f, _obstacleMask, _maxRayHits);
+                _obstacleCommands[i] = new RaycastCommand(origin, obstacleDirs[i].normalized, qpObstacle, 1f);
             }
             
             _obstacleJob = RaycastCommand.ScheduleBatch(_obstacleCommands, _obstacleResults, 1);
         }
-
-        #endregion
-        
-        #region Utils
         
         private void OnControlPanelUpdated(GDControlPanel controlPanel)
         {
