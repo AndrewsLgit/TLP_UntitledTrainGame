@@ -11,7 +11,6 @@ namespace Player.Runtime
 {
     [RequireComponent(typeof(CharacterController))]
     [RequireComponent(typeof(Input))]
-    [RequireComponent(typeof(SphereCollider))]
     public class PlayerController : FMono
     {
         
@@ -26,8 +25,6 @@ namespace Player.Runtime
         [SerializeField] private float _popupOffsetY = 1f;
         
         [Header("Player Stop")]
-        [SerializeField] private UnityEvent _onPlayerStop;
-
         [SerializeField] private EmptyEventChannel _onPlayerJourneyEnd;
         
         private CharacterController _characterController;
@@ -35,10 +32,6 @@ namespace Player.Runtime
         private Transform _cameraTransform;
         private Camera _camera;
         
-        // Player Interaction
-        private IInteractable _interactable;
-        private SphereCollider _detectionCollider;
-        private bool _canInteract;
         
         private Ray _wallDetectionRay;
         private RaycastHit _detectionHit;
@@ -50,16 +43,10 @@ namespace Player.Runtime
         private float _turnSmoothTime;
         private Vector3 direction;
         
-        // Interaction Variables
-        private float _interactionDistance = 5f;
-        private float _interactionAngle = 45f;
-        private Vector3 _directionToInteractable;
-        
+       
         //Raycast Command
         [Header("Raycast Command")]
-        [SerializeField] private float _scanDistance = 3f;
-
-        [SerializeField] private int _numInteractionRaycasts = 3;
+        [SerializeField] private int _numInteractionRaycasts = 5;
         [SerializeField] private int _numObstacleRaycasts = 3;
         [SerializeField] private int _maxRayHits = 4;
         
@@ -68,12 +55,21 @@ namespace Player.Runtime
         [SerializeField] private LayerMask _obstacleMask;
         [SerializeField] private LayerMask _interactableObstacleMask;
 
+        // Interaction Raycast command
         private NativeArray<RaycastCommand> _interactionCommands;
         private NativeArray<RaycastHit> _interactionResults;
+        private JobHandle _interactionJob;
+        
+        // Player Interaction
+        private IInteractable _interactable;
+        private bool _canInteract;
+        // Interaction Variables
+        private float _interactionDistance = 3f;
+        private float _interactionAngle = 45f;
+
+        // Obstacle Raycast Command
         private NativeArray<RaycastCommand> _obstacleCommands;
         private NativeArray<RaycastHit> _obstacleResults;
-        
-        private JobHandle _interactionJob;
         private JobHandle _obstacleJob;
 
         // Private Variables
@@ -101,7 +97,7 @@ namespace Player.Runtime
             // Interaction Raycast
             _interactionCommands = new NativeArray<RaycastCommand>(_numInteractionRaycasts, Allocator.Persistent);
             _interactionResults = new NativeArray<RaycastHit>(_numInteractionRaycasts * _maxRayHits, Allocator.Persistent);
-            SetupInteractionRaycasts();
+            // SetupInteractionRaycasts();
             
             // Wall Raycast
             _obstacleCommands = new NativeArray<RaycastCommand>(_numObstacleRaycasts, Allocator.Persistent);
@@ -121,7 +117,6 @@ namespace Player.Runtime
         {
             _camera = Camera.main;
             _characterController = GetComponent<CharacterController>();
-            _detectionCollider = GetComponent<SphereCollider>();
             _controlPanel = GDControlPanel.Instance;
             GDControlPanel.OnValuesUpdated += OnControlPanelUpdated;
             GetFromControlPanel();
@@ -129,14 +124,6 @@ namespace Player.Runtime
             _cameraTransform = _camera.transform;
             _inputMove = Vector2.zero;
 
-            if (_detectionCollider != null)
-            {
-                _detectionCollider.radius = _interactionDistance;
-                _detectionCollider.isTrigger = true;
-                Info($"Detection collider configured: radius {_detectionCollider.radius}, isTrigger: {_detectionCollider.isTrigger}");
-            }
-            else Error("No detection collider found!");
-            
         }
 
         private void OnDestroy()
@@ -144,16 +131,11 @@ namespace Player.Runtime
             GDControlPanel.OnValuesUpdated -= OnControlPanelUpdated;
         }
 
-        
-
         // Update is called once per frame
         void Update()
         {
             HandleMovement();
-            // InteractionDetection();
-            
-             SetupInteractionRaycasts();
-            //_interactionJob = RaycastCommand.ScheduleBatch(_interactionCommands, _interactionResults, 1);
+            SetupInteractionRaycasts();
         }
 
         private void LateUpdate()
@@ -161,38 +143,6 @@ namespace Player.Runtime
             CompleteInteractionJob();
         }
 
-        // private void OnTriggerEnter(Collider other)
-        // {
-        //     if (other.transform == transform || other.transform.IsChildOf(transform)) return;
-        //     Info($"Entering trigger with {other.gameObject.name}");
-        //
-        //     if (other.TryGetComponent(out IInteractable interactable))
-        //     {
-        //         Info("Found interactable near player");
-        //         _interactable = interactable;
-        //     }
-        //     else
-        //     {
-        //         Info($"No interactable found on {other.gameObject.name}");
-        //     }
-        //     //var interactable = other.GetComponent<IInteractable>();
-        //     // if (interactable == null) return;
-        //     // _interactable = interactable;
-        //     // Info($"Passed interactable: {interactable.GetType()} to player");
-        //     // _canInteract = true;
-        // }
-        // private void OnTriggerExit(Collider other)
-        // {
-        //     if(other.transform == transform || other.transform.IsChildOf(transform)) return;
-        //     
-        //     Info($"Exiting trigger");
-        //     // var interactable = other.GetComponent<IInteractable>();
-        //     // if (interactable == null || interactable != _interactable) return;
-        //     _interactable = null;
-        //     _canInteract = false;
-        //     ShowInteractionPopup(false);
-        //     // _canInteract = false;
-        // }
         #endregion
 
         #region Main Methods
@@ -213,13 +163,11 @@ namespace Player.Runtime
         {
             if (context.phase != InputActionPhase.Canceled) return;
             _onPlayerJourneyEnd?.Invoke();
-            // _onPlayerStop.Invoke();
         }
 
         private void HandleMovement()
         {
             var finalMoveSpeed = _moveSpeed;
-            
             
             if (_camera == null)
             {
@@ -250,8 +198,6 @@ namespace Player.Runtime
                 direction = Vector3.ProjectOnPlane(direction, wallNormal);
                 Info($"New direction: {direction} : normal {wallNormal}");     
             }
-            
-            
 
             if (!(direction.magnitude >= 0.1f)) return;
             float targetAngle = Mathf.Atan2(direction.x, direction.z) * Mathf.Rad2Deg;
@@ -264,43 +210,19 @@ namespace Player.Runtime
             _characterController.Move(direction * (_moveSpeed * Time.deltaTime));
         }
 
-        private void InteractionDetection()
-        {
-            if (_interactable == null)
-            {
-                _canInteract = false;
-                ShowInteractionPopup(false);
-                return;
-            }
-            
-            var interactablePosition = ((MonoBehaviour)_interactable).transform.position;
-            _directionToInteractable = interactablePosition - transform.position;
-            // calculate angle between player's forward and the interactable gameObject
-            float angle = Vector3.Angle(transform.forward, _directionToInteractable);
-            
-            bool wasInteracting = _canInteract;
-            _canInteract = angle <= _interactionAngle;
-            
-            if(_canInteract != wasInteracting) ShowInteractionPopup(_canInteract);
-            //if (_canInteract && _interactionPopup.activeInHierarchy) UpdatePopupPosition();
-            
-            if (_canInteract) Info($"Found interactable: Dir({_directionToInteractable}) Angle({angle})");
-        }
-
         private void SetupInteractionRaycasts()
         {
             Vector3 origin = transform.position;
 
             var qpInteract = new QueryParameters
             {
-                layerMask = _interactionMask ,
+                layerMask = _interactionMask | _interactableObstacleMask,
                 hitTriggers = QueryTriggerInteraction.Ignore,
             };
 
             for (int i = 0; i < _numInteractionRaycasts; i++)
             {
                 float angle = (_interactionAngle / _numInteractionRaycasts) * i;
-                // float angle = (i / (float)(_numInteractionRaycasts - 1)) * 360f;
                 
                 Vector3 dir = Quaternion.Euler(0,angle,0) * transform.forward;
                 // use layer because maybe raycast is getting filled
@@ -328,7 +250,6 @@ namespace Player.Runtime
                 // Info($"Ray angle: {angle}");
                 Vector3 dir = Quaternion.Euler(0, angle, 0) * transform.forward;
                 // Info($"Ray direction: {dir}");
-                // use layer because maybe raycast is getting filled
 
                 float dot = Vector3.Dot(transform.forward.normalized, dir.normalized);
                 //Info($"[INTERACT] Checking dot, threshold: {facingDotThreshold}, dot: {dot}");
@@ -339,7 +260,6 @@ namespace Player.Runtime
                 {
 
                     var hit = _interactionResults[baseIndex + j];
-                    //Info($"[INTERACT] Raycast hit: {hit}");
                     if (hit.collider == null) continue;
                     Debug.DrawLine(origin, hit.point, Color.red, 0.05f);
 
@@ -355,20 +275,11 @@ namespace Player.Runtime
                         _canInteract = true;
                     }
 
-                    //_canInteract = true;
                     if(_canInteract && _interactable != null)
                         Info($"[INTERACT] Found {hit.collider.name}");
-                    // ShowInteractionPopup(_canInteract);
-
-
-                    // _interactionResults[i].collider.TryGetComponent(out _interactable);
-
-                    //if (_interactable == null) continue;
-                    //_canInteract = (_interactable != null);
                 }
             }
-
-            // _canInteract = false;
+            
             Info($"Interaction job completed: {_canInteract}");
             ShowInteractionPopup(_canInteract);
         }
@@ -413,7 +324,6 @@ namespace Player.Runtime
         {
             if (_interactionPopup == null) return;
             _interactionPopup.SetActive(enable);
-            //if (enable) UpdatePopupPosition();
         }
 
         private void UpdatePopupPosition()
