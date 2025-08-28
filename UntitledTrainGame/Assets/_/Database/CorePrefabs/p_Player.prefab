@@ -203,7 +203,6 @@ GameObject:
   m_Component:
   - component: {fileID: 6131279136529223855}
   - component: {fileID: -7561028645449774875}
-  - component: {fileID: 7104388444984602249}
   - component: {fileID: 6020351398471558277}
   - component: {fileID: 7000478002477096855}
   - component: {fileID: 8400131081262846548}
@@ -245,17 +244,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 07953bef3f3d248be87e7101ec491aca, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_isVerbose: 1
+  m_isVerbose: 0
   _interactionPopup: {fileID: 301085527920185685}
   _popupOffsetY: 0
-  _onPlayerStop:
-    m_PersistentCalls:
-      m_Calls: []
   _onPlayerJourneyEnd: {fileID: 11400000, guid: a4e88e88e0d1a4770988ea07c0fd3258, type: 2}
-  _scanDistance: 3
   _numInteractionRaycasts: 5
   _numObstacleRaycasts: 3
-  _maxRayHits: 2
+  _maxRayHits: 1
   _interactionMask:
     serializedVersion: 2
     m_Bits: 64
@@ -265,27 +260,6 @@ MonoBehaviour:
   _interactableObstacleMask:
     serializedVersion: 2
     m_Bits: 256
---- !u!135 &7104388444984602249
-SphereCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5092453341363809159}
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_IsTrigger: 1
-  m_ProvidesContacts: 0
-  m_Enabled: 1
-  serializedVersion: 3
-  m_Radius: 2
-  m_Center: {x: 0, y: 0, z: 0}
 --- !u!114 &6020351398471558277
 MonoBehaviour:
   m_ObjectHideFlags: 0
