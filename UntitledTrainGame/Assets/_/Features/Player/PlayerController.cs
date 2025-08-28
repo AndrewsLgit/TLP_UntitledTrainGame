@@ -48,6 +48,7 @@ namespace Player.Runtime
         private Vector2 _inputMove;
         private float _moveSpeed;
         private float _turnSmoothTime;
+        private Vector3 direction;
         
         // Interaction Variables
         private float _interactionDistance = 5f;
@@ -56,21 +57,24 @@ namespace Player.Runtime
         
         //Raycast Command
         [Header("Raycast Command")]
-        [SerializeField] private float _scanRadius = 3f;
+        [SerializeField] private float _scanDistance = 3f;
 
-        [SerializeField] private int _numInteractionRaycasts = 5;
-        [SerializeField] private int _numWallRaycasts = 3;
+        [SerializeField] private int _numInteractionRaycasts = 3;
+        [SerializeField] private int _numObstacleRaycasts = 3;
         [SerializeField] private int _maxRayHits = 4;
+        
+        [Header("Raycast Masks")]
         [SerializeField] private LayerMask _interactionMask;
-        [SerializeField] private LayerMask _wallMask;
+        [SerializeField] private LayerMask _obstacleMask;
+        [SerializeField] private LayerMask _interactableObstacleMask;
 
         private NativeArray<RaycastCommand> _interactionCommands;
         private NativeArray<RaycastHit> _interactionResults;
-        private NativeArray<RaycastCommand> _wallCommands;
-        private NativeArray<RaycastHit> _wallResults;
+        private NativeArray<RaycastCommand> _obstacleCommands;
+        private NativeArray<RaycastHit> _obstacleResults;
         
-        private JobHandle _interactionJobHandle;
-        private JobHandle _wallJobHandle;
+        private JobHandle _interactionJob;
+        private JobHandle _obstacleJob;
 
         // Private Variables
         #endregion
@@ -97,18 +101,19 @@ namespace Player.Runtime
             // Interaction Raycast
             _interactionCommands = new NativeArray<RaycastCommand>(_numInteractionRaycasts, Allocator.Persistent);
             _interactionResults = new NativeArray<RaycastHit>(_numInteractionRaycasts * _maxRayHits, Allocator.Persistent);
+            SetupInteractionRaycasts();
             
             // Wall Raycast
-            _wallCommands = new NativeArray<RaycastCommand>(_numWallRaycasts, Allocator.Persistent);
-            _wallResults = new NativeArray<RaycastHit>(_numWallRaycasts * _maxRayHits, Allocator.Persistent);
+            _obstacleCommands = new NativeArray<RaycastCommand>(_numObstacleRaycasts, Allocator.Persistent);
+            _obstacleResults = new NativeArray<RaycastHit>(_numObstacleRaycasts * _maxRayHits, Allocator.Persistent);
         }
         private void OnDisable()
         {
             if(_interactionCommands.IsCreated) _interactionCommands.Dispose();
             if (_interactionResults.IsCreated) _interactionResults.Dispose();
             
-            if (_wallCommands.IsCreated) _wallCommands.Dispose();
-            if (_wallResults.IsCreated) _wallResults.Dispose();
+            if (_obstacleCommands.IsCreated) _obstacleCommands.Dispose();
+            if (_obstacleResults.IsCreated) _obstacleResults.Dispose();
         }
 
         // Start is called once before the first execution of Update after the MonoBehaviour is created
@@ -147,7 +152,8 @@ namespace Player.Runtime
             HandleMovement();
             // InteractionDetection();
             
-            HandleInteractionRaycast();
+             SetupInteractionRaycasts();
+            //_interactionJob = RaycastCommand.ScheduleBatch(_interactionCommands, _interactionResults, 1);
         }
 
         private void LateUpdate()
@@ -237,7 +243,7 @@ namespace Player.Runtime
             
             _wallDetectionRay = new Ray(transform.position, direction);
 
-            if (Physics.Raycast(_wallDetectionRay, out _detectionHit, _interactionDistance, _wallMask))
+            if (Physics.Raycast(_wallDetectionRay, out _detectionHit, _interactionDistance, _obstacleMask))
             {
                 Info($"Finding new direction to glide");
                 var wallNormal = _detectionHit.normal;
@@ -281,48 +287,85 @@ namespace Player.Runtime
             if (_canInteract) Info($"Found interactable: Dir({_directionToInteractable}) Angle({angle})");
         }
 
-        private void HandleInteractionRaycast()
+        private void SetupInteractionRaycasts()
         {
             Vector3 origin = transform.position;
+
+            var qpInteract = new QueryParameters
+            {
+                layerMask = _interactionMask ,
+                hitTriggers = QueryTriggerInteraction.Ignore,
+            };
 
             for (int i = 0; i < _numInteractionRaycasts; i++)
             {
                 float angle = (_interactionAngle / _numInteractionRaycasts) * i;
                 // float angle = (i / (float)(_numInteractionRaycasts - 1)) * 360f;
                 
-                Vector3 dir = Quaternion.Euler(0,angle,0) * Vector3.forward;
+                Vector3 dir = Quaternion.Euler(0,angle,0) * transform.forward;
                 // use layer because maybe raycast is getting filled
-                _interactionCommands[i] = new RaycastCommand(origin, dir, _scanRadius, _maxRayHits);
+                _interactionCommands[i] = new RaycastCommand(origin, dir, qpInteract, _interactionDistance);
             }
             
-            _interactionJobHandle = RaycastCommand.ScheduleBatch(_interactionCommands, _interactionResults, 1);
+            _interactionJob = RaycastCommand.ScheduleBatch(_interactionCommands, _interactionResults, 1);
         }
 
         private void CompleteInteractionJob()
         {
-            _interactionJobHandle.Complete();
+            _interactionJob.Complete();
+            _interactable = null;
+            _canInteract = false;
+
+            float angleDegrees = _interactionAngle;
+            float facingDotThreshold = Mathf.Cos(Mathf.Deg2Rad * (angleDegrees * 0.5f)); // safer than ad-hoc 0.9
+            
             Vector3 origin = transform.position;
-            for (int i = 0; i < _numInteractionRaycasts * _maxRayHits; i++)
+            
+            float nearestDistance = float.MaxValue;
+            for (int ray = 0; ray < _numInteractionRaycasts; ray++)
             {
-                _canInteract = _interactable != null;
-                if (_interactionResults[i].collider == null) continue;
-                if (!_interactionResults[i].collider.TryGetComponent(out _interactable))
+                float angle = (_interactionAngle / _numInteractionRaycasts) * ray;
+                // Info($"Ray angle: {angle}");
+                Vector3 dir = Quaternion.Euler(0, angle, 0) * transform.forward;
+                // Info($"Ray direction: {dir}");
+                // use layer because maybe raycast is getting filled
+
+                float dot = Vector3.Dot(transform.forward.normalized, dir.normalized);
+                //Info($"[INTERACT] Checking dot, threshold: {facingDotThreshold}, dot: {dot}");
+                if (dot < facingDotThreshold) continue;
+
+                int baseIndex = ray * _maxRayHits;
+                for (int j = 0; j < _maxRayHits; j++)
                 {
-                    _canInteract = false;
-                    _interactable = null;
-                    continue;
+
+                    var hit = _interactionResults[baseIndex + j];
+                    //Info($"[INTERACT] Raycast hit: {hit}");
+                    if (hit.collider == null) continue;
+                    Debug.DrawLine(origin, hit.point, Color.red, 0.05f);
+
+                    var interactable = hit.collider.GetComponent<IInteractable>();
+                    Info($"[INTERACT] Found interactable: {interactable}]");
+                    if (interactable == null) continue;
+
+                    var dist = Vector3.Distance(origin, hit.point);
+                    if (dist < nearestDistance)
+                    {
+                        nearestDistance = dist;
+                        _interactable = interactable;
+                        _canInteract = true;
+                    }
+
+                    //_canInteract = true;
+                    if(_canInteract && _interactable != null)
+                        Info($"[INTERACT] Found {hit.collider.name}");
+                    // ShowInteractionPopup(_canInteract);
+
+
+                    // _interactionResults[i].collider.TryGetComponent(out _interactable);
+
+                    //if (_interactable == null) continue;
+                    //_canInteract = (_interactable != null);
                 }
-                
-                //_canInteract = true;
-                Info($"[INTERACT] Found {_interactionResults[i].collider.name}");
-                Debug.DrawLine(origin, _interactionResults[i].point, Color.cyan, 0.05f);
-                // ShowInteractionPopup(_canInteract);
-                
-                
-                // _interactionResults[i].collider.TryGetComponent(out _interactable);
-                
-                //if (_interactable == null) continue;
-                //_canInteract = (_interactable != null);
             }
 
             // _canInteract = false;
@@ -341,12 +384,12 @@ namespace Player.Runtime
                 Quaternion.Euler(0, 45, 0) * transform.forward
             };
             
-            for (int i = 0; i < _numWallRaycasts; i++)
+            for (int i = 0; i < _numObstacleRaycasts; i++)
             {
-                _wallCommands[i] = new RaycastCommand(origin, wallDirs[i].normalized, 2f, _wallMask, _maxRayHits);
+                _obstacleCommands[i] = new RaycastCommand(origin, wallDirs[i].normalized, 2f, _obstacleMask, _maxRayHits);
             }
             
-            _wallJobHandle = RaycastCommand.ScheduleBatch(_wallCommands, _wallResults, 1);
+            _obstacleJob = RaycastCommand.ScheduleBatch(_obstacleCommands, _obstacleResults, 1);
         }
 
         #endregion

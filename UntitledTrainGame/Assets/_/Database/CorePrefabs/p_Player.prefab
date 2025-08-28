@@ -252,16 +252,19 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   _onPlayerJourneyEnd: {fileID: 11400000, guid: a4e88e88e0d1a4770988ea07c0fd3258, type: 2}
-  _scanRadius: 3
+  _scanDistance: 3
   _numInteractionRaycasts: 5
-  _numWallRaycasts: 3
-  _maxRayHits: 4
+  _numObstacleRaycasts: 3
+  _maxRayHits: 2
   _interactionMask:
     serializedVersion: 2
-    m_Bits: 65
-  _wallMask:
+    m_Bits: 64
+  _obstacleMask:
     serializedVersion: 2
     m_Bits: 128
+  _interactableObstacleMask:
+    serializedVersion: 2
+    m_Bits: 256
 --- !u!135 &7104388444984602249
 SphereCollider:
   m_ObjectHideFlags: 0
