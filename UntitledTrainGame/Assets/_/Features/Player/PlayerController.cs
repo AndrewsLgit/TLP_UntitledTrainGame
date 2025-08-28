@@ -11,7 +11,7 @@ namespace Player.Runtime
 {
     [RequireComponent(typeof(CharacterController))]
     [RequireComponent(typeof(Input))]
-    
+    [RequireComponent(typeof(Animator))]
     public class PlayerController : FMono
     {
         
@@ -28,7 +28,9 @@ namespace Player.Runtime
         [Header("Player Stop")]
         [SerializeField] private EmptyEventChannel _onPlayerJourneyEnd;
         
+        // References
         private CharacterController _characterController;
+        private Animator _animator;
         private GDControlPanel _controlPanel;
         private Transform _cameraTransform;
         private Camera _camera;
@@ -40,7 +42,7 @@ namespace Player.Runtime
         // Movement Variables
         private float _turnSmoothVelocity;
         private Vector2 _inputMove;
-        private float _moveSpeed;
+        private float _maxMoveSpeed;
         private float _turnSmoothTime;
         private Vector3 direction;
         
@@ -118,6 +120,7 @@ namespace Player.Runtime
         {
             _camera = Camera.main;
             _characterController = GetComponent<CharacterController>();
+            _animator = GetComponent<Animator>();
             _controlPanel = GDControlPanel.Instance;
             GDControlPanel.OnValuesUpdated += OnControlPanelUpdated;
             GetFromControlPanel();
@@ -135,8 +138,14 @@ namespace Player.Runtime
         // Update is called once per frame
         void Update()
         {
+            var last_pos = transform.position;
             HandleMovement();
             SetupInteractionRaycasts();
+            var current_pos = transform.position;
+            var velocity = (current_pos - last_pos) / Time.deltaTime;
+            _animator.SetFloat("Velocity", velocity.magnitude);
+            Info($"Setting velocity in animator: {velocity.magnitude} / {_maxMoveSpeed} = {(velocity.magnitude/ _maxMoveSpeed)}");
+            
         }
 
         private void LateUpdate()
@@ -172,7 +181,7 @@ namespace Player.Runtime
 
         private void HandleMovement()
         {
-            var finalMoveSpeed = _moveSpeed;
+            var finalMoveSpeed = _maxMoveSpeed;
             
             if (_camera == null)
             {
@@ -220,7 +229,7 @@ namespace Player.Runtime
 
             // Apply gravity to player
             direction.y = -2f;
-            _characterController.Move(direction * (_moveSpeed * Time.deltaTime));
+            _characterController.Move(direction * (_maxMoveSpeed * Time.deltaTime));
         }
 
         
@@ -337,7 +346,7 @@ namespace Player.Runtime
 
         private void GetFromControlPanel()
         {
-            _moveSpeed = _controlPanel.PlayerMoveSpeed;
+            _maxMoveSpeed = _controlPanel.PlayerMoveSpeed;
             _turnSmoothTime = _controlPanel.TurnSmoothTime;
             _interactionDistance = _controlPanel.DetectionDistance;
             _interactionAngle = _controlPanel.DetectionAngle;
