@@ -9,6 +9,11 @@ ModelImporter:
       assembly: UnityEngine.CoreModule
       name: M_PROPS-color-palette
     second: {fileID: 2100000, guid: ea92c5f89d00fe24ab62fcf5b233dbbe, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: M_Poster
+    second: {fileID: 2100000, guid: 58ab0dee97af15a4491285789c8086fc, type: 2}
   materials:
     materialImportMode: 2
     materialName: 0
