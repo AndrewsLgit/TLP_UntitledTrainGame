@@ -20,7 +20,7 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: M_WaterFall
+  m_Name: M_WaterFall-bg
   m_Shader: {fileID: -6465566751694194690, guid: c2121252f53059e4bb4769ccaf137711, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
@@ -52,7 +52,7 @@ Material:
     m_Ints: []
     m_Floats:
     - _Alpha: 1
-    - _FoamScale: 150
+    - _FoamScale: 400
     - _MaskScale: 0.11
     - _QueueControl: 0
     - _QueueOffset: 0
@@ -60,6 +60,6 @@ Material:
     - _RefractionStrength: 0.025
     - _Speed: 1
     m_Colors:
-    - _Color: {r: 0, g: 0.48225284, b: 0.645283, a: 1}
+    - _Color: {r: 0.3244357, g: 0.7744694, b: 0.93962264, a: 1}
   m_BuildTextureStacks: []
   m_AllowLocking: 1
