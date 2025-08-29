@@ -46,10 +46,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_isVerbose: 0
+  _isMainSceneControlPanel: 0
   _playerMoveSpeed: 5
   _turnSmoothTime: 0.08
-  _detectionDistance: 3
-  _detectionAngle: 65
+  _detectionDistance: 2
+  _detectionAngle: 60
   _edgeThresholdY: 0.05
   _edgeThresholdX: 0.2
   _markerDistanceThreshold: 2
