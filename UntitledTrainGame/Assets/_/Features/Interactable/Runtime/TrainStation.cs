@@ -17,7 +17,7 @@ namespace Interactable.Runtime
         
         private float _timeToInteract;
         private SceneManager _sceneManager;
-        [SerializeField] private string _sceneToLoad;
+        [SerializeField] private SceneReference _sceneToLoad;
         
         // Private Variables
         #endregion
