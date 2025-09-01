@@ -25,7 +25,7 @@ RenderSettings:
   m_AmbientGroundColor: {r: 0.047, g: 0.043, b: 0.035, a: 1}
   m_AmbientIntensity: 1
   m_AmbientMode: 0
-  m_SubtractiveShadowColor: {r: 0.42, g: 0.478, b: 0.627, a: 1}
+  m_SubtractiveShadowColor: {r: 0.6981132, g: 0.6981132, b: 0.6981132, a: 1}
   m_SkyboxMaterial: {fileID: 10304, guid: 0000000000000000f000000000000000, type: 0}
   m_HaloStrength: 0.5
   m_FlareStrength: 1
@@ -37,7 +37,7 @@ RenderSettings:
   m_ReflectionBounces: 1
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
-  m_Sun: {fileID: 0}
+  m_Sun: {fileID: 1834640607}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -1410,13 +1410,13 @@ Light:
   m_InnerSpotAngle: 21.80208
   m_CookieSize: 10
   m_Shadows:
-    m_Type: 2
+    m_Type: 1
     m_Resolution: -1
     m_CustomResolution: -1
     m_Strength: 1
-    m_Bias: 0.05
-    m_NormalBias: 0.4
-    m_NearPlane: 0.2
+    m_Bias: 0
+    m_NormalBias: 0
+    m_NearPlane: 0.1
     m_CullingMatrixOverride:
       e00: 1
       e01: 0
@@ -1466,13 +1466,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1834640606}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.47174028, y: 0.45079783, z: -0.6928434, w: 0.3069373}
+  m_LocalRotation: {x: 0.47887844, y: 0.5186612, z: -0.4645516, w: 0.5346568}
   m_LocalPosition: {x: 0, y: 3, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 113.9, y: 111.5, z: 0}
+  m_LocalEulerAnglesHint: {x: 83.7, y: 808.26, z: 0}
 --- !u!114 &1834640609
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1486,7 +1486,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Version: 3
-  m_UsePipelineSettings: 1
+  m_UsePipelineSettings: 0
   m_AdditionalLightsShadowResolutionTier: 2
   m_LightLayerMask: 1
   m_RenderingLayers: 1
@@ -1504,6 +1504,18 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 341076030125910223, guid: 70f48c9b8ff918943a2d3c4219191415, type: 3}
+      propertyPath: m_CastShadows
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 341076030125910223, guid: 70f48c9b8ff918943a2d3c4219191415, type: 3}
+      propertyPath: m_RenderingLayerMask
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 341076030125910223, guid: 70f48c9b8ff918943a2d3c4219191415, type: 3}
+      propertyPath: m_StaticShadowCaster
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 1508866451330683808, guid: 70f48c9b8ff918943a2d3c4219191415, type: 3}
       propertyPath: m_LocalPosition.x
       value: -5.04
@@ -1685,6 +1697,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 896479966938977101, guid: b4cab56cb39957348a9fcfab42bcc6d0, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 2690da05b98a27e4d968152246f1ab78, type: 2}
     - target: {fileID: 6097096260743149583, guid: b4cab56cb39957348a9fcfab42bcc6d0, type: 3}
       propertyPath: m_Name
       value: p_ground_station_2
@@ -1734,6 +1750,79 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: b4cab56cb39957348a9fcfab42bcc6d0, type: 3}
+--- !u!1001 &2038740475
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 341076030125910223, guid: 70f48c9b8ff918943a2d3c4219191415, type: 3}
+      propertyPath: m_CastShadows
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 341076030125910223, guid: 70f48c9b8ff918943a2d3c4219191415, type: 3}
+      propertyPath: m_RenderingLayerMask
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 341076030125910223, guid: 70f48c9b8ff918943a2d3c4219191415, type: 3}
+      propertyPath: m_StaticShadowCaster
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 341076030125910223, guid: 70f48c9b8ff918943a2d3c4219191415, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 7e8d2f652da804a41ae8c2f9047b5fa5, type: 2}
+    - target: {fileID: 1508866451330683808, guid: 70f48c9b8ff918943a2d3c4219191415, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -5.04
+      objectReference: {fileID: 0}
+    - target: {fileID: 1508866451330683808, guid: 70f48c9b8ff918943a2d3c4219191415, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 5.39
+      objectReference: {fileID: 0}
+    - target: {fileID: 1508866451330683808, guid: 70f48c9b8ff918943a2d3c4219191415, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 1.03
+      objectReference: {fileID: 0}
+    - target: {fileID: 1508866451330683808, guid: 70f48c9b8ff918943a2d3c4219191415, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1508866451330683808, guid: 70f48c9b8ff918943a2d3c4219191415, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1508866451330683808, guid: 70f48c9b8ff918943a2d3c4219191415, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1508866451330683808, guid: 70f48c9b8ff918943a2d3c4219191415, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1508866451330683808, guid: 70f48c9b8ff918943a2d3c4219191415, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1508866451330683808, guid: 70f48c9b8ff918943a2d3c4219191415, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1508866451330683808, guid: 70f48c9b8ff918943a2d3c4219191415, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2286494523391576346, guid: 70f48c9b8ff918943a2d3c4219191415, type: 3}
+      propertyPath: m_Name
+      value: p_exterior_station_building 1 (1)
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 70f48c9b8ff918943a2d3c4219191415, type: 3}
 --- !u!1 &2068158970
 GameObject:
   m_ObjectHideFlags: 0
@@ -2338,3 +2427,4 @@ SceneRoots:
   - {fileID: 1624767389}
   - {fileID: 552991944}
   - {fileID: 1858002470}
+  - {fileID: 2038740475}
