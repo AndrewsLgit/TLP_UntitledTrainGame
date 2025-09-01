@@ -1,0 +1,20 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7d2a26a9c326845b48c36db7edb82bcb, type: 3}
+  m_Name: SO_Network Line C
+  m_EditorClassIdentifier: 
+  Name: Network C
+  LinePrefix: 2
+  Connections:
+  - From: {fileID: 11400000, guid: d1a014493c297f94ebb7303bebdb01a1, type: 2}
+    To: {fileID: 11400000, guid: b1128251d605b5c4e91a89c71a65ad18, type: 2}
+    TravelTime: 0
