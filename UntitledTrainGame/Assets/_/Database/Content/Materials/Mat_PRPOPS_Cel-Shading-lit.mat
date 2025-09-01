@@ -20,8 +20,8 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: Mat_PRPOPS_Cel-Shading
-  m_Shader: {fileID: -6465566751694194690, guid: dc4137e205611414da46ca163328b4aa, type: 3}
+  m_Name: Mat_PRPOPS_Cel-Shading-lit
+  m_Shader: {fileID: -6465566751694194690, guid: 4e7e25f4a6ec9884f949d4f1415619c8, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
   m_ValidKeywords: []
