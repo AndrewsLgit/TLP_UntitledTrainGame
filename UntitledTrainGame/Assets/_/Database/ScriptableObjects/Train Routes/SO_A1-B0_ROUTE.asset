@@ -16,4 +16,4 @@ MonoBehaviour:
   EndStation: {fileID: 11400000, guid: f3eae102c19af9b47a6e206c061f2855, type: 2}
   CompressionFactor: 0
   IsExpress: 0
-  Network: {fileID: 0}
+  Network: {fileID: 11400000, guid: dddf21d635aee80489765c03da4b09b4, type: 2}
