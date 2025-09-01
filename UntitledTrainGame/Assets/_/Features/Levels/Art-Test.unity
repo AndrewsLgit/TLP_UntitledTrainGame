@@ -2398,6 +2398,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: p_Train_D_regular
       objectReference: {fileID: 0}
+    - target: {fileID: 6463727152751184063, guid: ff4931916f9b1854a8c5555349e61b23, type: 3}
+      propertyPath: _trainRoute
+      value: 
+      objectReference: {fileID: 11400000, guid: 82b77bd7b75ac4d73b74bbe3d0156b90, type: 2}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
