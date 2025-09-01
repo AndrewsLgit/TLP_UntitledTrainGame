@@ -6,7 +6,6 @@ using UnityEditor;
 
 namespace SharedData.Runtime
 {
-    [CreateAssetMenu(fileName = "SceneReference", menuName = "Game/SceneReference", order = 1)]
     public class SceneReference : ScriptableObject
     {
         [SerializeField] public string SceneName;
