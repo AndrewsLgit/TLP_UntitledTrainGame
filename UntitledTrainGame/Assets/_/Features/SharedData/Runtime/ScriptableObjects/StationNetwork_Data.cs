@@ -14,6 +14,7 @@ namespace SharedData.Runtime
         public StationPrefix LinePrefix;
         //public Station_Data[] Stations; // StationDB Reference
         public StationNode[] Connections;
+        public bool IsSingleDirection = false;
         
         #endregion
 
@@ -59,7 +60,7 @@ namespace SharedData.Runtime
                         //Debug.Log($"Found connection: {connection.From.DisplayName} -> {connection.To.DisplayName}");
                     }
                     // check backward direction
-                    else if (connection.To == currentStation)
+                    else if (connection.To == currentStation && !IsSingleDirection)
                     {
                         nextStation = connection.From;
                         //Debug.Log($"Found connection: {connection.To.DisplayName} -> {connection.From.DisplayName}");   
