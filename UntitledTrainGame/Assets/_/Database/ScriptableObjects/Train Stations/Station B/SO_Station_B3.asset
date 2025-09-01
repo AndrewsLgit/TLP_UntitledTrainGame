@@ -14,6 +14,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   LinePrefix: 1
   Id: 3
-  StationScene: {fileID: 11400000, guid: 6b9f0f212f0904d27b495fbc93acb60e, type: 2}
+  StationScene: {fileID: 11400000, guid: b1abab6a56a9a814e897f2a81126dfb2, type: 2}
   DisplayName: 
   IsDiscovered: 0
