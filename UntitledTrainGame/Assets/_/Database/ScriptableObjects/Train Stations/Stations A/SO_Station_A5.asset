@@ -16,4 +16,4 @@ MonoBehaviour:
   Id: 5
   StationScene: {fileID: 11400000, guid: 3c015c8e106bfa140b61632a0dfa2fc0, type: 2}
   DisplayName: 
-  IsDiscovered: 0
+  IsDiscovered: 1

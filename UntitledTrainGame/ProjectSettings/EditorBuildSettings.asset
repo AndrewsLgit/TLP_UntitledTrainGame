@@ -32,6 +32,15 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/_/Features/Levels/Design_A5.unity
     guid: e2bd27415017d134c844d97981e0aaa0
+  - enabled: 1
+    path: Assets/_/Features/Levels/Design_A1.unity
+    guid: 476df7366f0c2784ea73541b65d2527b
+  - enabled: 1
+    path: Assets/_/Features/Levels/Design_A2.unity
+    guid: 22ab6fdbd0732e349af63ac81d34f623
+  - enabled: 1
+    path: Assets/_/Features/Levels/Design_B0.unity
+    guid: c6232c7f7fda5674291a1ee01c007f89
   m_configObjects:
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}
   m_UseUCBPForAssetBundles: 0

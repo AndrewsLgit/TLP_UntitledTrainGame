@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: SO_Stations_B4
   m_EditorClassIdentifier: 
   LinePrefix: 1
-  Id: 0
-  StationScene: {fileID: 0}
+  Id: 4
+  StationScene: {fileID: 11400000, guid: 57b630fadcbbc4178836212af0f38589, type: 2}
   DisplayName: 
   IsDiscovered: 0
