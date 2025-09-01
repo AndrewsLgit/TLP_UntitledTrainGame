@@ -91,15 +91,17 @@ namespace Manager.Runtime
         [ContextMenu("Start Test Journey")]
         private void StartJourney()
         {
+            _segments = new List<Station_Data>();
             _currentStationIndex = 0;
             _segments.Clear();
-            StartJourney(_testTrainRoute);
+            StartJourney(_testTrainRoute, _stationNetwork);
         }
         // calculate segments and start traveling through them
-        public void StartJourney(TrainRoute_Data trainRoute)
+        public void StartJourney(TrainRoute_Data trainRoute, StationNetwork_Data stationNetwork)
         {
             if (_currentSegmentTimer is { IsRunning: true }) return;
             CleanupCurrentJourney();
+            _stationNetwork = stationNetwork;
             // get all stations from route.start to route.end from StationGraphSO
             _segments = _stationNetwork.CalculatePath(trainRoute.StartStation, trainRoute.EndStation);
             if (_segments == null)

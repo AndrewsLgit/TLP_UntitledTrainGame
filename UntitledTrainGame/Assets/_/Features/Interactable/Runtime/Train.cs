@@ -46,7 +46,7 @@ namespace Interactable.Runtime
         #region Main Methods
         public void Interact()
         {
-            _routeManager.StartJourney(_trainRoute);
+            _routeManager.StartJourney(_trainRoute, _trainRoute.Network);
         }
         #endregion
     }
