@@ -14,6 +14,8 @@ namespace SharedData.Runtime
     [CreateAssetMenu(fileName = "Station_Data", menuName = "Data/Station_Data")]
     public class Station_Data : ScriptableObject
     {
+        
+        //todo : Add intersection -> make stations able to actually be 3 stations in one
         public StationPrefix LinePrefix;
         public int Id;
         
