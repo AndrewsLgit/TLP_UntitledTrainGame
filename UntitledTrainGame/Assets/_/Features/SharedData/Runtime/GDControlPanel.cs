@@ -21,7 +21,7 @@ namespace SharedData.Runtime
         [SerializeField, Range(0f,20f)] private float _detectionDistance = 10f;
         [SerializeField, Range(0,180)] private float _detectionAngle = 45f;
         
-        [Header("Camera Settings")]
+        [Header("Camera Settings (DEPRECATED: use Camera Rotation Settings instead)")]
         [SerializeField, Range(0,1f)] private float _edgeThresholdY = 0.1f; 
         [SerializeField, Range(0,1f)] private float _edgeThresholdX = 0.1f;
         
