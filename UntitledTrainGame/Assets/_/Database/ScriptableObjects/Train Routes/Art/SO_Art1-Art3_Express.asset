@@ -10,10 +10,10 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 65d2e04f8c8444fcfa68157930a06932, type: 3}
-  m_Name: SO_Art3-Art1_Express
+  m_Name: SO_Art1-Art3_Express
   m_EditorClassIdentifier: 
-  StartStation: {fileID: 11400000, guid: f8c9b4a7d36a447ada4f548a53ffa1b3, type: 2}
-  EndStation: {fileID: 11400000, guid: d30c500b3fa2f479985d6b0adab856b4, type: 2}
+  StartStation: {fileID: 11400000, guid: d30c500b3fa2f479985d6b0adab856b4, type: 2}
+  EndStation: {fileID: 11400000, guid: f8c9b4a7d36a447ada4f548a53ffa1b3, type: 2}
   CompressionFactor: 0.02
   IsExpress: 1
   Network: {fileID: 11400000, guid: 44d8ff52970a64fbe80f384096c5ab3b, type: 2}
