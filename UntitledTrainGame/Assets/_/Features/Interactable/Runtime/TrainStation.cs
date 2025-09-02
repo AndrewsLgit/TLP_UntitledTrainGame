@@ -1,10 +1,7 @@
-using System;
 using Foundation.Runtime;
 using SharedData.Runtime;
-using Tools.Runtime;
 using UnityEngine;
-using UnityEngine.SceneManagement;
-using SceneManager = Tools.Runtime.SceneManager;
+using SceneManager = Manager.Runtime.SceneManager;
 
 namespace Interactable.Runtime
 {
@@ -15,7 +12,7 @@ namespace Interactable.Runtime
         #region Private
         // Private Variables
         
-        private float _timeToInteract;
+        [SerializeField] private GameTime _timeToInteract;
         private SceneManager _sceneManager;
         [SerializeField] private SceneReference _sceneToLoad;
         
@@ -25,7 +22,7 @@ namespace Interactable.Runtime
         #region Public
         // Public Variables
         
-        public float TimeToInteract => _timeToInteract;
+        public GameTime TimeToInteract => _timeToInteract;
         
         // Public Variables
         #endregion
