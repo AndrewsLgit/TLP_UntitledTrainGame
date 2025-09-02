@@ -1,6 +1,6 @@
-using Foundation.Runtime;
 using Manager.Runtime;
 using SharedData.Runtime;
+using UnityEditor;
 using UnityEngine;
 
 namespace Manager.Editor
@@ -10,53 +10,59 @@ namespace Manager.Editor
     /// - Can set time manually (hours/minutes)
     /// - Can jump to next event with a given tag (e.g. Train)
     /// </summary>
-    public class TimeDebugTool : FMono
+    public class TimeDebugTool : EditorWindow
     {
-        [Header("Target Time (HH:MM)")]
-        [Range(0,23)] public int m_Hours;
-        [Range(0,59)] public int m_Minutes;
+        private int _hours;
+        private int _minutes;
         
         private ClockManager _clockManager;
 
-        private void Start()
+        [MenuItem("Custom Tool/Time Debug Tool")]
+        public static void ShowWindow()
         {
-            _clockManager = ClockManager.Instance;
+            GetWindow<TimeDebugTool>("Time Debug Tool");
         }
-
-        
         private void OnGUI()
         {
             
-#if UNITY_EDITOR
+// #if UNITY_EDITOR
             if(ClockManager.Instance == null) return;
+            _clockManager = ClockManager.Instance;
             if(_clockManager == null) return;
             
-            GUILayout.BeginVertical("box");
-            GUILayout.Label("Time Debug Tool");
+            // GUILayout.BeginVertical("box");
+            // GUILayout.Label("Time Debug Tool");
+            GUILayout.Label("Manual Time Control", EditorStyles.boldLabel);
             
             GUILayout.Label($"Current Time: {_clockManager.m_CurrentTime.ToString()}");
             GUILayout.Space(10);
             
-            GUILayout.Label($"Target Time: {m_Hours:D2}:{m_Minutes:D2}");
+            // GUILayout.Label($"Target Time: {m_Hours:D2}:{m_Minutes:D2}");
 
-            if (GUILayout.Button("Set Time"))
-                _clockManager.SetTime(new GameTime(m_Hours, m_Minutes));
+            _hours = EditorGUILayout.IntSlider("Hours", _hours, 0, 23);
+            _minutes = EditorGUILayout.IntSlider("Minutes", _minutes, 0, 59);
             
-            GUILayout.Space(10);
-            GUILayout.Label("Quick Jumps:");
+            if (GUILayout.Button("Set Time"))
+                _clockManager.SetTime(new GameTime(_hours, _minutes));
+            
+            GUILayout.Space(15);
+            GUILayout.Label("Quick Jumps", EditorStyles.boldLabel);;
 
             if (GUILayout.Button("Jump to Next Train"))
             {
                 var timeEvent = _clockManager.FindNextEventWithTag("Train");
-                
+
                 if (timeEvent != null)
+                {
                     _clockManager.SetTime(timeEvent.m_Start);
+                    Debug.Log($"Jumped to next train at {timeEvent.m_Start}");
+                }
                 else
-                    Warning("No train train event found on this loop.");
+                    Debug.LogWarning("No train train event found on this loop.");
             }
             
             GUILayout.EndVertical();
-#endif
+// #endif
         }
         
     }
