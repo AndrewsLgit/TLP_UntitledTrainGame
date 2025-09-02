@@ -25,7 +25,7 @@ namespace Manager.Runtime
         #region Private
         // Start of the Private region
 
-        [SerializeField] private List<TimeEventGroup> _timeEventGroups = new List<TimeEventGroup>();
+        private List<TimeEventGroup> _timeEventGroups = new List<TimeEventGroup>();
         
         #endregion
 
