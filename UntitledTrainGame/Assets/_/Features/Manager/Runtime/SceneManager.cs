@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using Foundation.Runtime;
 using SharedData.Runtime;
@@ -6,7 +7,7 @@ using UnityEngine.SceneManagement;
 using UnitySceneManager = UnityEngine.SceneManagement.SceneManager;
 
 
-namespace Tools.Runtime
+namespace Manager.Runtime
 {
     public class SceneManager : FMono
     {
@@ -28,6 +29,7 @@ namespace Tools.Runtime
         private Coroutine _preloadCoroutine;
         private Coroutine _replaceCoroutine;
         
+        
         // Private Variables
         #endregion
         
@@ -35,6 +37,8 @@ namespace Tools.Runtime
         // Public Variables
         
         public static SceneManager Instance { get; private set; }
+        
+        public event Action m_SceneActivated;
         
         // Public Variables
         #endregion
@@ -68,6 +72,13 @@ namespace Tools.Runtime
                 PreloadScene(_startScene);
                 ActivateScene();
             }
+            
+            ClockManager.Instance.m_OnLoopEnd += ResetFromStartScene;
+        }
+
+        private void OnDestroy()
+        {
+            ClockManager.Instance.m_OnLoopEnd -= ResetFromStartScene;
         }
         
         #endregion
@@ -157,6 +168,22 @@ namespace Tools.Runtime
             StartCoroutine(UnloadPreviousSceneWhenReady());
  
         }
+
+        public void ResetFromStartScene()
+        {
+            if (_startScene != null)
+            {
+                if (_startScene.name == _currentActiveScene.name)
+                {
+                    Info("Start scene is already active. Unloading then reloading.");
+                    UnitySceneManager.UnloadSceneAsync(_currentActiveScene);
+                }
+                    
+                PreloadScene(_startScene);
+                ActivateScene();
+            }
+            else Error("Start scene is null!");
+        }
         
         #endregion
         
@@ -190,7 +217,8 @@ namespace Tools.Runtime
             _preloadOp = null;
             _currentActiveScene = newScene;
             _isActivating = false;
-            
+
+            // m_SceneActivated?.Invoke();
         }
 
         private IEnumerator PreloadRoutine(string sceneName)
