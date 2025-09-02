@@ -25,7 +25,7 @@ namespace Manager.Runtime
         #region Private
         // Start of the Private region
 
-        private List<TimeEventGroup> _timeEventGroups = new List<TimeEventGroup>();
+        [SerializeField] private List<TimeEventGroup> _timeEventGroups = new List<TimeEventGroup>();
         
         #endregion
 
@@ -39,8 +39,11 @@ namespace Manager.Runtime
         
         [Header("Runtime State (Read Only)")]
         public GameTime m_CurrentTime { get; private set; }
+
+        [Header("Current Events (Read Only)")] public List<TimeEventGroup> m_CurrentEvents => _timeEventGroups;
         
         public event Action<GameTime> m_OnTimeUpdated;
+        public event Action m_OnLoopEnd;
 
         #endregion
         
@@ -68,11 +71,13 @@ namespace Manager.Runtime
         {
             // Refresh when scene loaded
             UnitySceneManager.sceneLoaded += OnSceneLoaded;
+            SceneManager.Instance.m_SceneActivated += OnSceneLoaded;
         }
 
         private void OnDisable()
         {
             UnitySceneManager.sceneLoaded -= OnSceneLoaded;
+            SceneManager.Instance.m_SceneActivated -= OnSceneLoaded;
         }
 
         // Start is called once before the first execution of Update after the MonoBehaviour is created
@@ -89,6 +94,7 @@ namespace Manager.Runtime
         /// </summary>
         public void AdvanceTime(GameTime duration)
         {
+            Info($"Advancing time by {duration}");
             SetTime(m_CurrentTime.AddTime(duration));
             m_OnTimeUpdated?.Invoke(m_CurrentTime);
         } 
@@ -105,6 +111,9 @@ namespace Manager.Runtime
             
             if (newTimeToMinues < minTime || newTimeToMinues > maxTime)
             {
+                if(newTimeToMinues > maxTime)
+                    m_OnLoopEnd?.Invoke();
+                
                 // If new time is outside of loop range, reset to loop start
                 Warning($"Time {newTime} is outside of loop range [{minTime} - {maxTime}]. Resetting to {m_TimeConfig.m_LoopStart}");
                 // m_CurrentTime = m_TimeConfig.m_LoopStart;
@@ -133,6 +142,11 @@ namespace Manager.Runtime
             RefreshEventGroups();
         }
 
+        private void OnSceneLoaded()
+        {
+            RefreshEventGroups();
+        }
+
         /// <summary>
         /// Find all TimeEventGroups in all loaded scenes.
         /// </summary>
@@ -148,6 +162,8 @@ namespace Manager.Runtime
         {
             foreach (var group in _timeEventGroups)
                 group.ResetEvents();
+            
+            m_OnLoopEnd?.Invoke();
         }
 
         /// <summary>
@@ -165,16 +181,36 @@ namespace Manager.Runtime
         /// </summary>
         public TimeEvent FindNextEventWithTag(string tag)
         {
+            InfoInProgress($"Finding next event with tag {tag}");
             int now = m_CurrentTime.ToTotalMinutes();
             int loopEnd = m_TimeConfig.m_LoopEnd.ToTotalMinutes();
-            
-            return _timeEventGroups
+            TimeEvent nextEvent = null;
+
+            if (string.IsNullOrEmpty(tag))
+                nextEvent = _timeEventGroups.SelectMany(g => g.m_Events)
+                    .Where(e => e.m_Start.ToTotalMinutes() > now && e.m_Start.ToTotalMinutes() < loopEnd)
+                    .OrderBy(e => e.m_Start.ToTotalMinutes())
+                    .FirstOrDefault();
+
+            nextEvent = _timeEventGroups
                 .SelectMany(g => g.m_Events)
-                .Where(e => (e.m_Tag == tag) && 
-                            (e.m_Start.ToTotalMinutes() > now) && 
+                .Where(e => (e.m_Tag == tag) &&
+                            (e.m_Start.ToTotalMinutes() > now) &&
                             (e.m_Start.ToTotalMinutes() < loopEnd))
                 .OrderBy(e => e.m_Start.ToTotalMinutes())
                 .FirstOrDefault();
+
+            if (nextEvent == null)
+            {
+                Warning($"No event found with tag {tag}, reloading from start scene.");
+                m_OnLoopEnd?.Invoke();
+                // if(now >= loopEnd)
+                //     m_OnLoopEnd?.Invoke();
+                
+                return null;
+            }
+            SetTime(nextEvent.m_Start);
+            return nextEvent;
         }
         
         #endregion
