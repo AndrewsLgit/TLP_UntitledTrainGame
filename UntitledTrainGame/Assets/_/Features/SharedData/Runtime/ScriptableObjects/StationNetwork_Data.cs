@@ -106,7 +106,7 @@ namespace SharedData.Runtime
         }
         
         // Helper method to get travel time between two stations
-        public float GetTravelTime(Station_Data from, Station_Data to)
+        public GameTime GetTravelTime(Station_Data from, Station_Data to)
         {
             var connection = Connections.FirstOrDefault(c => 
                 (c.From == from && c.To == to) || (c.From == to && c.To == from));
@@ -122,9 +122,9 @@ namespace SharedData.Runtime
     {
         public Station_Data From;
         public Station_Data To;
-        public float TravelTime;
+        public GameTime TravelTime;
         
-        public StationNode(Station_Data from, Station_Data to, float travelTime)
+        public StationNode(Station_Data from, Station_Data to, GameTime travelTime)
         {
             From = from;
             To = to;
