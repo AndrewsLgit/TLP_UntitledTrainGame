@@ -109,8 +109,12 @@ namespace Manager.Runtime
             {
                 // If new time is outside of loop range, reset to loop start
                 Warning($"Time {newTime} is outside of loop range [{minTime} - {maxTime}]. Resetting to {m_TimeConfig.m_LoopStart}");
-                m_CurrentTime = m_TimeConfig.m_LoopStart;
+                // m_CurrentTime = m_TimeConfig.m_LoopStart;
+                m_CurrentTime = newTime; // to trigger last event's onEnd callback
+                //todo: trigger last event's onEnd callback
+                CheckAllEvents();
                 ResetAllEvents();
+                m_CurrentTime = m_TimeConfig.m_LoopStart;
             }
             else m_CurrentTime = newTime;
 
