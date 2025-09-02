@@ -115,7 +115,7 @@ namespace Manager.Runtime
                     m_OnLoopEnd?.Invoke();
                 
                 // If new time is outside of loop range, reset to loop start
-                Warning($"Time {newTime} is outside of or at loop range [{minTime} - {maxTime}]. Resetting to {m_TimeConfig.m_LoopStart}");
+                Warning($"Time {newTime} is outside of or at loop range [{GameTime.FromTotalMinutes(minTime)} - {GameTime.FromTotalMinutes(maxTime)}]. Resetting to {m_TimeConfig.m_LoopStart}");
                 // m_CurrentTime = m_TimeConfig.m_LoopStart;
                 m_CurrentTime = newTime; // to trigger last event's onEnd callback
                 //todo: trigger last event's onEnd callback
@@ -193,12 +193,13 @@ namespace Manager.Runtime
         /// </summary>
         public TimeEvent FindNextEventWithTag(string tag)
         {
-            InfoInProgress($"Finding next event with tag {tag}");
+            var tagString = tag == String.Empty ? "no tag" : tag;
+            InfoInProgress($"Finding next event with tag: {tagString}");
             int now = m_CurrentTime.ToTotalMinutes();
             int loopEnd = m_TimeConfig.m_LoopEnd.ToTotalMinutes();
             TimeEvent nextEvent = null;
 
-            if (string.IsNullOrEmpty(tag) || tag != "Train")
+            if (string.IsNullOrEmpty(tag))
                 nextEvent = _timeEventGroups.SelectMany(g => g.m_Events)
                     .Where(e => e.m_Start.ToTotalMinutes() > now && e.m_Start.ToTotalMinutes() < loopEnd)
                     .OrderBy(e => e.m_Start.ToTotalMinutes())

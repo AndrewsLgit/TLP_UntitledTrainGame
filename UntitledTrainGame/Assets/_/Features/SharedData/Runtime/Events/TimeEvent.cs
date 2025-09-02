@@ -20,7 +20,7 @@ namespace SharedData.Runtime.Events
         
         [Header("Optional Tag")]
         [Tooltip("Useful for quick jumps in the DebugTool (e.g. 'Train').")]
-        public string m_Tag;
+        public string m_Tag = "";
 
         [Header("Actions")] 
         public UnityEvent m_OnStart;

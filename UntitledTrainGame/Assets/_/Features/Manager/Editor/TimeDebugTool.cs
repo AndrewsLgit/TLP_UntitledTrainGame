@@ -14,6 +14,7 @@ namespace Manager.Editor
     {
         private int _hours;
         private int _minutes;
+        private string _tag = "Train";
         
         private ClockManager _clockManager;
 
@@ -48,14 +49,17 @@ namespace Manager.Editor
             GUILayout.Space(15);
             GUILayout.Label("Quick Jumps", EditorStyles.boldLabel);;
 
-            if (GUILayout.Button("Jump to Next Train"))
+            _tag = EditorGUILayout.TextField("Tag", _tag);
+
+            if (GUILayout.Button("Jump to Next Event"))
             {
-                var timeEvent = _clockManager.FindNextEventWithTag("Train");
+                Debug.Log($"Using tag: {_tag}");
+                var timeEvent = _clockManager.FindNextEventWithTag(_tag);
 
                 if (timeEvent != null)
                 {
-                    _clockManager.SetTime(timeEvent.m_Start);
-                    Debug.Log($"Jumped to next train at {timeEvent.m_Start}");
+                    // _clockManager.SetTime(timeEvent.m_Start);
+                    Debug.Log($"Jumped to next event at {timeEvent.m_Start}");
                 }
                 else
                     Debug.LogWarning("No train train event found on this loop.");
