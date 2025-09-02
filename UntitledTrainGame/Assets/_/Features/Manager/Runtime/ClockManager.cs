@@ -39,6 +39,8 @@ namespace Manager.Runtime
         
         [Header("Runtime State (Read Only)")]
         public GameTime m_CurrentTime { get; private set; }
+        
+        public event Action<GameTime> m_OnTimeUpdated;
 
         #endregion
         
@@ -59,6 +61,7 @@ namespace Manager.Runtime
 
             // initialize time to loop start
             m_CurrentTime = m_TimeConfig.m_LoopStart;
+
         }
 
         private void OnEnable()
@@ -78,12 +81,6 @@ namespace Manager.Runtime
             RefreshEventGroups();
         }
 
-        // Update is called once per frame
-        void Update()
-        {
-        
-        }
-        
         #endregion
         
         #region Main Methods
@@ -93,6 +90,7 @@ namespace Manager.Runtime
         public void AdvanceTime(GameTime duration)
         {
             SetTime(m_CurrentTime.AddTime(duration));
+            m_OnTimeUpdated?.Invoke(m_CurrentTime);
         } 
         
         /// <summary>
@@ -119,6 +117,7 @@ namespace Manager.Runtime
             else m_CurrentTime = newTime;
 
             CheckAllEvents();
+            m_OnTimeUpdated?.Invoke(m_CurrentTime);
         }
         
         #endregion
