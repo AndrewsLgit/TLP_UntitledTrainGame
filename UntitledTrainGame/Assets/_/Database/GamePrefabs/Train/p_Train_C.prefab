@@ -77,6 +77,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_isVerbose: 0
   _trainRoute: {fileID: 0}
+  _regularTrainModel: {fileID: 7969175456646007605}
+  _expressTrainModel: {fileID: 8202671560914819228}
 --- !u!65 &5484992037690736373
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -164,6 +166,11 @@ Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: 3f827524ef4e462459ea73b8b637b1f1, type: 3}
   m_PrefabInstance: {fileID: 7086795591751612004}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &7969175456646007605 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 919132149155446097, guid: 3f827524ef4e462459ea73b8b637b1f1, type: 3}
+  m_PrefabInstance: {fileID: 7086795591751612004}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &9013065711136531917
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -225,6 +232,11 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 7dce9a87f84552044bc31055ef5090e9, type: 3}
+--- !u!1 &8202671560914819228 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 919132149155446097, guid: 7dce9a87f84552044bc31055ef5090e9, type: 3}
+  m_PrefabInstance: {fileID: 9013065711136531917}
+  m_PrefabAsset: {fileID: 0}
 --- !u!4 &8835621563382792742 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: 7dce9a87f84552044bc31055ef5090e9, type: 3}

@@ -1,8 +1,6 @@
-using System;
 using Foundation.Runtime;
 using Manager.Runtime;
 using SharedData.Runtime;
-using Tools.Runtime;
 using UnityEngine;
 
 namespace Interactable.Runtime
@@ -14,11 +12,13 @@ namespace Interactable.Runtime
         #region Private
         // Private Variables
         
-        private float _timeToInteract;
-        private SceneManager _sceneManager;
+        private GameTime _timeToInteract;
         private RouteManager _routeManager;
         [SerializeField] private TrainRoute_Data _trainRoute;
+        [SerializeField] private GameObject _regularTrainModel;
+        [SerializeField] private GameObject _expressTrainModel;
         
+        private bool _isExpress;
         
         // Private Variables
         #endregion
@@ -26,7 +26,7 @@ namespace Interactable.Runtime
         #region Public
         // Public Variables
         
-        public float TimeToInteract => _timeToInteract;
+        public GameTime TimeToInteract => _timeToInteract;
         
         // Public Variables
         #endregion
@@ -37,8 +37,14 @@ namespace Interactable.Runtime
 
         private void Start()
         {
-            _sceneManager = SceneManager.Instance;
             _routeManager = RouteManager.Instance;
+
+            _isExpress = _trainRoute.IsExpress;
+            
+            // enable train model based on express train flag
+            _regularTrainModel.SetActive(!_isExpress);
+            _expressTrainModel.SetActive(_isExpress);
+            
         }
 
         #endregion
