@@ -71,13 +71,13 @@ namespace Manager.Runtime
         {
             // Refresh when scene loaded
             UnitySceneManager.sceneLoaded += OnSceneLoaded;
-            SceneManager.Instance.m_SceneActivated += OnSceneLoaded;
+            // SceneManager.Instance.m_SceneActivated += OnSceneLoaded;
         }
 
         private void OnDisable()
         {
             UnitySceneManager.sceneLoaded -= OnSceneLoaded;
-            SceneManager.Instance.m_SceneActivated -= OnSceneLoaded;
+            // SceneManager.Instance.m_SceneActivated -= OnSceneLoaded;
         }
 
         // Start is called once before the first execution of Update after the MonoBehaviour is created
@@ -109,19 +109,20 @@ namespace Manager.Runtime
             int maxTime = m_TimeConfig.m_LoopEnd.ToTotalMinutes();
             int newTimeToMinues = newTime.ToTotalMinutes();
             
-            if (newTimeToMinues < minTime || newTimeToMinues > maxTime)
+            if (newTimeToMinues < minTime || newTimeToMinues >= maxTime)
             {
-                if(newTimeToMinues > maxTime)
+                if(newTimeToMinues >= maxTime)
                     m_OnLoopEnd?.Invoke();
                 
                 // If new time is outside of loop range, reset to loop start
-                Warning($"Time {newTime} is outside of loop range [{minTime} - {maxTime}]. Resetting to {m_TimeConfig.m_LoopStart}");
+                Warning($"Time {newTime} is outside of or at loop range [{minTime} - {maxTime}]. Resetting to {m_TimeConfig.m_LoopStart}");
                 // m_CurrentTime = m_TimeConfig.m_LoopStart;
                 m_CurrentTime = newTime; // to trigger last event's onEnd callback
                 //todo: trigger last event's onEnd callback
-                CheckAllEvents();
-                ResetAllEvents();
-                m_CurrentTime = m_TimeConfig.m_LoopStart;
+                // CheckAllEvents();
+                // ResetAllEvents();
+                // m_CurrentTime = m_TimeConfig.m_LoopStart;
+                ResetClock();
             }
             else m_CurrentTime = newTime;
 
@@ -139,7 +140,8 @@ namespace Manager.Runtime
         /// </summary>
         private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
         {
-            RefreshEventGroups();
+            // RefreshEventGroups();
+            ResetClock();
         }
 
         private void OnSceneLoaded()
@@ -153,6 +155,16 @@ namespace Manager.Runtime
         private void RefreshEventGroups()
         {
             _timeEventGroups = FindObjectsByType<TimeEventGroup>(FindObjectsSortMode.None).ToList();
+            // ResetAllEvents();
+            Info($"Found {_timeEventGroups.Count} TimeEventGroups with {_timeEventGroups.ToArray().Length}");
+        }
+
+        private void ResetClock()
+        {
+            CheckAllEvents();
+            ResetAllEvents();
+            RefreshEventGroups();
+            SetTime(m_TimeConfig.m_LoopStart);
         }
 
         /// <summary>
@@ -186,27 +198,28 @@ namespace Manager.Runtime
             int loopEnd = m_TimeConfig.m_LoopEnd.ToTotalMinutes();
             TimeEvent nextEvent = null;
 
-            if (string.IsNullOrEmpty(tag))
+            if (string.IsNullOrEmpty(tag) || tag != "Train")
                 nextEvent = _timeEventGroups.SelectMany(g => g.m_Events)
                     .Where(e => e.m_Start.ToTotalMinutes() > now && e.m_Start.ToTotalMinutes() < loopEnd)
                     .OrderBy(e => e.m_Start.ToTotalMinutes())
                     .FirstOrDefault();
 
-            nextEvent = _timeEventGroups
-                .SelectMany(g => g.m_Events)
-                .Where(e => (e.m_Tag == tag) &&
-                            (e.m_Start.ToTotalMinutes() > now) &&
-                            (e.m_Start.ToTotalMinutes() < loopEnd))
-                .OrderBy(e => e.m_Start.ToTotalMinutes())
-                .FirstOrDefault();
+            else
+                nextEvent = _timeEventGroups
+                    .SelectMany(g => g.m_Events)
+                    .Where(e => (e.m_Tag == tag) &&
+                                (e.m_Start.ToTotalMinutes() > now) &&
+                                (e.m_Start.ToTotalMinutes() < loopEnd))
+                    .OrderBy(e => e.m_Start.ToTotalMinutes())
+                    .FirstOrDefault();
 
             if (nextEvent == null)
             {
                 Warning($"No event found with tag {tag}, reloading from start scene.");
-                m_OnLoopEnd?.Invoke();
+                // m_OnLoopEnd?.Invoke();
                 // if(now >= loopEnd)
                 //     m_OnLoopEnd?.Invoke();
-                
+                SetTime(m_TimeConfig.m_LoopEnd);
                 return null;
             }
             SetTime(nextEvent.m_Start);
