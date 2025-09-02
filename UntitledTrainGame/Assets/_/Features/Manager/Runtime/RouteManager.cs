@@ -25,7 +25,7 @@ namespace Manager.Runtime
 
         private List<Station_Data> _segments = new List<Station_Data>();
         private int _currentStationIndex = 0;
-        private float _compressionFactor = 0.05f;
+        private float _compressionFactor = 0.02f;
         private CountdownTimer _currentSegmentTimer;
         private bool _isExpress = false;
         private bool _stopEarly = false;
@@ -135,7 +135,7 @@ namespace Manager.Runtime
             
             var realTime = _stationNetwork.GetTravelTime(_segments[index], _segments[index + 1]);
             Info($"Real time: {realTime}");
-            var uiTime = realTime * _compressionFactor;
+            var uiTime = realTime.ToTotalMinutes() * _compressionFactor;
             Info($"UI time: {uiTime}");
             
             //test
