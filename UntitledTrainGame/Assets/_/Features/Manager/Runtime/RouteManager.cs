@@ -119,6 +119,8 @@ namespace Manager.Runtime
             // test
             UIManager.Instance?.CreateProgressBarsForRoute(_segments, _stationNetwork, _compressionFactor);
             //test
+            
+            _isExpress = trainRoute.IsExpress;
             StartSegment(_currentStationIndex);
         }
 
@@ -136,6 +138,7 @@ namespace Manager.Runtime
             var realTime = _stationNetwork.GetTravelTime(_segments[index], _segments[index + 1]);
             Info($"Real time: {realTime}");
             var uiTime = realTime.ToTotalMinutes() * _compressionFactor;
+            if (_isExpress) uiTime /= 2;
             Info($"UI time: {uiTime}");
             
             //test
@@ -182,6 +185,7 @@ namespace Manager.Runtime
             // _currentSegmentTimer.Stop();
             // timer stop is done in the uiManager
             _currentSegmentTimer = null;
+            _isExpress = false;
             //test
             _sceneManager.ActivateScene();
         }
