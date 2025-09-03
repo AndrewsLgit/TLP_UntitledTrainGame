@@ -54,6 +54,12 @@ namespace Interactable.Runtime
         {
             _routeManager.StartJourney(_trainRoute, _trainRoute.Network);
         }
+
+        public void AdvanceTime(GameTime time)
+        {
+            throw new System.NotImplementedException();
+        }
+
         #endregion
     }
 }

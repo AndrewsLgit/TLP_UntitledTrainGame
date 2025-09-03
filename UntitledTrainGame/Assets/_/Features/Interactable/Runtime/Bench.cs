@@ -11,13 +11,14 @@ namespace Interactable.Runtime
         
         #region Private
         private ClockManager _clockManager;
+        private GameTime _timeToInteract;
         
         #endregion
         
         #region Public
         
-        public GameTime TimeToInteract { get; }
-        
+        public GameTime TimeToInteract => _timeToInteract;
+
         #endregion
         
         #endregion
@@ -27,7 +28,6 @@ namespace Interactable.Runtime
         // Start is called once before the first execution of Update after the MonoBehaviour is created
         void Start()
         {
-        
             _clockManager = ClockManager.Instance;
             
         }
@@ -49,6 +49,11 @@ namespace Interactable.Runtime
                 Info($"Event found: {foundEvent}. Advancing time to {foundEvent.m_Start}");
             }
             else Warning("No event found!");
+        }
+
+        public void AdvanceTime(GameTime time)
+        {
+            throw new System.NotImplementedException();
         }
 
         #endregion
