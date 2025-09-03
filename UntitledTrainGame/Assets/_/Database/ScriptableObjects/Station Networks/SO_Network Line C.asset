@@ -15,6 +15,15 @@ MonoBehaviour:
   Name: Network C
   LinePrefix: 2
   Connections:
+  - From: {fileID: 11400000, guid: de68932a1cee41340bbc1e7d800cc93f, type: 2}
+    To: {fileID: 11400000, guid: 51599d683f97a4d01a759c2579dfc88c, type: 2}
+    TravelTime: 0
+  - From: {fileID: 11400000, guid: 51599d683f97a4d01a759c2579dfc88c, type: 2}
+    To: {fileID: 11400000, guid: d1a014493c297f94ebb7303bebdb01a1, type: 2}
+    TravelTime: 0
   - From: {fileID: 11400000, guid: d1a014493c297f94ebb7303bebdb01a1, type: 2}
     To: {fileID: 11400000, guid: b1128251d605b5c4e91a89c71a65ad18, type: 2}
+    TravelTime: 0
+  - From: {fileID: 11400000, guid: b1128251d605b5c4e91a89c71a65ad18, type: 2}
+    To: {fileID: 11400000, guid: f3f9695ecebfa3a4e9bec5e13212b97e, type: 2}
     TravelTime: 0
