@@ -140,8 +140,9 @@ namespace Manager.Runtime
         /// </summary>
         private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
         {
-            // RefreshEventGroups();
-            ResetClock();
+            RefreshEventGroups();
+            CheckAllEvents();
+            //ResetClock();
         }
 
         private void OnSceneLoaded()
