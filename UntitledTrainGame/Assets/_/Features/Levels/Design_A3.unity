@@ -252,10 +252,6 @@ PrefabInstance:
       propertyPath: m_Name
       value: p_TEST_Station
       objectReference: {fileID: 0}
-    - target: {fileID: 5254944252054914963, guid: e17302e8239d14d8facdb270cb35d404, type: 3}
-      propertyPath: _trainRoute
-      value: 
-      objectReference: {fileID: 11400000, guid: ede58a6ae8ddca54f99d13a85521c50a, type: 2}
     - target: {fileID: 8218516033108555164, guid: e17302e8239d14d8facdb270cb35d404, type: 3}
       propertyPath: m_LocalPosition.x
       value: -5.6369867

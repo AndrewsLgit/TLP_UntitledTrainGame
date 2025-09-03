@@ -17,17 +17,27 @@ MonoBehaviour:
   Connections:
   - From: {fileID: 11400000, guid: f5c0e8cdd9ba6064caa8ed98b4e76662, type: 2}
     To: {fileID: 11400000, guid: f3eae102c19af9b47a6e206c061f2855, type: 2}
-    TravelTime: 5
+    TravelTime:
+      Hours: 0
+      Minutes: 10
   - From: {fileID: 11400000, guid: f3eae102c19af9b47a6e206c061f2855, type: 2}
     To: {fileID: 11400000, guid: 69135ee22c58d07488c01598e86c19a2, type: 2}
-    TravelTime: 5
+    TravelTime:
+      Hours: 0
+      Minutes: 10
   - From: {fileID: 11400000, guid: 69135ee22c58d07488c01598e86c19a2, type: 2}
     To: {fileID: 11400000, guid: de68932a1cee41340bbc1e7d800cc93f, type: 2}
-    TravelTime: 5
+    TravelTime:
+      Hours: 0
+      Minutes: 10
   - From: {fileID: 11400000, guid: de68932a1cee41340bbc1e7d800cc93f, type: 2}
     To: {fileID: 11400000, guid: 1f08f5f6349d0474d8dd5fe1b4141ca6, type: 2}
-    TravelTime: 5
+    TravelTime:
+      Hours: 0
+      Minutes: 10
   - From: {fileID: 11400000, guid: 1f08f5f6349d0474d8dd5fe1b4141ca6, type: 2}
     To: {fileID: 11400000, guid: f5c0e8cdd9ba6064caa8ed98b4e76662, type: 2}
-    TravelTime: 5
+    TravelTime:
+      Hours: 0
+      Minutes: 10
   IsSingleDirection: 1

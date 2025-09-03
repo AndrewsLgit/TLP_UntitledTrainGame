@@ -17,7 +17,12 @@ MonoBehaviour:
   Connections:
   - From: {fileID: 11400000, guid: 51599d683f97a4d01a759c2579dfc88c, type: 2}
     To: {fileID: 11400000, guid: fa4bedeac85d0c74ca0a7bec13db17a2, type: 2}
-    TravelTime: 0
+    TravelTime:
+      Hours: 0
+      Minutes: 30
   - From: {fileID: 11400000, guid: fa4bedeac85d0c74ca0a7bec13db17a2, type: 2}
     To: {fileID: 11400000, guid: f3f9695ecebfa3a4e9bec5e13212b97e, type: 2}
-    TravelTime: 0
+    TravelTime:
+      Hours: 0
+      Minutes: 20
+  IsSingleDirection: 0
