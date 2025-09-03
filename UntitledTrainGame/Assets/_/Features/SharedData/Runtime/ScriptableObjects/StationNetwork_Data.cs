@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace SharedData.Runtime
 {
-    [CreateAssetMenu(fileName = "StationNetwork_Data", menuName = "Data/StationNetwork_Data")]
+    [CreateAssetMenu(fileName = "SO_StationNetwork_Data", menuName = "Data/StationNetwork_Data")]
     public class StationNetwork_Data : ScriptableObject
     {
         #region Variables
@@ -14,6 +14,7 @@ namespace SharedData.Runtime
         public StationPrefix LinePrefix;
         //public Station_Data[] Stations; // StationDB Reference
         public StationNode[] Connections;
+        public bool IsSingleDirection = false;
         
         #endregion
 
@@ -59,7 +60,7 @@ namespace SharedData.Runtime
                         //Debug.Log($"Found connection: {connection.From.DisplayName} -> {connection.To.DisplayName}");
                     }
                     // check backward direction
-                    else if (connection.To == currentStation)
+                    else if (connection.To == currentStation && !IsSingleDirection)
                     {
                         nextStation = connection.From;
                         //Debug.Log($"Found connection: {connection.To.DisplayName} -> {connection.From.DisplayName}");   
@@ -105,7 +106,7 @@ namespace SharedData.Runtime
         }
         
         // Helper method to get travel time between two stations
-        public float GetTravelTime(Station_Data from, Station_Data to)
+        public GameTime GetTravelTime(Station_Data from, Station_Data to)
         {
             var connection = Connections.FirstOrDefault(c => 
                 (c.From == from && c.To == to) || (c.From == to && c.To == from));
@@ -121,9 +122,9 @@ namespace SharedData.Runtime
     {
         public Station_Data From;
         public Station_Data To;
-        public float TravelTime;
+        public GameTime TravelTime;
         
-        public StationNode(Station_Data from, Station_Data to, float travelTime)
+        public StationNode(Station_Data from, Station_Data to, GameTime travelTime)
         {
             From = from;
             To = to;

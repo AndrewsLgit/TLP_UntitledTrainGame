@@ -25,10 +25,11 @@ namespace Manager.Runtime
 
         private List<Station_Data> _segments = new List<Station_Data>();
         private int _currentStationIndex = 0;
-        private float _compressionFactor = 0.05f;
+        private float _compressionFactor = 0.02f;
         private CountdownTimer _currentSegmentTimer;
         private bool _isExpress = false;
         private bool _stopEarly = false;
+        private GameTime _segmentTime;
 
         // Private Variables
         #endregion
@@ -119,6 +120,8 @@ namespace Manager.Runtime
             // test
             UIManager.Instance?.CreateProgressBarsForRoute(_segments, _stationNetwork, _compressionFactor);
             //test
+            
+            _isExpress = trainRoute.IsExpress;
             StartSegment(_currentStationIndex);
         }
 
@@ -133,9 +136,13 @@ namespace Manager.Runtime
             
             InfoInProgress($"Segment {_segments[index].GetStationName()} -> {_segments[index + 1].GetStationName()}");
             
-            var realTime = _stationNetwork.GetTravelTime(_segments[index], _segments[index + 1]);
-            Info($"Real time: {realTime}");
-            var uiTime = realTime * _compressionFactor;
+            _segmentTime = _stationNetwork.GetTravelTime(_segments[index], _segments[index + 1]);
+            Info($"Travel time between {_segments[index].GetStationName()} -> {_segments[index+1].GetStationName()}: {_segmentTime.ToString()}");
+            if(_isExpress)
+                _segmentTime = GameTime.FromTotalMinutes(_segmentTime.ToTotalMinutes()/2);
+            Info($"Real time: {_segmentTime}");
+            var uiTime = _segmentTime.ToTotalMinutes() * _compressionFactor;
+            //if (_isExpress) uiTime /= 2;
             Info($"UI time: {uiTime}");
             
             //test
@@ -153,6 +160,7 @@ namespace Manager.Runtime
         private void EndSegment()
         {
             _currentStationIndex++;
+            ClockManager.Instance.AdvanceTime(_segmentTime);
             if (!_isExpress && _stopEarly)
             {
                 ChangeDestination(_currentStationIndex);
@@ -182,6 +190,7 @@ namespace Manager.Runtime
             // _currentSegmentTimer.Stop();
             // timer stop is done in the uiManager
             _currentSegmentTimer = null;
+            _isExpress = false;
             //test
             _sceneManager.ActivateScene();
         }

@@ -127,6 +127,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 328081566541519197, guid: d8e9f92f8780447b28f7475513cdaa9d, type: 3}
+      propertyPath: m_isVerbose
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 735075299666991869, guid: d8e9f92f8780447b28f7475513cdaa9d, type: 3}
       propertyPath: m_Name
       value: Persistent Game Manager
@@ -171,13 +175,13 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 8053136215402187809, guid: d8e9f92f8780447b28f7475513cdaa9d, type: 3}
-      propertyPath: _startScene
-      value: 
-      objectReference: {fileID: 11400000, guid: f68158648ba98e7478592d161bc644f2, type: 2}
+    - target: {fileID: 3120195562584573836, guid: d8e9f92f8780447b28f7475513cdaa9d, type: 3}
+      propertyPath: m_isVerbose
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 8053136215402187809, guid: d8e9f92f8780447b28f7475513cdaa9d, type: 3}
       propertyPath: m_isVerbose
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8343106658253979835, guid: d8e9f92f8780447b28f7475513cdaa9d, type: 3}
       propertyPath: _detectionDistance

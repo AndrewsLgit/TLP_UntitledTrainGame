@@ -57,12 +57,18 @@ Material:
     m_Floats:
     - _Max: 1.5
     - _Min: 0.3
+    - _OLD_ShadowStep: 0.07
+    - _OLD_Shadow_strength: 1
+    - _OLD_Steps: 3
     - _QueueControl: 0
     - _QueueOffset: 0
     - _Shades: 0.45
+    - _ShadowStep: 0.07
     - _Shadow_strength: 1
     - _Steps: 3
     m_Colors:
     - _Color: {r: 1, g: 1, b: 1, a: 1}
+    - _MainColor: {r: 0, g: 0, b: 0, a: 0}
+    - _OLD_MainColor: {r: 0, g: 0, b: 0, a: 1}
   m_BuildTextureStacks: []
   m_AllowLocking: 1

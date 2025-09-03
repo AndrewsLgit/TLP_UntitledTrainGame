@@ -5,6 +5,7 @@ namespace SharedData.Runtime
     public interface IInteractable
     {
         public void Interact();
-        public float TimeToInteract { get;}
+        public void AdvanceTime(GameTime time);
+        public GameTime TimeToInteract { get; }
     }
 }

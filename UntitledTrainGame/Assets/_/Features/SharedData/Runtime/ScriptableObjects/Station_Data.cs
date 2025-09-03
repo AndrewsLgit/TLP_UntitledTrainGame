@@ -11,7 +11,7 @@ using System.Collections.Generic;
 
 namespace SharedData.Runtime
 {
-    [CreateAssetMenu(fileName = "Station_Data", menuName = "Data/Station_Data")]
+    [CreateAssetMenu(fileName = "SO_Station_Data", menuName = "Data/Station_Data")]
     public class Station_Data : ScriptableObject
     {
         

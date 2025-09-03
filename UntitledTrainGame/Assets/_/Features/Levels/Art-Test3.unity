@@ -1739,7 +1739,7 @@ PrefabInstance:
     - target: {fileID: 6463727152751184063, guid: ff4931916f9b1854a8c5555349e61b23, type: 3}
       propertyPath: _trainRoute
       value: 
-      objectReference: {fileID: 11400000, guid: 3cf3df979cbeb41beb23002ff0f1fdef, type: 2}
+      objectReference: {fileID: 11400000, guid: 1bf27163c6d99454fbf01875e314e3aa, type: 2}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []

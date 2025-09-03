@@ -105,7 +105,7 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
-  _compressionFactor: 0.4
+  _compressionFactor: 0.02
 --- !u!114 &1011655273124440827
 MonoBehaviour:
   m_ObjectHideFlags: 0
