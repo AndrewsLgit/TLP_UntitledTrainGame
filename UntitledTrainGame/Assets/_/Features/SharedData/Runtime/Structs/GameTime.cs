@@ -15,9 +15,12 @@ namespace SharedData.Runtime
 
         public GameTime(int hours, int minutes)
         {
-            Hours = (hours % 24 + 24) % 24;
-            Minutes = (minutes % 60 + 60) % 60;
+            // Hours = (hours % 24 + 24) % 24;
+            // Minutes = (minutes % 60 + 60) % 60;
             // if Minutes overflow, normalize via FromTotalMinutes()
+            Hours = hours;
+            Minutes = minutes;
+            Normalize();
         }
 
         /// <summary>
