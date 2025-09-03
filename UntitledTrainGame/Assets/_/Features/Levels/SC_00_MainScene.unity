@@ -177,11 +177,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3120195562584573836, guid: d8e9f92f8780447b28f7475513cdaa9d, type: 3}
       propertyPath: m_isVerbose
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8053136215402187809, guid: d8e9f92f8780447b28f7475513cdaa9d, type: 3}
       propertyPath: m_isVerbose
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8343106658253979835, guid: d8e9f92f8780447b28f7475513cdaa9d, type: 3}
       propertyPath: _detectionDistance
