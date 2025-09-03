@@ -29,6 +29,7 @@ namespace Manager.Runtime
         private CountdownTimer _currentSegmentTimer;
         private bool _isExpress = false;
         private bool _stopEarly = false;
+        private GameTime _segmentTime;
 
         // Private Variables
         #endregion
@@ -135,10 +136,13 @@ namespace Manager.Runtime
             
             InfoInProgress($"Segment {_segments[index].GetStationName()} -> {_segments[index + 1].GetStationName()}");
             
-            var realTime = _stationNetwork.GetTravelTime(_segments[index], _segments[index + 1]);
-            Info($"Real time: {realTime}");
-            var uiTime = realTime.ToTotalMinutes() * _compressionFactor;
-            if (_isExpress) uiTime /= 2;
+            _segmentTime = _stationNetwork.GetTravelTime(_segments[index], _segments[index + 1]);
+            Info($"Travel time between {_segments[index].GetStationName()} -> {_segments[index+1].GetStationName()}: {_segmentTime.ToString()}");
+            if(_isExpress)
+                _segmentTime = GameTime.FromTotalMinutes(_segmentTime.ToTotalMinutes()/2);
+            Info($"Real time: {_segmentTime}");
+            var uiTime = _segmentTime.ToTotalMinutes() * _compressionFactor;
+            //if (_isExpress) uiTime /= 2;
             Info($"UI time: {uiTime}");
             
             //test
@@ -156,6 +160,7 @@ namespace Manager.Runtime
         private void EndSegment()
         {
             _currentStationIndex++;
+            ClockManager.Instance.AdvanceTime(_segmentTime);
             if (!_isExpress && _stopEarly)
             {
                 ChangeDestination(_currentStationIndex);
