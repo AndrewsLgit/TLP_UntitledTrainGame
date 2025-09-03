@@ -111,6 +111,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4402155658453844363}
+  - component: {fileID: 3649724109390607097}
   m_Layer: 0
   m_Name: p_Clock_Hung_2
   m_TagString: Untagged
@@ -135,6 +136,18 @@ Transform:
   - {fileID: 6505415620403882598}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &3649724109390607097
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2007280413838223690}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0c52eb84da7c74ca18c32d6a3bfc6c17, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &4809289781161914953
 GameObject:
   m_ObjectHideFlags: 0
