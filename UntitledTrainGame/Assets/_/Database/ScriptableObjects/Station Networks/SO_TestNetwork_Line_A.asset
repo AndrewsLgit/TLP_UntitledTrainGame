@@ -24,7 +24,7 @@ MonoBehaviour:
     To: {fileID: 11400000, guid: 9b49817de33384beb9dc6beb51755b67, type: 2}
     TravelTime:
       Hours: 1
-      Minutes: 20
+      Minutes: 30
   - From: {fileID: 11400000, guid: 9b49817de33384beb9dc6beb51755b67, type: 2}
     To: {fileID: 11400000, guid: f5c0e8cdd9ba6064caa8ed98b4e76662, type: 2}
     TravelTime:

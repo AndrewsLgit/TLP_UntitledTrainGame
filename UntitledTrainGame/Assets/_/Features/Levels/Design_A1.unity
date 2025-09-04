@@ -256,6 +256,10 @@ PrefabInstance:
       propertyPath: _trainRoute
       value: 
       objectReference: {fileID: 11400000, guid: 3cb911eddcfa5474380496908851f86d, type: 2}
+    - target: {fileID: 7227251282503685941, guid: e17302e8239d14d8facdb270cb35d404, type: 3}
+      propertyPath: _sceneToLoad
+      value: 
+      objectReference: {fileID: 11400000, guid: eaded202a6bc44f4489e1e209ce2137e, type: 2}
     - target: {fileID: 8218516033108555164, guid: e17302e8239d14d8facdb270cb35d404, type: 3}
       propertyPath: m_LocalPosition.x
       value: -5.6369867

@@ -56,6 +56,18 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/_/Features/Levels/Design_D2.unity
     guid: 6285bfb51a75ca04e8b495bd75aa907a
+  - enabled: 1
+    path: Assets/_/Features/Levels/Interior_Test_A3.unity
+    guid: facc38cfe6c87d847bde8b32d95d9ae2
+  - enabled: 1
+    path: Assets/_/Features/Levels/Interior_Test_A5.unity
+    guid: 81d9bb5d12b863548b73426cdb34bbd8
+  - enabled: 1
+    path: Assets/_/Features/Levels/Interior_Test_A1.unity
+    guid: 677e744e0b730c74bb636503fac168c2
+  - enabled: 1
+    path: Assets/_/Features/Levels/Interior_Test_C3.unity
+    guid: 8bc7a9826676aad4b8338b3a256b3198
   m_configObjects:
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}
   m_UseUCBPForAssetBundles: 0

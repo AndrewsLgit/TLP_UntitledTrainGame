@@ -248,10 +248,74 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 196776575183286669, guid: e17302e8239d14d8facdb270cb35d404, type: 3}
+      propertyPath: _trainRoute
+      value: 
+      objectReference: {fileID: 11400000, guid: 3cf3df979cbeb41beb23002ff0f1fdef, type: 2}
+    - target: {fileID: 736130843146208237, guid: e17302e8239d14d8facdb270cb35d404, type: 3}
+      propertyPath: _trainRoute
+      value: 
+      objectReference: {fileID: 11400000, guid: 8a00d8919119db940ab4f89d11e6680b, type: 2}
+    - target: {fileID: 1103280492682075916, guid: e17302e8239d14d8facdb270cb35d404, type: 3}
+      propertyPath: _trainRoute
+      value: 
+      objectReference: {fileID: 11400000, guid: ede58a6ae8ddca54f99d13a85521c50a, type: 2}
+    - target: {fileID: 1141362868423708213, guid: e17302e8239d14d8facdb270cb35d404, type: 3}
+      propertyPath: m_Events.Array.size
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 1141362868423708213, guid: e17302e8239d14d8facdb270cb35d404, type: 3}
+      propertyPath: m_Events.Array.data[0].m_End.Hours
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 1141362868423708213, guid: e17302e8239d14d8facdb270cb35d404, type: 3}
+      propertyPath: m_Events.Array.data[1].m_End.Hours
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 1141362868423708213, guid: e17302e8239d14d8facdb270cb35d404, type: 3}
+      propertyPath: m_Events.Array.data[2].m_End.Hours
+      value: 12
+      objectReference: {fileID: 0}
+    - target: {fileID: 1141362868423708213, guid: e17302e8239d14d8facdb270cb35d404, type: 3}
+      propertyPath: m_Events.Array.data[0].m_End.Minutes
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1141362868423708213, guid: e17302e8239d14d8facdb270cb35d404, type: 3}
+      propertyPath: m_Events.Array.data[1].m_End.Minutes
+      value: 16
+      objectReference: {fileID: 0}
+    - target: {fileID: 1141362868423708213, guid: e17302e8239d14d8facdb270cb35d404, type: 3}
+      propertyPath: m_Events.Array.data[1].m_Start.Hours
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 1141362868423708213, guid: e17302e8239d14d8facdb270cb35d404, type: 3}
+      propertyPath: m_Events.Array.data[2].m_End.Minutes
+      value: 45
+      objectReference: {fileID: 0}
+    - target: {fileID: 1141362868423708213, guid: e17302e8239d14d8facdb270cb35d404, type: 3}
+      propertyPath: m_Events.Array.data[2].m_Start.Hours
+      value: 11
+      objectReference: {fileID: 0}
+    - target: {fileID: 1141362868423708213, guid: e17302e8239d14d8facdb270cb35d404, type: 3}
+      propertyPath: m_Events.Array.data[0].m_Start.Minutes
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1141362868423708213, guid: e17302e8239d14d8facdb270cb35d404, type: 3}
+      propertyPath: m_Events.Array.data[1].m_Start.Minutes
+      value: 15
+      objectReference: {fileID: 0}
+    - target: {fileID: 1141362868423708213, guid: e17302e8239d14d8facdb270cb35d404, type: 3}
+      propertyPath: m_Events.Array.data[2].m_Start.Minutes
+      value: 5
+      objectReference: {fileID: 0}
     - target: {fileID: 4928777450702166291, guid: e17302e8239d14d8facdb270cb35d404, type: 3}
       propertyPath: m_Name
       value: p_TEST_Station
       objectReference: {fileID: 0}
+    - target: {fileID: 7227251282503685941, guid: e17302e8239d14d8facdb270cb35d404, type: 3}
+      propertyPath: _sceneToLoad
+      value: 
+      objectReference: {fileID: 11400000, guid: f6ad17d50eca44b4eab33191a09602be, type: 2}
     - target: {fileID: 8218516033108555164, guid: e17302e8239d14d8facdb270cb35d404, type: 3}
       propertyPath: m_LocalPosition.x
       value: -5.6369867
@@ -292,8 +356,17 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 9214795122172063887, guid: e17302e8239d14d8facdb270cb35d404, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -3.52
+      objectReference: {fileID: 0}
+    - target: {fileID: 9214795122172063887, guid: e17302e8239d14d8facdb270cb35d404, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: -4.37
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
-    m_RemovedGameObjects: []
+    m_RemovedGameObjects:
+    - {fileID: 7750681611840036108, guid: e17302e8239d14d8facdb270cb35d404, type: 3}
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: e17302e8239d14d8facdb270cb35d404, type: 3}
