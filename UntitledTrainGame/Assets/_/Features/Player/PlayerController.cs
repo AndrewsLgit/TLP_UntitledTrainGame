@@ -4,6 +4,7 @@ using SharedData.Runtime;
 using Unity.Collections;
 using Unity.Jobs;
 using UnityEngine;
+using UnityEngine.Assertions;
 using UnityEngine.Events;
 using UnityEngine.InputSystem;
 
@@ -22,7 +23,13 @@ namespace Player.Runtime
         
         // References
         [Header("UI References")]
-        [SerializeField] private GameObject _interactionPopup;
+        [SerializeField] private GameObject _interactionPopupParent;
+        [SerializeField] private GameObject _interactionPopupEnter;
+        [SerializeField] private GameObject _interactionPopupTrain;
+        [SerializeField] private GameObject _interactionPopupBench;
+        [SerializeField] private GameObject _interactionPopupPickUp;
+        [SerializeField] private GameObject _interactionPopupDialog;
+
         // [SerializeField] private float _popupOffsetY = 1f;
         
         [Header("Player Stop")]
@@ -66,6 +73,7 @@ namespace Player.Runtime
         // Player Interaction
         private IInteractable _interactable;
         private bool _canInteract;
+        private InteractionType _interactionType;
         // Interaction Variables
         private float _interactionDistance = 3f;
         private float _interactionAngle = 45f;
@@ -275,6 +283,7 @@ namespace Player.Runtime
                     {
                         nearestDistance = dist;
                         _interactable = interactable;
+                        _interactionType = _interactable.InteractionType;
                         _canInteract = true;
                     }
 
@@ -284,7 +293,7 @@ namespace Player.Runtime
             }
             
             Info($"Interaction job completed: {_canInteract}");
-            ShowInteractionPopup(_canInteract);
+            ShowInteractionPopup(_canInteract, _interactionType);
         }
         
 
@@ -352,15 +361,52 @@ namespace Player.Runtime
             _interactionAngle = _controlPanel.DetectionAngle;
         }
 
-        private void ShowInteractionPopup(bool enable)
+        private void ShowInteractionPopup(bool enable, InteractionType type)
         {
-            if (_interactionPopup == null) return;
-            _interactionPopup.SetActive(enable);
+            Assert.IsNotNull(_interactionPopupParent);
+            Assert.IsNotNull(_interactionPopupTrain);
+            Assert.IsNotNull(_interactionPopupDialog);
+            Assert.IsNotNull(_interactionPopupBench);
+            Assert.IsNotNull(_interactionPopupEnter);
+            Assert.IsNotNull(_interactionPopupPickUp);
+
+
+            if (_interactionPopupParent == null) return;
+            switch (type)
+            {
+                case InteractionType.Train:
+                    _interactionPopupParent.SetActive(enable);
+                    _interactionPopupTrain.SetActive(enable);
+                    break;
+                case InteractionType.Dialog:
+                case InteractionType.Inspect:
+                case InteractionType.Read:
+                    _interactionPopupParent.SetActive(enable);
+                    _interactionPopupDialog.SetActive(enable);
+                    break;
+                case InteractionType.Bench:
+                    _interactionPopupParent.SetActive(enable);
+                    _interactionPopupBench.SetActive(enable);
+                    break;
+                case InteractionType.EnterBuilding:
+                    _interactionPopupParent.SetActive(enable);
+                    _interactionPopupEnter.SetActive(enable);
+                    break;
+                case InteractionType.PickUp:
+                    _interactionPopupParent.SetActive(enable);
+                    _interactionPopupPickUp.SetActive(enable);
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(type), type, null);
+                    break;
+            }
+            _interactionPopupParent.SetActive(enable);
+            
         }
 
         private void UpdatePopupPosition()
         {
-            if(_interactionPopup == null || _camera == null) return;
+            if(_interactionPopupParent == null || _camera == null) return;
 
             Vector3 playerScreenPos = _camera.WorldToScreenPoint(transform.position);
             
@@ -368,7 +414,7 @@ namespace Player.Runtime
             var popupPos = playerScreenPos + dirToCamera * .5f;
 
             // playerScreenPos.y += _popupOffsetY;
-            _interactionPopup.transform.position = playerScreenPos;
+            _interactionPopupParent.transform.position = playerScreenPos;
         }
         
         #endregion

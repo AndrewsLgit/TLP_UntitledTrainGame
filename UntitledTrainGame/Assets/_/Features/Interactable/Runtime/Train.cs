@@ -31,6 +31,7 @@ namespace Interactable.Runtime
         // Public Variables
         
         public GameTime TimeToInteract => _timeToInteract;
+        public InteractionType InteractionType => InteractionType.Train;
         
         // Public Variables
         #endregion

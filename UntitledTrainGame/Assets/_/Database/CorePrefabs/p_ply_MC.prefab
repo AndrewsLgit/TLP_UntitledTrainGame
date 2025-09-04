@@ -521,7 +521,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &3968617251433904280
 RectTransform:
   m_ObjectHideFlags: 0
@@ -792,7 +792,7 @@ RectTransform:
   m_GameObject: {fileID: 6474589265992572259}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 0.02, y: 0.02, z: 0.02}
+  m_LocalScale: {x: 0.03, y: 0.03, z: 0.03}
   m_ConstrainProportionsScale: 1
   m_Children:
   - {fileID: 2273984128607769123}
@@ -801,7 +801,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0, y: 2.7}
+  m_AnchoredPosition: {x: 0, y: 3}
   m_SizeDelta: {x: 100, y: 60}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!223 &4383331407140523485
@@ -1151,15 +1151,15 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: -8679921383154817045, guid: 8cd174534d9f8164ab1c0a6e66d1e1e8, type: 3}
       propertyPath: m_LocalPosition.x
-      value: -5.6369867
+      value: -5.2639456
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 8cd174534d9f8164ab1c0a6e66d1e1e8, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 0.56999993
+      value: 0.75
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 8cd174534d9f8164ab1c0a6e66d1e1e8, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 2.173892
+      value: 2.951136
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 8cd174534d9f8164ab1c0a6e66d1e1e8, type: 3}
       propertyPath: m_LocalRotation.w
@@ -1275,7 +1275,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_isVerbose: 0
-  _interactionPopup: {fileID: 6474589265992572259}
+  _interactionPopupParent: {fileID: 6474589265992572259}
+  _interactionPopupEnter: {fileID: 8947022736143329606}
+  _interactionPopupTrain: {fileID: 3687199859172911539}
+  _interactionPopupBench: {fileID: 5239416590538795919}
+  _interactionPopupPickUp: {fileID: 4259993566596408811}
+  _interactionPopupDialog: {fileID: 4666728155020381518}
   _onPlayerJourneyEnd: {fileID: 11400000, guid: a4e88e88e0d1a4770988ea07c0fd3258, type: 2}
   _numInteractionRaycasts: 5
   _numObstacleRaycasts: 3

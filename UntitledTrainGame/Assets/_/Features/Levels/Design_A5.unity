@@ -167,6 +167,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 3597615696468006668, guid: 7694d04ffee374c5d9c06a969acc27eb, type: 3}
+      propertyPath: _trainRoute
+      value: 
+      objectReference: {fileID: 0}
     - target: {fileID: 6329061466236294378, guid: 7694d04ffee374c5d9c06a969acc27eb, type: 3}
       propertyPath: m_Name
       value: p_TrainGroupSchedule_C
@@ -181,11 +185,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8397048955470582326, guid: 7694d04ffee374c5d9c06a969acc27eb, type: 3}
       propertyPath: m_Events.Array.data[0].m_End.Hours
-      value: 13
+      value: 12
       objectReference: {fileID: 0}
     - target: {fileID: 8397048955470582326, guid: 7694d04ffee374c5d9c06a969acc27eb, type: 3}
       propertyPath: m_Events.Array.data[0].m_End.Minutes
-      value: 40
+      value: 31
       objectReference: {fileID: 0}
     - target: {fileID: 8397048955470582326, guid: 7694d04ffee374c5d9c06a969acc27eb, type: 3}
       propertyPath: m_Events.Array.data[0].m_Start.Hours
@@ -363,7 +367,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8397048955470582326, guid: 3e04f8d9292c340bcb441dea671e7147, type: 3}
       propertyPath: m_Events.Array.data[0].m_End.Minutes
-      value: 35
+      value: 11
       objectReference: {fileID: 0}
     - target: {fileID: 8397048955470582326, guid: 3e04f8d9292c340bcb441dea671e7147, type: 3}
       propertyPath: m_Events.Array.data[0].m_Start.Hours
