@@ -228,6 +228,8 @@ namespace Manager.Runtime
             return nextEvent;
         }
         
+        //todo: get next train, with arrival time and destination station
+        
         #endregion
     }
 }
