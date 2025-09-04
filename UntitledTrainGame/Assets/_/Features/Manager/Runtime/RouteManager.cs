@@ -42,6 +42,7 @@ namespace Manager.Runtime
         // Public Variables
         
         public static RouteManager Instance { get; private set; }
+        public event Action m_onPausedRouteRemoved;
         
         // Public Variables
         #endregion
@@ -173,8 +174,10 @@ namespace Manager.Runtime
             
             _segmentTime = _stationNetwork.GetTravelTime(_segments[index], _segments[index + 1]);
             Info($"Travel time between {_segments[index].GetStationName()} -> {_segments[index+1].GetStationName()}: {_segmentTime.ToString()}");
+            
             if(_isExpress)
                 _segmentTime = GameTime.FromTotalMinutes(_segmentTime.ToTotalMinutes()/2);
+            
             Info($"Real time: {_segmentTime}");
             var uiTime = _segmentTime.ToTotalMinutes() * _compressionFactor;
             //if (_isExpress) uiTime /= 2;
@@ -295,10 +298,11 @@ namespace Manager.Runtime
             
             // Ensure current index is set to the paused station
             _currentStationIndex = _routePausedIndex;
-            _routePaused = false;
-            _routePausedIndex = -1;
+            // _trainRoute = null;
+            // _routePaused = false;
+            // _routePausedIndex = -1;
             
-            
+            RemovePausedRoute();
             
             // Recreate route UI
             //UIManager.Instance?.CreateProgressBarsForRoute(_segments, _stationNetwork, _compressionFactor);
@@ -314,6 +318,15 @@ namespace Manager.Runtime
                 StartJourney(startStation, endStation, _stationNetwork);
             }
             
+        }
+        
+        public void RemovePausedRoute()
+        {
+            _trainRoute = null;
+            _routePaused = false;
+            _routePausedIndex = -1;
+
+            m_onPausedRouteRemoved?.Invoke();
         }
 
         private SceneManager GetSceneLoader()

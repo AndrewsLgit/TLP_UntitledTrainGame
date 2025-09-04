@@ -2,6 +2,7 @@ using Foundation.Runtime;
 using Manager.Runtime;
 using SharedData.Runtime;
 using SharedData.Runtime.Events;
+using UnityEngine.Assertions;
 
 namespace Interactable.Runtime
 {
@@ -37,12 +38,17 @@ namespace Interactable.Runtime
         
         public void Interact()
         {
+            
+            if (_clockManager == null)
+                _clockManager = ClockManager.Instance;
+            Assert.IsNotNull(_clockManager, "ClockManager not found!");
+            
             TimeEvent foundEvent = null;
             Info("Interacting with Bench");
-            if (_clockManager != null)
-               foundEvent = _clockManager.FindNextEventWithTag("Train");
-            else
-                Error("ClockManager not found!");
+            
+            foundEvent = _clockManager.FindNextEventWithTag("Train");
+            // else
+            // Error("ClockManager not found!");
 
             if (foundEvent != null)
             {

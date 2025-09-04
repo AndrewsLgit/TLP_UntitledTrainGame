@@ -3,6 +3,7 @@ using Foundation.Runtime;
 using Manager.Runtime;
 using SharedData.Runtime;
 using UnityEngine;
+using UnityEngine.Assertions;
 
 namespace Interactable.Runtime
 {
@@ -19,6 +20,7 @@ namespace Interactable.Runtime
         [SerializeField] private GameObject _regularTrainModel;
         [SerializeField] private GameObject _expressTrainModel;
         [SerializeField] private bool _isPendingTrain = false;
+        private bool _isPendingExists = false;
         
         private bool _isExpress;
         
@@ -41,22 +43,50 @@ namespace Interactable.Runtime
         {
             _routeManager = RouteManager.Instance;
 
-            _isExpress = _trainRoute.IsExpress;
+            // _isExpress = _trainRoute.IsExpress;
+            _isExpress = _trainRoute != null && _trainRoute.IsExpress;
+            //_isPendingExists = _routeManager.HasPendingTrainAtActiveScene();
             
             // enable train model based on express train flag
             SetModel();
+            
+            _routeManager.m_onPausedRouteRemoved += DisableModel;
             // _regularTrainModel.SetActive(!_isExpress || _isPendingTrain);
             // _expressTrainModel.SetActive(_isExpress && !_isPendingTrain);
             
         }
 
+        private void Update()
+        {
+            if (!_isPendingTrain) return;
+            // if (!_routeManager.HasPendingTrainAtActiveScene()) 
+            //SetModel();
+            // if (FactExists<bool>("isPending", out var isPending))
+            // {
+            //     GetFact<bool>("isPending");
+            //     _isPendingTrain = isPending;
+            //     SetModel();
+            // }
+        }
+
         private void OnEnable()
         {
-            _isExpress = _trainRoute.IsExpress;
+            if(_routeManager == null)
+                _routeManager = RouteManager.Instance;
+            
+            Assert.IsNotNull(_routeManager);
+            
+            _isExpress = _trainRoute != null && _trainRoute.IsExpress;
+            //_isPendingExists = _routeManager.HasPendingTrainAtActiveScene();
             // enable train model based on express train flag
             SetModel();
             // _regularTrainModel.SetActive(!_isExpress || _isPendingTrain);
             // _expressTrainModel.SetActive(_isExpress && !_isPendingTrain);
+        }
+
+        private void OnDestroy()
+        {
+            _routeManager.m_onPausedRouteRemoved -= DisableModel;
         }
 
         #endregion
@@ -66,6 +96,7 @@ namespace Interactable.Runtime
         {
             if (!_isPendingTrain)
             {
+                Assert.IsNotNull(_trainRoute);
                 _routeManager.StartJourney(_trainRoute, _trainRoute.Network);
                 return;
             }
@@ -82,6 +113,12 @@ namespace Interactable.Runtime
             throw new System.NotImplementedException();
         }
 
+        private void DisableModel()
+        {
+            _regularTrainModel.SetActive(false);
+            _expressTrainModel.SetActive(false);
+            gameObject.SetActive(false);
+        }
         private void SetModel()
         {
             _routeManager = RouteManager.Instance;
@@ -92,10 +129,12 @@ namespace Interactable.Runtime
             }
             if (_isPendingTrain)
             {
+                Info($"Train is pending.");
                 _regularTrainModel.SetActive(false);
                 _expressTrainModel.SetActive(false);
-                var isPendingExists = _routeManager.HasPendingTrainAtActiveScene();
-                _regularTrainModel.SetActive(isPendingExists);
+                _isPendingExists = _routeManager.HasPendingTrainAtActiveScene();
+                Info($"Pending train exists in scene: {_isPendingExists}");
+                _regularTrainModel.SetActive(_isPendingExists);
                 return;
             }
             _regularTrainModel.SetActive(!_isExpress);
