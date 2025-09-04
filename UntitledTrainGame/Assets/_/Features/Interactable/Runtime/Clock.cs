@@ -18,6 +18,8 @@ namespace Interactable.Runtime
             _clockText = GetComponentInChildren<TMP_Text>();
             _clockManager = ClockManager.Instance;
             _clockManager.m_OnTimeUpdated += UpdateTime;
+            
+            UpdateTime(_clockManager.m_CurrentTime);
         }
 
         // private void OnEnable()
