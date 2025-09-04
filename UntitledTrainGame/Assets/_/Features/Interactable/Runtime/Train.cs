@@ -1,3 +1,4 @@
+using System;
 using Foundation.Runtime;
 using Manager.Runtime;
 using SharedData.Runtime;
@@ -17,6 +18,7 @@ namespace Interactable.Runtime
         [SerializeField] private TrainRoute_Data _trainRoute;
         [SerializeField] private GameObject _regularTrainModel;
         [SerializeField] private GameObject _expressTrainModel;
+        [SerializeField] private bool _isPendingTrain = false;
         
         private bool _isExpress;
         
@@ -42,9 +44,19 @@ namespace Interactable.Runtime
             _isExpress = _trainRoute.IsExpress;
             
             // enable train model based on express train flag
-            _regularTrainModel.SetActive(!_isExpress);
-            _expressTrainModel.SetActive(_isExpress);
+            SetModel();
+            // _regularTrainModel.SetActive(!_isExpress || _isPendingTrain);
+            // _expressTrainModel.SetActive(_isExpress && !_isPendingTrain);
             
+        }
+
+        private void OnEnable()
+        {
+            _isExpress = _trainRoute.IsExpress;
+            // enable train model based on express train flag
+            SetModel();
+            // _regularTrainModel.SetActive(!_isExpress || _isPendingTrain);
+            // _expressTrainModel.SetActive(_isExpress && !_isPendingTrain);
         }
 
         #endregion
@@ -52,7 +64,17 @@ namespace Interactable.Runtime
         #region Main Methods
         public void Interact()
         {
-            _routeManager.StartJourney(_trainRoute, _trainRoute.Network);
+            if (!_isPendingTrain)
+            {
+                _routeManager.StartJourney(_trainRoute, _trainRoute.Network);
+                return;
+            }
+
+            if (_isPendingTrain && _routeManager.HasPendingTrainAtActiveScene())
+            {
+                _routeManager.ResumeJourneyFromPausedStation();
+                return;
+            }
         }
 
         public void AdvanceTime(GameTime time)
@@ -60,6 +82,25 @@ namespace Interactable.Runtime
             throw new System.NotImplementedException();
         }
 
+        private void SetModel()
+        {
+            _routeManager = RouteManager.Instance;
+            if (_routeManager == null)
+            {
+                Debug.LogError("RouteManager not found!");
+                return;           
+            }
+            if (_isPendingTrain)
+            {
+                _regularTrainModel.SetActive(false);
+                _expressTrainModel.SetActive(false);
+                var isPendingExists = _routeManager.HasPendingTrainAtActiveScene();
+                _regularTrainModel.SetActive(isPendingExists);
+                return;
+            }
+            _regularTrainModel.SetActive(!_isExpress);
+            _expressTrainModel.SetActive(_isExpress);
+        }
         #endregion
     }
 }
