@@ -24,6 +24,7 @@ namespace Interactable.Runtime
         // Public Variables
         
         public GameTime TimeToInteract { get; }
+        public InteractionType InteractionType => InteractionType.EnterBuilding;
 
         // Public Variables
         #endregion

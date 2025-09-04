@@ -71,12 +71,16 @@ namespace Manager.Runtime
         {
             // Refresh when scene loaded
             UnitySceneManager.sceneLoaded += OnSceneLoaded;
+            // UnitySceneManager.sceneUnloaded += OnSceneLoaded;
+            // UnitySceneManager.activeSceneChanged += OnSceneLoaded;
             // SceneManager.Instance.m_SceneActivated += OnSceneLoaded;
         }
 
         private void OnDisable()
         {
             UnitySceneManager.sceneLoaded -= OnSceneLoaded;
+            // UnitySceneManager.sceneUnloaded -= OnSceneLoaded;
+            // UnitySceneManager.activeSceneChanged -= OnSceneLoaded;
             // SceneManager.Instance.m_SceneActivated -= OnSceneLoaded;
         }
 
@@ -84,6 +88,7 @@ namespace Manager.Runtime
         private void Start()
         {
             RefreshEventGroups();
+            CheckAllEvents();
         }
 
         #endregion
@@ -145,6 +150,13 @@ namespace Manager.Runtime
             //ResetClock();
         }
 
+        private void OnSceneLoaded(Scene scene)
+        {
+            RefreshEventGroups();
+            CheckAllEvents();
+            //ResetClock();       
+        }
+
         private void OnSceneLoaded()
         {
             RefreshEventGroups();
@@ -155,7 +167,8 @@ namespace Manager.Runtime
         /// </summary>
         private void RefreshEventGroups()
         {
-            _timeEventGroups = FindObjectsByType<TimeEventGroup>(FindObjectsSortMode.None).ToList();
+            _timeEventGroups.Clear(); ;
+            _timeEventGroups = FindObjectsByType<TimeEventGroup>(FindObjectsSortMode.None).Where(eg => eg.gameObject.scene.name == SceneManager.Instance.CurrentActiveScene).ToList();
             // ResetAllEvents();
             Info($"Found {_timeEventGroups.Count} TimeEventGroups with {_timeEventGroups.ToArray().Length}");
         }

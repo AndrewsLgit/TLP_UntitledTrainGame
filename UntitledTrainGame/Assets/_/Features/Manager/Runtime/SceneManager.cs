@@ -37,6 +37,7 @@ namespace Manager.Runtime
         // Public Variables
         
         public static SceneManager Instance { get; private set; }
+        public string CurrentActiveScene => _preloadedSceneName;
         
         public event Action m_SceneActivated;
         

@@ -19,6 +19,7 @@ namespace Interactable.Runtime
         #region Public
         
         public GameTime TimeToInteract => _timeToInteract;
+        public InteractionType InteractionType => InteractionType.Bench;
 
         #endregion
         
