@@ -864,6 +864,18 @@ PrefabInstance:
       propertyPath: m_IsActive
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 2950001871955522408, guid: a5ac3f1732bbb4f6bbe48536dc0b60e2, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -3.36
+      objectReference: {fileID: 0}
+    - target: {fileID: 2950001871955522408, guid: a5ac3f1732bbb4f6bbe48536dc0b60e2, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0.33
+      objectReference: {fileID: 0}
+    - target: {fileID: 2950001871955522408, guid: a5ac3f1732bbb4f6bbe48536dc0b60e2, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: -7.45
+      objectReference: {fileID: 0}
     - target: {fileID: 6329061466236294378, guid: a5ac3f1732bbb4f6bbe48536dc0b60e2, type: 3}
       propertyPath: m_Name
       value: p_TrainGroupSchedule_A

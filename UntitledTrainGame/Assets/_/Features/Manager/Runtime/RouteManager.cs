@@ -6,6 +6,7 @@ using SharedData.Runtime;
 using Tools.Runtime;
 using UnityEngine;
 using UnityEngine.Assertions;
+using UnitySceneManager = UnityEngine.SceneManagement.SceneManager;
 
 namespace Manager.Runtime
 {
@@ -18,7 +19,7 @@ namespace Manager.Runtime
         
         // References
         [SerializeField] private StationNetwork_Data _stationNetwork;
-        [SerializeField] private TrainRoute_Data _testTrainRoute;
+        [SerializeField] private TrainRoute_Data _trainRoute;
         private GDControlPanel _controlPanel = null;
         private SceneManager _sceneManager;
         private SceneReference _sceneToLoad;
@@ -31,6 +32,9 @@ namespace Manager.Runtime
         private bool _stopEarly = false;
         private GameTime _segmentTime;
 
+        private bool _routePaused = false;
+        private int _routePausedIndex = -1;
+
         // Private Variables
         #endregion
         
@@ -38,6 +42,7 @@ namespace Manager.Runtime
         // Public Variables
         
         public static RouteManager Instance { get; private set; }
+        public event Action m_onPausedRouteRemoved;
         
         // Public Variables
         #endregion
@@ -95,7 +100,7 @@ namespace Manager.Runtime
             _segments = new List<Station_Data>();
             _currentStationIndex = 0;
             _segments.Clear();
-            StartJourney(_testTrainRoute, _stationNetwork);
+            StartJourney(_trainRoute, _stationNetwork);
         }
         // calculate segments and start traveling through them
         public void StartJourney(TrainRoute_Data trainRoute, StationNetwork_Data stationNetwork)
@@ -124,6 +129,37 @@ namespace Manager.Runtime
             _isExpress = trainRoute.IsExpress;
             StartSegment(_currentStationIndex);
         }
+        // Overload to start a journey from the current station to a target station without needing a TrainRoute asset
+        public void StartJourney(Station_Data start, Station_Data end, StationNetwork_Data stationNetwork)
+        {
+            if (_currentSegmentTimer is { IsRunning: true }) return;
+            CleanupCurrentJourney();
+            
+            _stationNetwork = stationNetwork;
+
+            if (_stationNetwork == null)
+            {
+                Error("StationNetwork is not set. Cannot start journey.");
+                return;
+            }
+
+            _segments = _stationNetwork.CalculatePath(start, end);
+            if (_segments == null)
+            {
+                Error("Path not calculated!");
+                return;
+            }
+
+            _sceneToLoad = end.StationScene;
+            _sceneManager = GetSceneLoader();
+
+            Info($"Starting journey from {_segments[0].GetStationName()} to {_segments[^1].GetStationName()}");
+            UIManager.Instance?.CreateProgressBarsForRoute(_segments, _stationNetwork, _compressionFactor);
+
+            _isExpress = false;
+            StartSegment(_currentStationIndex);
+        }
+
 
         private void StartSegment(int index)
         {
@@ -138,8 +174,10 @@ namespace Manager.Runtime
             
             _segmentTime = _stationNetwork.GetTravelTime(_segments[index], _segments[index + 1]);
             Info($"Travel time between {_segments[index].GetStationName()} -> {_segments[index+1].GetStationName()}: {_segmentTime.ToString()}");
+            
             if(_isExpress)
                 _segmentTime = GameTime.FromTotalMinutes(_segmentTime.ToTotalMinutes()/2);
+            
             Info($"Real time: {_segmentTime}");
             var uiTime = _segmentTime.ToTotalMinutes() * _compressionFactor;
             //if (_isExpress) uiTime /= 2;
@@ -175,7 +213,36 @@ namespace Manager.Runtime
             // _sceneManager.UnloadScene(_sceneToLoad);
             _sceneToLoad = _segments[index].StationScene;
             // _sceneManager.PreloadScene(_sceneToLoad);
-            EndJourney();
+            
+            ArriveAndPauseAtStation(index);
+            // EndJourney();
+        }
+
+        // Pauses the route at the given station index, loads and activates the scene,
+        // but does NOT clear the route segments. The train is considered "present" at this station.
+        private void ArriveAndPauseAtStation(int stationIndex)
+        {
+            _routePaused = true;
+            _routePausedIndex = stationIndex;
+            
+            //Mark discovered on arrival
+            _segments[stationIndex].IsDiscovered = true;
+            
+            // Clear any running UI/timers for the traveling segment
+            if (_currentSegmentTimer != null)
+            {
+                _currentSegmentTimer.OnTimerStop -= EndSegment;
+                _currentSegmentTimer.Stop();
+                _currentSegmentTimer = null;
+            }
+            UIManager.Instance?.ClearProgressBars();
+            
+            // Load and activate the scene
+            _sceneManager = GetSceneLoader();
+            _sceneManager.PreloadScene(_sceneToLoad);
+            _sceneManager.ActivateScene();
+            
+            InfoDone($"Journey paused at station {_segments[stationIndex].GetStationName()}");
         }
 
         private void EndJourney()
@@ -205,6 +272,62 @@ namespace Manager.Runtime
         #endregion
 
         #region Utils
+        
+        // True if a paused route is present and the active scene is the paused station's scene
+        public bool HasPendingTrainAtActiveScene()
+        {
+            if(!_routePaused || _routePausedIndex < 0 || _routePausedIndex >= _segments.Count)
+                return false;
+
+            var activeSceneName = UnitySceneManager.GetActiveScene().name;
+            var pausedSceneName = _segments[_routePausedIndex].StationScene?.SceneName;
+            Info($"pausedSceneName: {pausedSceneName}, activeSceneName: {activeSceneName}");
+            return !string.IsNullOrEmpty(pausedSceneName) && string.Equals(activeSceneName, pausedSceneName, StringComparison.Ordinal);
+        }
+        // Resume the route from the paused station, continuing to the next station if available
+        public void ResumeJourneyFromPausedStation()
+        {
+            if (!_routePaused)
+            {
+                Warning("No paused journey to resume.");
+                return;
+            }
+            
+            var startStation = _segments[_routePausedIndex];
+            var endStation = _segments[^1];
+            
+            // Ensure current index is set to the paused station
+            _currentStationIndex = _routePausedIndex;
+            // _trainRoute = null;
+            // _routePaused = false;
+            // _routePausedIndex = -1;
+            
+            RemovePausedRoute();
+            
+            // Recreate route UI
+            //UIManager.Instance?.CreateProgressBarsForRoute(_segments, _stationNetwork, _compressionFactor);
+            
+            // If we are at the final station already, end the journey; otherwise, start the next segment
+            if (_currentStationIndex >= _segments.Count - 1)
+            {
+                EndJourney();
+            }
+            else
+            {
+                // StartSegment(_currentStationIndex);
+                StartJourney(startStation, endStation, _stationNetwork);
+            }
+            
+        }
+        
+        public void RemovePausedRoute()
+        {
+            _trainRoute = null;
+            _routePaused = false;
+            _routePausedIndex = -1;
+
+            m_onPausedRouteRemoved?.Invoke();
+        }
 
         private SceneManager GetSceneLoader()
         {

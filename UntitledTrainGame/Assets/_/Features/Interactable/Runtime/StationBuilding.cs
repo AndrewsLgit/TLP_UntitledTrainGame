@@ -1,4 +1,5 @@
 using Foundation.Runtime;
+using Manager.Runtime;
 using SharedData.Runtime;
 using UnityEngine;
 using SceneManager = Manager.Runtime.SceneManager;
@@ -34,6 +35,9 @@ namespace Interactable.Runtime
         private void Start()
         {
             _sceneManager = SceneManager.Instance;
+            //todo: replace this with a proper event system
+            //SetFact("isPending", false, false);
+            //RouteManager.Instance.RemovePausedRoute();
         }
 
         #endregion
@@ -43,6 +47,7 @@ namespace Interactable.Runtime
         {
             Info($"Interacting with Train Station");
             // SceneManager.LoadScene(_sceneToLoad);
+            RouteManager.Instance.RemovePausedRoute();
             _sceneManager.PreloadScene(_sceneToLoad);
             _sceneManager.ActivateScene();
         }
