@@ -1,5 +1,5 @@
 fileFormatVersion: 2
-guid: 1cdd30caf5bee9549b2e4c0bb9159ca0
+guid: 9550a4b60fb23f647896c19f9a07d8ee
 ModelImporter:
   serializedVersion: 22200
   internalIDToNameTable: []
@@ -7,13 +7,8 @@ ModelImporter:
   - first:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
-      name: M_PROPS-color-palette.007
-    second: {fileID: 2100000, guid: 9b7cbd4ef0fa4f64eabef5397d0dc78a, type: 2}
-  - first:
-      type: UnityEngine:Material
-      assembly: UnityEngine.CoreModule
-      name: Mat_Props_Alpha
-    second: {fileID: 2100000, guid: 6f970b1d1201eb94d969c5d949878c7b, type: 2}
+      name: Mat_station_ground
+    second: {fileID: 2100000, guid: 81eafb02269ae6a44b165f7f88d8ba1a, type: 2}
   materials:
     materialImportMode: 2
     materialName: 0
