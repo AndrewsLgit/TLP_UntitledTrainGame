@@ -1,5 +1,5 @@
 fileFormatVersion: 2
-guid: 1019020841c64014a898fa9565c8c306
+guid: a37e62de861bbc54c806a3a4231a112d
 TrueTypeFontImporter:
   externalObjects: {}
   serializedVersion: 4
@@ -9,7 +9,7 @@ TrueTypeFontImporter:
   characterPadding: 1
   includeFontData: 1
   fontNames:
-  - Madimi One
+  - CCMeanwhile-Bold
   fallbackFontReferences: []
   customCharacters: 
   fontRenderingMode: 0
