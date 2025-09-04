@@ -7,5 +7,15 @@ namespace SharedData.Runtime
         public void Interact();
         public void AdvanceTime(GameTime time);
         public GameTime TimeToInteract { get; }
+        public InteractionType InteractionType { get; }
+    }
+    public enum InteractionType {
+        Dialog,
+        Read,
+        Inspect,
+        PickUp,
+        Train,
+        EnterBuilding,
+        Bench
     }
 }
