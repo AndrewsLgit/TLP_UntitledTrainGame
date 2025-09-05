@@ -513,7 +513,7 @@ RectTransform:
   m_GameObject: {fileID: 2176967926193716335}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1.15, y: 1.15, z: 1.15}
+  m_LocalScale: {x: 1.1, y: 1.1, z: 1.1}
   m_ConstrainProportionsScale: 1
   m_Children:
   - {fileID: 8614301772071032981}
@@ -956,8 +956,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: Ticket Agent
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: f39824a3a9b58f64c8cbaed29fb13d84, type: 2}
-  m_sharedMaterial: {fileID: -2626235021911643545, guid: f39824a3a9b58f64c8cbaed29fb13d84, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: f33940d7fde37db4eb173fe28ff70579, type: 2}
+  m_sharedMaterial: {fileID: -7410966160062273788, guid: f33940d7fde37db4eb173fe28ff70579, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
