@@ -1,7 +1,6 @@
-using System;
 using Manager.Runtime;
-using NUnit.Framework;
 using UnityEngine;
+using UnityEngine.Assertions;
 
 namespace Interactable.Runtime
 {

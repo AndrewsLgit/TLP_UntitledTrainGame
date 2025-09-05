@@ -5,7 +5,6 @@ using Unity.Collections;
 using Unity.Jobs;
 using UnityEngine;
 using UnityEngine.Assertions;
-using UnityEngine.Events;
 using UnityEngine.InputSystem;
 
 namespace Player.Runtime
@@ -398,7 +397,6 @@ namespace Player.Runtime
                     break;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(type), type, null);
-                    break;
             }
             _interactionPopupParent.SetActive(enable);
             
