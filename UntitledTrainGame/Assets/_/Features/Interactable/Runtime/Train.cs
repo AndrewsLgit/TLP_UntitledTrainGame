@@ -95,18 +95,27 @@ namespace Interactable.Runtime
         #region Main Methods
         public void Interact()
         {
-            if (!_isPendingTrain)
-            {
-                Assert.IsNotNull(_trainRoute);
-                _routeManager.StartJourney(_trainRoute, _trainRoute.Network);
-                return;
-            }
-
-            if (_isPendingTrain && _routeManager.HasPendingTrainAtActiveScene())
+            if (_routeManager.HasPendingTrainAtActiveScene())
             {
                 _routeManager.ResumeJourneyFromPausedStation();
                 return;
             }
+            
+            Assert.IsNotNull(_trainRoute);
+            _routeManager.StartJourney(_trainRoute, _trainRoute.Network);
+            
+            // if (!_isPendingTrain)
+            // {
+            //     Assert.IsNotNull(_trainRoute);
+            //     _routeManager.StartJourney(_trainRoute, _trainRoute.Network);
+            //     return;
+            // }
+            //
+            // if (_isPendingTrain && _routeManager.HasPendingTrainAtActiveScene())
+            // {
+            //     _routeManager.ResumeJourneyFromPausedStation();
+            //     return;
+            // }
         }
 
         public void AdvanceTime(GameTime time)
