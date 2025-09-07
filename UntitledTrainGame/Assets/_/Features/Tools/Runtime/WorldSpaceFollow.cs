@@ -1,8 +1,9 @@
+using Foundation.Runtime;
+using UnityEngine;
+
 namespace Tools.Runtime
 {
-    using UnityEngine;
-
-    public class CLASS_NAME : MonoBehaviour
+    public class WorldSpaceFollow : FMono
     {
         #region Variables
 
@@ -10,7 +11,12 @@ namespace Tools.Runtime
 
         // --- Start of Private Variables ---
 
-
+        [SerializeField] private Transform _target;
+        [SerializeField] private Vector3 _offset = new Vector3(0f, 2f, 0f); // tweak height above target
+        [SerializeField] private bool _faceCamera = true;
+        
+        private Camera _cam;
+        
         // --- End of Private Variables --- 
 
         #endregion
@@ -30,40 +36,35 @@ namespace Tools.Runtime
 
         private void Awake()
         {
+            _cam = Camera.main;
         }
 
-        private void Start()
+        private void LateUpdate()
         {
+            if (_target == null) return;
+            if(_cam == null)
+                _cam = Camera.main;
+
+            transform.position = _target.position + _offset;
+
+            if (_faceCamera && _cam != null)
+            {
+                // billboard to camera
+                transform.forward = (_cam.transform.position - transform.position).normalized * -1f;
+            }
         }
 
-        private void Update()
-        {
-        }
-
-        private void FixedUpdate()
-        {
-        }
-
-        private void OnEnable()
-        {
-        }
-
-        private void OnDisable()
-        {
-        }
-
-        private void OnDestroy()
-        {
-        }
 
         #endregion
 
         #region Main Methods
 
+        public void SetTarget(Transform target)
+        {
+            _target = target;
+        }
+
         #endregion
 
-        #region Helpers/Utils
-
-        #endregion
     }
 }
