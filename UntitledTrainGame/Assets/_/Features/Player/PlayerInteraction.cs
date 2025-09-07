@@ -127,9 +127,9 @@ namespace Player.Runtime
             
             GDControlPanel.OnValuesUpdated += OnControlPanelUpdated;
             _inputRouter.OnInteract += OnInteract;
-            GetFromControlPanel();
-
-            _benchChoiceUIBehaviour = FindAnyObjectByType();
+            GetFromControlPanel(); 
+            
+            // _benchChoiceUIBehaviour = FindAnyObjectByType<>()
             
             // Ensure bench choice UI is hidden at start and visuals initialized
             // if (_benchChoice != null) _benchChoice.SetActive(false);
