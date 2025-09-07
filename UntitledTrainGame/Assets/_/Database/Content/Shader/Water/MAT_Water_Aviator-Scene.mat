@@ -20,7 +20,7 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: MAT_Water_Shader-Graph
+  m_Name: MAT_Water_Aviator-Scene
   m_Shader: {fileID: -6465566751694194690, guid: aae128a314745ad48a2fb51dcf27bd1e, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
@@ -74,17 +74,17 @@ Material:
     - _Max_Depth: 0.5
     - _QueueControl: 1
     - _QueueOffset: 0
-    - _Size: 4
+    - _Size: 13.12
     - _Wave_Chopiness: 0.02
-    - _Wave_intensity: 0.02
+    - _Wave_intensity: 0.01
     - _depth: 26.77
     m_Colors:
     - _Dark_Depth_Color: {r: 0.453364, g: 0.7038484, b: 0.8490566, a: 1}
-    - _Dark_Foam_Color: {r: 0.5378213, g: 0.7451764, b: 0.8716981, a: 1}
-    - _Deep_Depth_Color: {r: 0.453364, g: 0.7038484, b: 0.8490566, a: 1}
-    - _Depth_Color: {r: 0.34321818, g: 0.49676087, b: 0.5849056, a: 1}
+    - _Dark_Foam_Color: {r: 0.69155306, g: 0.5372549, b: 0.87058824, a: 1}
+    - _Deep_Depth_Color: {r: 0.45490196, g: 0.5716777, b: 0.8509804, a: 1}
+    - _Depth_Color: {r: 0.34509805, g: 0.49610135, b: 0.58431375, a: 1}
     - _Ligth_Depth_Color: {r: 0.20281236, g: 0.39905015, b: 0.509434, a: 1}
     - _Ligth_Foam_Color: {r: 1, g: 1, b: 1, a: 1}
-    - _Water_Color: {r: 0.36954784, g: 0.69754267, b: 0.89433956, a: 1}
+    - _Water_Color: {r: 0.5906301, g: 0.3686275, b: 0.89411765, a: 1}
   m_BuildTextureStacks: []
   m_AllowLocking: 1
