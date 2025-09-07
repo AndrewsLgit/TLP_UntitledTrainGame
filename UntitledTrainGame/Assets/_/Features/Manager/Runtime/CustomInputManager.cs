@@ -6,14 +6,14 @@ using UnitySceneManager = UnityEngine.SceneManagement.SceneManager;
 
 namespace Manager.Runtime
 {
-    public class PlayerInputManager : FMono
+    public class CustomInputManager : FMono
     {
         [SerializeField] private PlayerInput _playerInput;
 
         private string _cachedScheme;
         private InputDevice[] _cachedDevices;
         
-        public static PlayerInputManager Instance { get; private set; }
+        public static CustomInputManager Instance { get; private set; }
 
         #region Unity API
         
@@ -49,6 +49,7 @@ namespace Manager.Runtime
 
         public void SetPlayerInput(PlayerInput playerInput)
         {
+            Info($"PlayerInput set to {playerInput}");
             _playerInput = playerInput;
             CacheSchemeAndDevices();
         }
