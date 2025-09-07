@@ -8,6 +8,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 6078924368665776075}
     m_Modifications:
+    - target: {fileID: 5434330807259210314, guid: e537dacf720574df2a208bda25773d8d, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 7014132658185209235, guid: e537dacf720574df2a208bda25773d8d, type: 3}
       propertyPath: m_Name
       value: PopUpCanvas
@@ -102,29 +106,9 @@ GameObject:
   m_CorrespondingSourceObject: {fileID: 3141221350019510742, guid: e537dacf720574df2a208bda25773d8d, type: 3}
   m_PrefabInstance: {fileID: 4075028546044811504}
   m_PrefabAsset: {fileID: 0}
---- !u!1 &3687199859172911539 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 839631485530861891, guid: e537dacf720574df2a208bda25773d8d, type: 3}
-  m_PrefabInstance: {fileID: 4075028546044811504}
-  m_PrefabAsset: {fileID: 0}
---- !u!1 &4259993566596408811 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 257797317455674651, guid: e537dacf720574df2a208bda25773d8d, type: 3}
-  m_PrefabInstance: {fileID: 4075028546044811504}
-  m_PrefabAsset: {fileID: 0}
---- !u!1 &4666728155020381518 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 8669117396656461246, guid: e537dacf720574df2a208bda25773d8d, type: 3}
-  m_PrefabInstance: {fileID: 4075028546044811504}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1 &4999523017653216895 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 9073829029651955343, guid: e537dacf720574df2a208bda25773d8d, type: 3}
-  m_PrefabInstance: {fileID: 4075028546044811504}
-  m_PrefabAsset: {fileID: 0}
---- !u!1 &5239416590538795919 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 8087142761277010815, guid: e537dacf720574df2a208bda25773d8d, type: 3}
   m_PrefabInstance: {fileID: 4075028546044811504}
   m_PrefabAsset: {fileID: 0}
 --- !u!1 &6052207563857131610 stripped
@@ -140,16 +124,6 @@ RectTransform:
 --- !u!1 &6467058176256883840 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 7003928629625250928, guid: e537dacf720574df2a208bda25773d8d, type: 3}
-  m_PrefabInstance: {fileID: 4075028546044811504}
-  m_PrefabAsset: {fileID: 0}
---- !u!1 &8351916493389593274 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 5434330807259210314, guid: e537dacf720574df2a208bda25773d8d, type: 3}
-  m_PrefabInstance: {fileID: 4075028546044811504}
-  m_PrefabAsset: {fileID: 0}
---- !u!1 &8947022736143329606 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 4947025078613799350, guid: e537dacf720574df2a208bda25773d8d, type: 3}
   m_PrefabInstance: {fileID: 4075028546044811504}
   m_PrefabAsset: {fileID: 0}
 --- !u!1 &9015188171387927861 stripped
@@ -212,6 +186,10 @@ PrefabInstance:
     - target: {fileID: 919132149155446097, guid: 8cd174534d9f8164ab1c0a6e66d1e1e8, type: 3}
       propertyPath: m_Name
       value: p_ply_MC
+      objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: 8cd174534d9f8164ab1c0a6e66d1e1e8, type: 3}
+      propertyPath: m_TagString
+      value: Player
       objectReference: {fileID: 0}
     - target: {fileID: 5866666021909216657, guid: 8cd174534d9f8164ab1c0a6e66d1e1e8, type: 3}
       propertyPath: m_Enabled
@@ -300,18 +278,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_isVerbose: 0
-  _interactionBubble: {fileID: 8351916493389593274}
-  _interactionBubbleEnter: {fileID: 8947022736143329606}
-  _interactionBubbleTrain: {fileID: 3687199859172911539}
-  _interactionBubbleBench: {fileID: 5239416590538795919}
-  _interactionBubblePickUp: {fileID: 4259993566596408811}
-  _interactionBubbleDialog: {fileID: 4666728155020381518}
-  _benchChoice: {fileID: 6052207563857131610}
-  _sleepUnselected: {fileID: 1376611594038602022}
-  _sleepSelected: {fileID: 6467058176256883840}
-  _waitUnselected: {fileID: 4999523017653216895}
-  _waitSelected: {fileID: 9015188171387927861}
   _benchChoiceUIBehaviour: {fileID: 1151290774914211198}
+  _popupPresenterBehaviour: {fileID: 0}
   _numInteractionRaycasts: 5
   _maxRayHits: 4
   _interactionMask:

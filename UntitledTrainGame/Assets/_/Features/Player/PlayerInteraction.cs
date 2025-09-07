@@ -23,26 +23,31 @@ namespace Player.Runtime
         private GDControlPanel _controlPanel;
         private PlayerInputRouter _inputRouter;
 
-        [Header("UI References - Interaction Bubble")]
-        [SerializeField] private GameObject _interactionBubble;
-        [SerializeField] private GameObject _interactionBubbleEnter;
-        [SerializeField] private GameObject _interactionBubbleTrain;
-        [SerializeField] private GameObject _interactionBubbleBench;
-        [SerializeField] private GameObject _interactionBubblePickUp;
-        [SerializeField] private GameObject _interactionBubbleDialog;
-        
-        [Header("UI References - Bench Choice")]
-        [SerializeField] private GameObject _benchChoice;
-        [SerializeField] private GameObject _sleepUnselected;
-        [SerializeField] private GameObject _sleepSelected;
-        [SerializeField] private GameObject _waitUnselected;
-        [SerializeField] private GameObject _waitSelected;
+        // [Header("UI References - Interaction Bubble")]
+        // [SerializeField] private GameObject _interactionBubble;
+        // [SerializeField] private GameObject _interactionBubbleEnter;
+        // [SerializeField] private GameObject _interactionBubbleTrain;
+        // [SerializeField] private GameObject _interactionBubbleBench;
+        // [SerializeField] private GameObject _interactionBubblePickUp;
+        // [SerializeField] private GameObject _interactionBubbleDialog;
+        //
+        // [Header("UI References - Bench Choice")]
+        // [SerializeField] private GameObject _benchChoice;
+        // [SerializeField] private GameObject _sleepUnselected;
+        // [SerializeField] private GameObject _sleepSelected;
+        // [SerializeField] private GameObject _waitUnselected;
+        // [SerializeField] private GameObject _waitSelected;
         
         
         // New: decoupled UI controller (assign your BenchChoiceUI here)
-        [Header("Decoupled Bench Choice UI (Optional)")]
+        [Header("Decoupled Bench Choice UI (Required)")]
         [SerializeField] private MonoBehaviour _benchChoiceUIBehaviour; // must implement IBenchChoiceUI
         private IBenchChoiceUI _benchChoiceUI;
+        
+        // New: decoupled popup presenter (assign a component that implements IInteractionPopupPresenter here)
+        [Header("Decoupled Popup Presenter (Required)")]
+        [SerializeField] private MonoBehaviour _popupPresenterBehaviour; // must implement IInteractionPopupPresenter
+        private IInteractionPopupPresenter _popupPresenter;
 
         // Bench choice state
         private bool _isBenchChoiceOpen = false;
@@ -97,7 +102,8 @@ namespace Player.Runtime
             // Ensure bench choice UI is hidden at start and visuals initialized
             _isBenchChoiceOpen = false;
             if(_benchChoiceUI != null) _benchChoiceUI.Close();
-            if(_benchChoice != null) _benchChoice.SetActive(false);
+            if(_popupPresenter != null) _popupPresenter.Hide();
+            // if(_benchChoice != null) _benchChoice.SetActive(false);
         }
         private void OnDisable()
         {
@@ -107,7 +113,8 @@ namespace Player.Runtime
             // Extra safety: make sure choice UI is closed when object is disabled (scene change, etc.)
             _isBenchChoiceOpen = false;
             if (_benchChoiceUI != null) _benchChoiceUI.Close();
-            if (_benchChoice != null) _benchChoice.SetActive(false);
+            if (_popupPresenter != null) _popupPresenter.Hide();
+            // if (_benchChoice != null) _benchChoice.SetActive(false);
             CustomInputManager.Instance.SwitchToPlayer();
 
         }
@@ -120,16 +127,22 @@ namespace Player.Runtime
             
             GDControlPanel.OnValuesUpdated += OnControlPanelUpdated;
             _inputRouter.OnInteract += OnInteract;
-            GetFromControlPanel(); 
+            GetFromControlPanel();
+
+            _benchChoiceUIBehaviour = FindAnyObjectByType();
             
             // Ensure bench choice UI is hidden at start and visuals initialized
-            if (_benchChoice != null) _benchChoice.SetActive(false);
-            _benchSelectedIndex = 0;
-            UpdateBenchChoiceVisuals();
+            // if (_benchChoice != null) _benchChoice.SetActive(false);
+            // _benchSelectedIndex = 0;
+            // UpdateBenchChoiceVisuals();
             
             // Ensure bench choice UI is hidden at start and visuals initialized
             if (_benchChoiceUIBehaviour != null) _benchChoiceUI = _benchChoiceUIBehaviour as IBenchChoiceUI;
+            if (_popupPresenterBehaviour != null) _popupPresenter = _popupPresenterBehaviour as IInteractionPopupPresenter;
+            
+            // Ensure hidden at start
             if (_benchChoiceUI != null) _benchChoiceUI.Close();
+            if (_popupPresenter != null) _popupPresenter.Hide();
             _isBenchChoiceOpen = false;
         }
 
@@ -197,7 +210,7 @@ namespace Player.Runtime
         {
             _interactionJob.Complete();
             
-            // While bench choice is open, keep current interactable
+            // While bench choice is open, keep current interactable and don't alter popups
             if(_isBenchChoiceOpen) return;
             
             _interactable = null;
@@ -248,59 +261,71 @@ namespace Player.Runtime
             }
             
             Info($"Interaction job completed: {_canInteract}");
-            ShowInteractionPopup(_canInteract, _interactionType);
+            // ShowInteractionPopup(_canInteract, _interactionType);
+            // Delegate popups to presenter (no direct GameObject toggles here
+            if (_popupPresenter != null)
+            {
+                if(_canInteract) _popupPresenter.Show(_interactionType);
+                else _popupPresenter.Hide();
+            }
         }
         
-        private void ShowInteractionPopup(bool enable, InteractionType type)
-        {
-            Assert.IsNotNull(_interactionBubble);
-            Assert.IsNotNull(_interactionBubbleTrain);
-            Assert.IsNotNull(_interactionBubbleDialog);
-            Assert.IsNotNull(_interactionBubbleBench);
-            Assert.IsNotNull(_interactionBubbleEnter);
-            Assert.IsNotNull(_interactionBubblePickUp);
-
-
-            if (_interactionBubble == null) return;
-            switch (type)
-            {
-                case InteractionType.Train:
-                    _interactionBubble.SetActive(enable);
-                    _interactionBubbleTrain.SetActive(enable);
-                    break;
-                case InteractionType.Dialog:
-                case InteractionType.Inspect:
-                case InteractionType.Read:
-                    _interactionBubble.SetActive(enable);
-                    _interactionBubbleDialog.SetActive(enable);
-                    break;
-                case InteractionType.Bench:
-                    _interactionBubble.SetActive(enable /*&& !_isBenchChoiceOpen*/);
-                    _interactionBubbleBench.SetActive(enable /*&& !_isBenchChoiceOpen*/);
-                    break;
-                case InteractionType.EnterBuilding:
-                    _interactionBubble.SetActive(enable);
-                    _interactionBubbleEnter.SetActive(enable);
-                    break;
-                case InteractionType.PickUp:
-                    _interactionBubble.SetActive(enable);
-                    _interactionBubblePickUp.SetActive(enable);
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(type), type, null);
-            }
-            _interactionBubble.SetActive(enable);
-            
-        }
+        // private void ShowInteractionPopup(bool enable, InteractionType type)
+        // {
+        //     Assert.IsNotNull(_interactionBubble);
+        //     Assert.IsNotNull(_interactionBubbleTrain);
+        //     Assert.IsNotNull(_interactionBubbleDialog);
+        //     Assert.IsNotNull(_interactionBubbleBench);
+        //     Assert.IsNotNull(_interactionBubbleEnter);
+        //     Assert.IsNotNull(_interactionBubblePickUp);
+        //
+        //
+        //     if (_interactionBubble == null) return;
+        //     switch (type)
+        //     {
+        //         case InteractionType.Train:
+        //             _interactionBubble.SetActive(enable);
+        //             _interactionBubbleTrain.SetActive(enable);
+        //             break;
+        //         case InteractionType.Dialog:
+        //         case InteractionType.Inspect:
+        //         case InteractionType.Read:
+        //             _interactionBubble.SetActive(enable);
+        //             _interactionBubbleDialog.SetActive(enable);
+        //             break;
+        //         case InteractionType.Bench:
+        //             _interactionBubble.SetActive(enable /*&& !_isBenchChoiceOpen*/);
+        //             _interactionBubbleBench.SetActive(enable /*&& !_isBenchChoiceOpen*/);
+        //             break;
+        //         case InteractionType.EnterBuilding:
+        //             _interactionBubble.SetActive(enable);
+        //             _interactionBubbleEnter.SetActive(enable);
+        //             break;
+        //         case InteractionType.PickUp:
+        //             _interactionBubble.SetActive(enable);
+        //             _interactionBubblePickUp.SetActive(enable);
+        //             break;
+        //         default:
+        //             throw new ArgumentOutOfRangeException(nameof(type), type, null);
+        //     }
+        //     _interactionBubble.SetActive(enable);
+        //     
+        // }
         
         private void OpenBenchChoice()
         {
             if (_isBenchChoiceOpen) return;
             //store interactable bench
-            _interactionBubble.SetActive(false);
+            // _interactionBubble.SetActive(false);
 
-            if (_benchChoiceUI == null) return;
-            
+            if (_benchChoiceUI == null)
+            {
+                Warning($"BenchChoiceUI is null. Cannot open bench choice.");
+                return;
+            }
+
+            _popupPresenter?.Hide();
+
             InfoInProgress($"Inside new BenchChoiceUI.");
             // Build model: labels + optional targets from _benchChoice children
             var model = BuildBenchChoiceModel();
@@ -317,6 +342,7 @@ namespace Player.Runtime
 
             _isBenchChoiceOpen = true;
         }
+        
         private IBenchChoiceUI.BenchChoiceModel BuildBenchChoiceModel()
         {
             IInteractable[] targets = null;
@@ -365,20 +391,31 @@ namespace Player.Runtime
         private void CloseBenchChoice()
         {
             if (!_isBenchChoiceOpen) return;
-            if (_benchChoiceUI != null)
-            {
-                _benchChoiceUI.Close();
-                CustomInputManager.Instance.SwitchToPlayer();
-                _isBenchChoiceOpen = false;
-                return;
-            }
-
-            if (_benchChoice == null)
-                _benchChoice.SetActive(false);
             
+            _benchChoiceUI?.Close();
             CustomInputManager.Instance.SwitchToPlayer();
-
             _isBenchChoiceOpen = false;
+            
+            // After closing the choice UI, resume showing popups according to current detection
+            if (_popupPresenter != null)
+            {
+                if (_canInteract) _popupPresenter.Show(_interactionType);
+                else _popupPresenter.Hide();
+            }
+            // if (_benchChoiceUI != null)
+            // {
+            //     _benchChoiceUI.Close();
+            //     CustomInputManager.Instance.SwitchToPlayer();
+            //     _isBenchChoiceOpen = false;
+            //     return;
+            // }
+
+            // if (_benchChoice == null)
+            //     _benchChoice.SetActive(false);
+            
+            // CustomInputManager.Instance.SwitchToPlayer();
+            //
+            // _isBenchChoiceOpen = false;
         }
 
         private void OnBenchChoiceSelected(int index)
@@ -404,16 +441,16 @@ namespace Player.Runtime
             CloseBenchChoice();
         }
 
-        private void UpdateBenchChoiceVisuals()
-        {
-            bool sleepSelected = _benchSelectedIndex == 0;
-            if(_sleepSelected != null) _sleepSelected.SetActive(sleepSelected);
-            if(_sleepUnselected != null) _sleepUnselected.SetActive(!sleepSelected);
-            
-            bool waitSelected = _benchSelectedIndex == 1;
-            if(_waitSelected != null) _waitSelected.SetActive(waitSelected);
-            if(_waitUnselected != null) _waitUnselected.SetActive(!waitSelected);
-        }
+        // private void UpdateBenchChoiceVisuals()
+        // {
+        //     bool sleepSelected = _benchSelectedIndex == 0;
+        //     if(_sleepSelected != null) _sleepSelected.SetActive(sleepSelected);
+        //     if(_sleepUnselected != null) _sleepUnselected.SetActive(!sleepSelected);
+        //     
+        //     bool waitSelected = _benchSelectedIndex == 1;
+        //     if(_waitSelected != null) _waitSelected.SetActive(waitSelected);
+        //     if(_waitUnselected != null) _waitUnselected.SetActive(!waitSelected);
+        // }
         
         #endregion
         
