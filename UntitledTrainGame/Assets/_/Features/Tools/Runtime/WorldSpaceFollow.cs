@@ -37,11 +37,16 @@ namespace Tools.Runtime
         private void Awake()
         {
             _cam = Camera.main;
+            _target = GameObject.FindGameObjectWithTag("Player").transform;
         }
 
         private void LateUpdate()
         {
-            if (_target == null) return;
+            if (_target == null)
+            {
+                _target = GameObject.FindGameObjectWithTag("Player").transform;
+                
+            }
             if(_cam == null)
                 _cam = Camera.main;
 
