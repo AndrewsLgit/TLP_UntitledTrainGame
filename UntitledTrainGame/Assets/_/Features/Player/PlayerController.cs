@@ -1,5 +1,6 @@
 using System;
 using Foundation.Runtime;
+using Manager.Runtime;
 using SharedData.Runtime;
 using Unity.Collections;
 using Unity.Jobs;
@@ -20,14 +21,26 @@ namespace Player.Runtime
         #region Private
         // Private Variables
         
-        // References
-        [Header("UI References")]
-        [SerializeField] private GameObject _interactionPopupParent;
-        [SerializeField] private GameObject _interactionPopupEnter;
-        [SerializeField] private GameObject _interactionPopupTrain;
-        [SerializeField] private GameObject _interactionPopupBench;
-        [SerializeField] private GameObject _interactionPopupPickUp;
-        [SerializeField] private GameObject _interactionPopupDialog;
+        // // References
+        // [Header("UI References - Interaction Bubble")]
+        // [SerializeField] private GameObject _interactionBubble;
+        // [SerializeField] private GameObject _interactionBubbleEnter;
+        // [SerializeField] private GameObject _interactionBubbleTrain;
+        // [SerializeField] private GameObject _interactionBubbleBench;
+        // [SerializeField] private GameObject _interactionBubblePickUp;
+        // [SerializeField] private GameObject _interactionBubbleDialog;
+        //
+        // [Header("UI References - Bench Choice")]
+        // [SerializeField] private GameObject _benchChoice;
+        // [SerializeField] private GameObject _sleepUnselected;
+        // [SerializeField] private GameObject _sleepSelected;
+        // [SerializeField] private GameObject _waitUnselected;
+        // [SerializeField] private GameObject _waitSelected;
+        // // Bench choice state
+        // private bool _isBenchChoiceOpen = false;
+        // // 0 = Sleep, 1 = Wait
+        // private int _benchSelectedIndex = 0;
+        
 
         // [SerializeField] private float _popupOffsetY = 1f;
         
@@ -45,37 +58,37 @@ namespace Player.Runtime
         private Ray _wallDetectionRay;
         private RaycastHit _detectionHit;
         
-        // Movement Variables
-        private float _turnSmoothVelocity;
-        private Vector2 _inputMove;
-        private float _maxMoveSpeed;
-        private float _turnSmoothTime;
-        private Vector3 direction;
+        // // Movement Variables
+        // private float _turnSmoothVelocity;
+        // private Vector2 _inputMove;
+        // private float _maxMoveSpeed;
+        // private float _turnSmoothTime;
+        // private Vector3 direction;
         
        
-        //Raycast Command
-        [Header("Raycast Command")]
-        [SerializeField] private int _numInteractionRaycasts = 5;
-        [SerializeField] private int _numObstacleRaycasts = 3;
-        [SerializeField] private int _maxRayHits = 4;
-        
-        [Header("Raycast Masks")]
-        [SerializeField] private LayerMask _interactionMask;
-        [SerializeField] private LayerMask _obstacleMask;
-        [SerializeField] private LayerMask _interactableObstacleMask;
-
-        // Interaction Raycast command
-        private NativeArray<RaycastCommand> _interactionCommands;
-        private NativeArray<RaycastHit> _interactionResults;
-        private JobHandle _interactionJob;
-        
-        // Player Interaction
-        private IInteractable _interactable;
-        private bool _canInteract;
-        private InteractionType _interactionType;
-        // Interaction Variables
-        private float _interactionDistance = 3f;
-        private float _interactionAngle = 45f;
+        // //Raycast Command
+        // [Header("Raycast Command")]
+        // [SerializeField] private int _numInteractionRaycasts = 5;
+        // [SerializeField] private int _numObstacleRaycasts = 3;
+        // [SerializeField] private int _maxRayHits = 4;
+        //
+        // [Header("Raycast Masks")]
+        // [SerializeField] private LayerMask _interactionMask;
+        // [SerializeField] private LayerMask _obstacleMask;
+        // [SerializeField] private LayerMask _interactableObstacleMask;
+        //
+        // // Interaction Raycast command
+        // private NativeArray<RaycastCommand> _interactionCommands;
+        // private NativeArray<RaycastHit> _interactionResults;
+        // private JobHandle _interactionJob;
+        //
+        // // Player Interaction
+        // private IInteractable _interactable;
+        // private bool _canInteract;
+        // private InteractionType _interactionType;
+        // // Interaction Variables
+        // private float _interactionDistance = 3f;
+        // private float _interactionAngle = 45f;
 
         // Obstacle Raycast Command
         private NativeArray<RaycastCommand> _obstacleCommands;
@@ -97,68 +110,83 @@ namespace Player.Runtime
         
         #region Unity API
 
-        private void Awake()
-        {
-            SetFact("playerTransform", transform, false);
-        }
+        // private void Awake()
+        // {
+        //     SetFact("playerTransform", transform, false);
+        // }
         
-        private void OnEnable()
-        {
-            // Interaction Raycast
-            _interactionCommands = new NativeArray<RaycastCommand>(_numInteractionRaycasts, Allocator.Persistent);
-            _interactionResults = new NativeArray<RaycastHit>(_numInteractionRaycasts * _maxRayHits, Allocator.Persistent);
-            // SetupInteractionRaycasts();
-            
-            // Wall Raycast
-            _obstacleCommands = new NativeArray<RaycastCommand>(_numObstacleRaycasts, Allocator.Persistent);
-            _obstacleResults = new NativeArray<RaycastHit>(_numObstacleRaycasts * _maxRayHits, Allocator.Persistent);
-        }
-        private void OnDisable()
-        {
-            if(_interactionCommands.IsCreated) _interactionCommands.Dispose();
-            if (_interactionResults.IsCreated) _interactionResults.Dispose();
-            
-            if (_obstacleCommands.IsCreated) _obstacleCommands.Dispose();
-            if (_obstacleResults.IsCreated) _obstacleResults.Dispose();
-        }
+        // private void OnEnable()
+        // {
+        //     // Interaction Raycast
+        //     _interactionCommands = new NativeArray<RaycastCommand>(_numInteractionRaycasts, Allocator.Persistent);
+        //     _interactionResults = new NativeArray<RaycastHit>(_numInteractionRaycasts * _maxRayHits, Allocator.Persistent);
+        //     // SetupInteractionRaycasts();
+        //     
+        //     // Wall Raycast
+        //     _obstacleCommands = new NativeArray<RaycastCommand>(_numObstacleRaycasts, Allocator.Persistent);
+        //     _obstacleResults = new NativeArray<RaycastHit>(_numObstacleRaycasts * _maxRayHits, Allocator.Persistent);
+        // }
+        // private void OnDisable()
+        // {
+        //     if(_interactionCommands.IsCreated) _interactionCommands.Dispose();
+        //     if (_interactionResults.IsCreated) _interactionResults.Dispose();
+        //     
+        //     if (_obstacleCommands.IsCreated) _obstacleCommands.Dispose();
+        //     if (_obstacleResults.IsCreated) _obstacleResults.Dispose();
+        // }
 
         // Start is called once before the first execution of Update after the MonoBehaviour is created
         void Start()
         {
-            _camera = Camera.main;
-            _characterController = GetComponent<CharacterController>();
-            _animator = GetComponent<Animator>();
+            // _camera = Camera.main;
+            // _characterController = GetComponent<CharacterController>();
+            // _animator = GetComponent<Animator>();
             _controlPanel = GDControlPanel.Instance;
-            GDControlPanel.OnValuesUpdated += OnControlPanelUpdated;
-            GetFromControlPanel();
+            // GDControlPanel.OnValuesUpdated += OnControlPanelUpdated;
+            // GetFromControlPanel();
             
-            _cameraTransform = _camera.transform;
-            _inputMove = Vector2.zero;
+            // _cameraTransform = _camera.transform;
+            // _inputMove = Vector2.zero;
+
+            CustomInputManager.Instance.SetPlayerInput(gameObject.GetComponent<PlayerInput>());
+            
+            // Ensure bench choice UI is hidden at start and visuals initialized
+            // if (_benchChoice != null) _benchChoice.SetActive(false);
+            // _benchSelectedIndex = 0;
+            // UpdateBenchChoiceVisuals();
 
         }
 
         private void OnDestroy()
         {
-            GDControlPanel.OnValuesUpdated -= OnControlPanelUpdated;
+            // GDControlPanel.OnValuesUpdated -= OnControlPanelUpdated;
         }
 
         // Update is called once per frame
         void Update()
         {
-            var last_pos = transform.position;
-            HandleMovement();
-            SetupInteractionRaycasts();
-            var current_pos = transform.position;
-            var velocity = (current_pos - last_pos) / Time.deltaTime;
-            _animator.SetFloat("Velocity", velocity.magnitude);
-            Info($"Setting velocity in animator: {velocity.magnitude} / {_maxMoveSpeed} = {(velocity.magnitude/ _maxMoveSpeed)}");
+            // if (_isBenchChoiceOpen)
+            // {
+            //     _inputMove = Vector2.zero;
+            //     HandleBenchChoiceInput();
+            //     _animator.SetFloat("Velocity", 0f);
+            //     return;
+            // }
+            
+            // var last_pos = transform.position;
+            // HandleMovement();
+            // SetupInteractionRaycasts();
+            // var current_pos = transform.position;
+            // var velocity = (current_pos - last_pos) / Time.deltaTime;
+            // _animator.SetFloat("Velocity", velocity.magnitude);
+            // Info($"Setting velocity in animator: {velocity.magnitude} / {_maxMoveSpeed} = {(velocity.magnitude/ _maxMoveSpeed)}");
             
         }
 
-        private void LateUpdate()
-        {
-            CompleteInteractionJob();
-        }
+        // private void LateUpdate()
+        // {
+        //     CompleteInteractionJob();
+        // }
 
         #endregion
 
@@ -166,16 +194,31 @@ namespace Player.Runtime
 
         #region Input
 
-        public void Move(InputAction.CallbackContext context)
-        {
-            _inputMove = context.ReadValue<Vector2>();
-        }
+        // public void Move(InputAction.CallbackContext context)
+        // {
+        //     _inputMove = context.ReadValue<Vector2>();
+        // }
         
         public void InteractWith(InputAction.CallbackContext context)
         {
             if (context.phase != InputActionPhase.Canceled) return;
-            if (!_canInteract || _interactable == null) return;
-            _interactable.Interact();
+            
+            // // If bench choice is open, confirm selection with E
+            // if (_isBenchChoiceOpen)
+            // {
+            //     ConfirmBenchChoice();
+            //     return;
+            // }
+            //
+            // if (!_canInteract || _interactable == null) return;
+            //
+            // // If interacting with bench, open bench choice UI
+            // if (_interactable.InteractionType == InteractionType.Bench)
+            // {
+            //     OpenBenchChoice();
+            //     return;
+            // }
+            // _interactable.Interact();
         }
         
         public void StopTrain(InputAction.CallbackContext context)
@@ -186,266 +229,332 @@ namespace Player.Runtime
         
         #endregion
 
-        private void HandleMovement()
-        {
-            var finalMoveSpeed = _maxMoveSpeed;
-            
-            if (_camera == null)
-            {
-                _camera = Camera.main;
-                _cameraTransform = _camera.transform;
-            }
-            // var speed = _controlPanel.PlayerMoveSpeed;
-            // var turnSmoothTime = _controlPanel.TurnSmoothTime;
-            var direction = new Vector3(_inputMove.x, 0f, _inputMove.y).normalized;
-            
-            var forward = _cameraTransform.forward;
-            var right = _cameraTransform.right;
-            
-            forward.y = 0f;
-            right.y = 0f;
-            forward.Normalize();
-            right.Normalize();
-            
-            direction = right * _inputMove.x + forward * _inputMove.y;
-            direction = direction.normalized;
-            
-            _wallDetectionRay = new Ray(transform.position, direction);
-
-            if (Physics.Raycast(_wallDetectionRay, out _detectionHit, 0.5f, _obstacleMask))
-            {
-                Debug.DrawLine(transform.position, _detectionHit.point, Color.cyan, 0.05f);
-                Info($"Finding new direction to glide");
-                var wallNormal = _detectionHit.normal;
-                direction = Vector3.ProjectOnPlane(direction, wallNormal);
-                // direction = Vector3.Lerp(
-                //     direction,
-                //     Vector3.ProjectOnPlane(direction, wallNormal),
-                //     _turnSmoothVelocity * Time.deltaTime);
-                // direction.Normalize();
-                // direction = newDirection;
-                // direction = Vector3.RotateTowards(direction, newDirection, _turnSmoothVelocity * Time.deltaTime,0f);
-                Info($"New direction: {direction} : normal {wallNormal}");     
-            }
-
-            if (!(direction.magnitude >= 0.1f)) return;
-            float targetAngle = Mathf.Atan2(direction.x, direction.z) * Mathf.Rad2Deg;
-            float angle = Mathf.SmoothDampAngle(transform.eulerAngles.y, targetAngle, ref _turnSmoothVelocity, _turnSmoothTime);
-                
-            transform.rotation = Quaternion.Euler(0f, angle, 0f);
-
-            // Apply gravity to player
-            direction.y = -2f;
-            _characterController.Move(direction * (_maxMoveSpeed * Time.deltaTime));
-        }
+        // private void HandleMovement()
+        // {
+        //     var finalMoveSpeed = _maxMoveSpeed;
+        //     
+        //     if (_camera == null)
+        //     {
+        //         _camera = Camera.main;
+        //         _cameraTransform = _camera.transform;
+        //     }
+        //     // var speed = _controlPanel.PlayerMoveSpeed;
+        //     // var turnSmoothTime = _controlPanel.TurnSmoothTime;
+        //     var direction = new Vector3(_inputMove.x, 0f, _inputMove.y).normalized;
+        //     
+        //     var forward = _cameraTransform.forward;
+        //     var right = _cameraTransform.right;
+        //     
+        //     forward.y = 0f;
+        //     right.y = 0f;
+        //     forward.Normalize();
+        //     right.Normalize();
+        //     
+        //     direction = right * _inputMove.x + forward * _inputMove.y;
+        //     direction = direction.normalized;
+        //     
+        //     _wallDetectionRay = new Ray(transform.position, direction);
+        //
+        //     if (Physics.Raycast(_wallDetectionRay, out _detectionHit, 0.5f, _obstacleMask))
+        //     {
+        //         Debug.DrawLine(transform.position, _detectionHit.point, Color.cyan, 0.05f);
+        //         Info($"Finding new direction to glide");
+        //         var wallNormal = _detectionHit.normal;
+        //         direction = Vector3.ProjectOnPlane(direction, wallNormal);
+        //         // direction = Vector3.Lerp(
+        //         //     direction,
+        //         //     Vector3.ProjectOnPlane(direction, wallNormal),
+        //         //     _turnSmoothVelocity * Time.deltaTime);
+        //         // direction.Normalize();
+        //         // direction = newDirection;
+        //         // direction = Vector3.RotateTowards(direction, newDirection, _turnSmoothVelocity * Time.deltaTime,0f);
+        //         Info($"New direction: {direction} : normal {wallNormal}");     
+        //     }
+        //
+        //     if (!(direction.magnitude >= 0.1f)) return;
+        //     float targetAngle = Mathf.Atan2(direction.x, direction.z) * Mathf.Rad2Deg;
+        //     float angle = Mathf.SmoothDampAngle(transform.eulerAngles.y, targetAngle, ref _turnSmoothVelocity, _turnSmoothTime);
+        //         
+        //     transform.rotation = Quaternion.Euler(0f, angle, 0f);
+        //
+        //     // Apply gravity to player
+        //     direction.y = -2f;
+        //     _characterController.Move(direction * (_maxMoveSpeed * Time.deltaTime));
+        // }
 
         
 
-        private void CompleteInteractionJob()
-        {
-            _interactionJob.Complete();
-            _interactable = null;
-            _canInteract = false;
-
-            float angleDegrees = _interactionAngle;
-            float facingDotThreshold = Mathf.Cos(Mathf.Deg2Rad * (angleDegrees * 0.5f)); // safer than ad-hoc 0.9
-            
-            Vector3 origin = transform.position;
-            
-            float nearestDistance = float.MaxValue;
-            for (int ray = 0; ray < _numInteractionRaycasts; ray++)
-            {
-                float angle = (_interactionAngle / _numInteractionRaycasts) * ray;
-                // Info($"Ray angle: {angle}");
-                Vector3 dir = Quaternion.Euler(0, angle, 0) * transform.forward;
-                // Info($"Ray direction: {dir}");
-
-                float dot = Vector3.Dot(transform.forward.normalized, dir.normalized);
-                //Info($"[INTERACT] Checking dot, threshold: {facingDotThreshold}, dot: {dot}");
-                if (dot < facingDotThreshold) continue;
-
-                int baseIndex = ray * _maxRayHits;
-                for (int j = 0; j < _maxRayHits; j++)
-                {
-
-                    var hit = _interactionResults[baseIndex + j];
-                    if (hit.collider == null) continue;
-
-                    Debug.DrawLine(origin, hit.point, Color.cyan, 0.05f);
-                    
-                    var interactable = hit.collider.GetComponent<IInteractable>();
-                    Info($"[INTERACT] Found interactable: {interactable}]");
-                    if (interactable == null) continue;
-
-                    var dist = Vector3.Distance(origin, hit.point);
-                    if (dist < nearestDistance)
-                    {
-                        nearestDistance = dist;
-                        _interactable = interactable;
-                        _interactionType = _interactable.InteractionType;
-                        _canInteract = true;
-                    }
-
-                    if(_canInteract && _interactable != null)
-                        Info($"[INTERACT] Found {hit.collider.name}");
-                }
-            }
-            
-            Info($"Interaction job completed: {_canInteract}");
-            ShowInteractionPopup(_canInteract, _interactionType);
-        }
+        // private void CompleteInteractionJob()
+        // {
+        //     _interactionJob.Complete();
+        //     
+        //     // While bench choice is open, keep current interactable
+        //     if(_isBenchChoiceOpen) return;
+        //     
+        //     _interactable = null;
+        //     _canInteract = false;
+        //
+        //     float angleDegrees = _interactionAngle;
+        //     float facingDotThreshold = Mathf.Cos(Mathf.Deg2Rad * (angleDegrees * 0.5f)); // safer than ad-hoc 0.9
+        //     
+        //     Vector3 origin = transform.position;
+        //     
+        //     float nearestDistance = float.MaxValue;
+        //     for (int ray = 0; ray < _numInteractionRaycasts; ray++)
+        //     {
+        //         float angle = (_interactionAngle / _numInteractionRaycasts) * ray;
+        //         // Info($"Ray angle: {angle}");
+        //         Vector3 dir = Quaternion.Euler(0, angle, 0) * transform.forward;
+        //         // Info($"Ray direction: {dir}");
+        //
+        //         float dot = Vector3.Dot(transform.forward.normalized, dir.normalized);
+        //         //Info($"[INTERACT] Checking dot, threshold: {facingDotThreshold}, dot: {dot}");
+        //         if (dot < facingDotThreshold) continue;
+        //
+        //         int baseIndex = ray * _maxRayHits;
+        //         for (int j = 0; j < _maxRayHits; j++)
+        //         {
+        //
+        //             var hit = _interactionResults[baseIndex + j];
+        //             if (hit.collider == null) continue;
+        //
+        //             Debug.DrawLine(origin, hit.point, Color.cyan, 0.05f);
+        //             
+        //             var interactable = hit.collider.GetComponent<IInteractable>();
+        //             Info($"[INTERACT] Found interactable: {interactable}]");
+        //             if (interactable == null) continue;
+        //
+        //             var dist = Vector3.Distance(origin, hit.point);
+        //             if (dist < nearestDistance)
+        //             {
+        //                 nearestDistance = dist;
+        //                 _interactable = interactable;
+        //                 _interactionType = _interactable.InteractionType;
+        //                 _canInteract = true;
+        //             }
+        //
+        //             if(_canInteract && _interactable != null)
+        //                 Info($"[INTERACT] Found {hit.collider.name}");
+        //         }
+        //     }
+        //     
+        //     Info($"Interaction job completed: {_canInteract}");
+        //     ShowInteractionPopup(_canInteract, _interactionType);
+        // }
         
 
         #endregion
         
         #region Utils
         
-        private void SetupInteractionRaycasts()
-        {
-            Vector3 origin = transform.position;
-
-            var qpInteract = new QueryParameters
-            {
-                layerMask = _interactionMask | _interactableObstacleMask,
-                hitTriggers = QueryTriggerInteraction.Ignore,
-            };
-
-            for (int i = 0; i < _numInteractionRaycasts; i++)
-            {
-                float angle = (_interactionAngle / _numInteractionRaycasts) * i;
-                
-                Vector3 dir = Quaternion.Euler(0,angle,0) * transform.forward;
-                // use layer because maybe raycast is getting filled
-                _interactionCommands[i] = new RaycastCommand(origin, dir, qpInteract, _interactionDistance);
-            }
-            
-            _interactionJob = RaycastCommand.ScheduleBatch(_interactionCommands, _interactionResults, 1);
-        }
+        // private void SetupInteractionRaycasts()
+        // {
+        //     Vector3 origin = transform.position;
+        //
+        //     var qpInteract = new QueryParameters
+        //     {
+        //         layerMask = _interactionMask | _interactableObstacleMask,
+        //         hitTriggers = QueryTriggerInteraction.Ignore,
+        //     };
+        //
+        //     for (int i = 0; i < _numInteractionRaycasts; i++)
+        //     {
+        //         float angle = (_interactionAngle / _numInteractionRaycasts) * i;
+        //         
+        //         Vector3 dir = Quaternion.Euler(0,angle,0) * transform.forward;
+        //         // use layer because maybe raycast is getting filled
+        //         _interactionCommands[i] = new RaycastCommand(origin, dir, qpInteract, _interactionDistance);
+        //     }
+        //     
+        //     _interactionJob = RaycastCommand.ScheduleBatch(_interactionCommands, _interactionResults, 1);
+        // }
         
-        private void SetupObstacleRaycast()
-        {
-            Vector3 origin = transform.position;
-            var qpObstacle = new QueryParameters
-            {
-                layerMask = _obstacleMask | _interactableObstacleMask,
-                hitTriggers = QueryTriggerInteraction.Ignore,
-            };
-
-            // forward, left, right
-            Vector3[] obstacleDirs =
-            {
-                transform.forward,
-                Quaternion.Euler(0, -45, 0) * transform.forward,
-                Quaternion.Euler(0, 45, 0) * transform.forward
-            };
-            
-            for (int i = 0; i < _numObstacleRaycasts; i++)
-            {
-                _obstacleCommands[i] = new RaycastCommand(origin, obstacleDirs[i].normalized, qpObstacle, 1f);
-            }
-            
-            _obstacleJob = RaycastCommand.ScheduleBatch(_obstacleCommands, _obstacleResults, 1);
-        }
+        // private void SetupObstacleRaycast()
+        // {
+        //     Vector3 origin = transform.position;
+        //     var qpObstacle = new QueryParameters
+        //     {
+        //         layerMask = _obstacleMask | _interactableObstacleMask,
+        //         hitTriggers = QueryTriggerInteraction.Ignore,
+        //     };
+        //
+        //     // forward, left, right
+        //     Vector3[] obstacleDirs =
+        //     {
+        //         transform.forward,
+        //         Quaternion.Euler(0, -45, 0) * transform.forward,
+        //         Quaternion.Euler(0, 45, 0) * transform.forward
+        //     };
+        //     
+        //     for (int i = 0; i < _numObstacleRaycasts; i++)
+        //     {
+        //         _obstacleCommands[i] = new RaycastCommand(origin, obstacleDirs[i].normalized, qpObstacle, 1f);
+        //     }
+        //     
+        //     _obstacleJob = RaycastCommand.ScheduleBatch(_obstacleCommands, _obstacleResults, 1);
+        // }
         
-        private void OnControlPanelUpdated(GDControlPanel controlPanel)
-        {
-            GetFromControlPanel();
-        }
+        // private void OnControlPanelUpdated(GDControlPanel controlPanel)
+        // {
+        //     GetFromControlPanel();
+        // }
+        //
+        // private void GetFromControlPanel()
+        // {
+        //     _maxMoveSpeed = _controlPanel.PlayerMoveSpeed;
+        //     _turnSmoothTime = _controlPanel.TurnSmoothTime;
+        //     _interactionDistance = _controlPanel.DetectionDistance;
+        //     _interactionAngle = _controlPanel.DetectionAngle;
+        // }
 
-        private void GetFromControlPanel()
-        {
-            _maxMoveSpeed = _controlPanel.PlayerMoveSpeed;
-            _turnSmoothTime = _controlPanel.TurnSmoothTime;
-            _interactionDistance = _controlPanel.DetectionDistance;
-            _interactionAngle = _controlPanel.DetectionAngle;
-        }
+        // private void ShowInteractionPopup(bool enable, InteractionType type)
+        // {
+        //     Assert.IsNotNull(_interactionBubble);
+        //     Assert.IsNotNull(_interactionBubbleTrain);
+        //     Assert.IsNotNull(_interactionBubbleDialog);
+        //     Assert.IsNotNull(_interactionBubbleBench);
+        //     Assert.IsNotNull(_interactionBubbleEnter);
+        //     Assert.IsNotNull(_interactionBubblePickUp);
+        //
+        //
+        //     if (_interactionBubble == null) return;
+        //     switch (type)
+        //     {
+        //         case InteractionType.Train:
+        //             _interactionBubble.SetActive(enable);
+        //             _interactionBubbleTrain.SetActive(enable);
+        //             break;
+        //         case InteractionType.Dialog:
+        //         case InteractionType.Inspect:
+        //         case InteractionType.Read:
+        //             _interactionBubble.SetActive(enable);
+        //             _interactionBubbleDialog.SetActive(enable);
+        //             break;
+        //         case InteractionType.Bench:
+        //             _interactionBubble.SetActive(enable && !_isBenchChoiceOpen);
+        //             _interactionBubbleBench.SetActive(enable && !_isBenchChoiceOpen);
+        //             break;
+        //         case InteractionType.EnterBuilding:
+        //             _interactionBubble.SetActive(enable);
+        //             _interactionBubbleEnter.SetActive(enable);
+        //             break;
+        //         case InteractionType.PickUp:
+        //             _interactionBubble.SetActive(enable);
+        //             _interactionBubblePickUp.SetActive(enable);
+        //             break;
+        //         default:
+        //             throw new ArgumentOutOfRangeException(nameof(type), type, null);
+        //     }
+        //     _interactionBubble.SetActive(enable);
+        //     
+        // }
 
-        private void ShowInteractionPopup(bool enable, InteractionType type)
-        {
-            Assert.IsNotNull(_interactionPopupParent);
-            Assert.IsNotNull(_interactionPopupTrain);
-            Assert.IsNotNull(_interactionPopupDialog);
-            Assert.IsNotNull(_interactionPopupBench);
-            Assert.IsNotNull(_interactionPopupEnter);
-            Assert.IsNotNull(_interactionPopupPickUp);
-
-
-            if (_interactionPopupParent == null) return;
-            switch (type)
-            {
-                case InteractionType.Train:
-                    _interactionPopupParent.SetActive(enable);
-                    _interactionPopupTrain.SetActive(enable);
-                    break;
-                case InteractionType.Dialog:
-                case InteractionType.Inspect:
-                case InteractionType.Read:
-                    _interactionPopupParent.SetActive(enable);
-                    _interactionPopupDialog.SetActive(enable);
-                    break;
-                case InteractionType.Bench:
-                    _interactionPopupParent.SetActive(enable);
-                    _interactionPopupBench.SetActive(enable);
-                    break;
-                case InteractionType.EnterBuilding:
-                    _interactionPopupParent.SetActive(enable);
-                    _interactionPopupEnter.SetActive(enable);
-                    break;
-                case InteractionType.PickUp:
-                    _interactionPopupParent.SetActive(enable);
-                    _interactionPopupPickUp.SetActive(enable);
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(type), type, null);
-            }
-            _interactionPopupParent.SetActive(enable);
-            
-        }
-
-        private void UpdatePopupPosition()
-        {
-            if(_interactionPopupParent == null || _camera == null) return;
-
-            Vector3 playerScreenPos = _camera.WorldToScreenPoint(transform.position);
-            
-            var dirToCamera = (_camera.transform.position - transform.position).normalized;
-            var popupPos = playerScreenPos + dirToCamera * .5f;
-
-            // playerScreenPos.y += _popupOffsetY;
-            _interactionPopupParent.transform.position = playerScreenPos;
-        }
+        // private void UpdatePopupPosition()
+        // {
+        //     if(_interactionBubble == null || _camera == null) return;
+        //
+        //     Vector3 playerScreenPos = _camera.WorldToScreenPoint(transform.position);
+        //     
+        //     var dirToCamera = (_camera.transform.position - transform.position).normalized;
+        //     var popupPos = playerScreenPos + dirToCamera * .5f;
+        //
+        //     // playerScreenPos.y += _popupOffsetY;
+        //     _interactionBubble.transform.position = playerScreenPos;
+        // }
+        
+        //Bench Choice helpers
+        // private void OpenBenchChoice()
+        // {
+        //     if (_isBenchChoiceOpen) return;
+        //      //store interactable bench
+        //      _interactionBubble.SetActive(false);
+        //      _benchSelectedIndex = 0;
+        //      UpdateBenchChoiceVisuals();
+        //      
+        //      _benchChoice.SetActive(true);
+        //      
+        //      CustomInputManager.Instance.SwitchToUI();
+        //      
+        //      _isBenchChoiceOpen = true;
+        // }
+        // private void CloseBenchChoice()
+        // {
+        //     if (!_isBenchChoiceOpen) return;
+        //     _benchChoice.SetActive(false);
+        //     
+        //     CustomInputManager.Instance.SwitchToPlayer();
+        //
+        //     _isBenchChoiceOpen = false;
+        // }
+        //
+        // private void UpdateBenchChoiceVisuals()
+        // {
+        //     bool sleepSelected = _benchSelectedIndex == 0;
+        //     if(_sleepSelected != null) _sleepSelected.SetActive(sleepSelected);
+        //     if(_sleepUnselected != null) _sleepUnselected.SetActive(!sleepSelected);
+        //     
+        //     bool waitSelected = _benchSelectedIndex == 1;
+        //     if(_waitSelected != null) _waitSelected.SetActive(waitSelected);
+        //     if(_waitUnselected != null) _waitUnselected.SetActive(!waitSelected);
+        // }
+        //
+        // private void HandleBenchChoiceInput()
+        // {
+        //     var kb = Keyboard.current;
+        //     if (kb == null) return;
+        //     
+        //     // Toogle selection on W or S
+        //     if (kb.wKey.wasPressedThisFrame || kb.sKey.wasPressedThisFrame)
+        //     {
+        //         _benchSelectedIndex = _benchSelectedIndex == 0 ? 1 : 0;
+        //         UpdateBenchChoiceVisuals();
+        //     }
+        //     
+        //     // Confirm with E
+        //     {
+        //         ConfirmBenchChoice();
+        //     }
+        // }
+        // private void ConfirmBenchChoice()
+        // {
+        //     if (_benchChoice == null) return;
+        //     var interactable = _benchChoice.transform.GetChild(_benchSelectedIndex).GetComponent<IInteractable>();
+        //     if (interactable == null) return;
+        //     interactable.Interact();
+        //     CloseBenchChoice();
+        // }
         
         #endregion
         
-        #region Debug
-        // Debug
-        private void OnDrawGizmosSelected()
-        {
-            // Visualize view radius
-            // Gizmos.color = Color.yellow;
-            // Gizmos.DrawWireSphere(transform.position, _interactionDistance);
-
-            // Visualize view angle
-            Vector3 viewAngleA = DirFromAngle(-_interactionAngle / 2);
-            Vector3 viewAngleB = DirFromAngle(_interactionAngle / 2);
-
-            Gizmos.color = Color.blue;
-            Gizmos.DrawLine(transform.position, transform.position + viewAngleA * _interactionDistance);
-            Gizmos.DrawLine(transform.position, transform.position + viewAngleB * _interactionDistance);
-        }
-        
-        private Vector3 DirFromAngle(float angleInDegrees)
-        {
-            /*
-                - represents the object's rotation around the vertical axis (`Y-axis`) in degrees. `transform.eulerAngles.y`
-                - The input is adjusted by adding the current rotation of the object to it.
-                This ensures the angle is relative to the direction the object is facing, instead of being fixed globally. `angleInDegrees`
-                This creates a direction vector in the X-Z plane pointing in the direction of the given angle relative to the object's rotation.
-
-             */
-            angleInDegrees += transform.eulerAngles.y;
-            return new Vector3(Mathf.Sin(angleInDegrees * Mathf.Deg2Rad), 0, Mathf.Cos(angleInDegrees * Mathf.Deg2Rad));
-        }
-        #endregion
+//         #region Debug
+//         // Debug
+//         private void OnDrawGizmosSelected()
+//         {
+//             // Visualize view radius
+//             // Gizmos.color = Color.yellow;
+//             // Gizmos.DrawWireSphere(transform.position, _interactionDistance);
+//
+//             // Visualize view angle
+//             Vector3 viewAngleA = DirFromAngle(-_interactionAngle / 2);
+//             Vector3 viewAngleB = DirFromAngle(_interactionAngle / 2);
+//
+//             Gizmos.color = Color.blue;
+//             Gizmos.DrawLine(transform.position, transform.position + viewAngleA * _interactionDistance);
+//             Gizmos.DrawLine(transform.position, transform.position + viewAngleB * _interactionDistance);
+//         }
+//         
+//         private Vector3 DirFromAngle(float angleInDegrees)
+//         {
+//             /*
+//                 - represents the object's rotation around the vertical axis (`Y-axis`) in degrees. `transform.eulerAngles.y`
+//                 - The input is adjusted by adding the current rotation of the object to it.
+//                 This ensures the angle is relative to the direction the object is facing, instead of being fixed globally. `angleInDegrees`
+//                 This creates a direction vector in the X-Z plane pointing in the direction of the given angle relative to the object's rotation.
+//
+//              */
+//             angleInDegrees += transform.eulerAngles.y;
+//             return new Vector3(Mathf.Sin(angleInDegrees * Mathf.Deg2Rad), 0, Mathf.Cos(angleInDegrees * Mathf.Deg2Rad));
+//         }
+//         #endregion
     }
 }
