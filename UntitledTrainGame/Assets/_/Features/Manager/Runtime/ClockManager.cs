@@ -213,6 +213,12 @@ namespace Manager.Runtime
             int loopEnd = m_TimeConfig.m_LoopEnd.ToTotalMinutes();
             TimeEvent nextEvent = null;
 
+            if (string.Equals(tag, "Sleep", StringComparison.OrdinalIgnoreCase))
+            {
+                SetTime(m_TimeConfig.m_LoopEnd);
+                return null;
+            }
+
             if (string.IsNullOrEmpty(tag))
                 nextEvent = _timeEventGroups.SelectMany(g => g.m_Events)
                     .Where(e => e.m_Start.ToTotalMinutes() > now && e.m_Start.ToTotalMinutes() < loopEnd)
@@ -230,13 +236,14 @@ namespace Manager.Runtime
 
             if (nextEvent == null)
             {
-                Warning($"No event found with tag {tag}, reloading from start scene.");
+                Warning($"No event found with tag {tag}.");
                 // m_OnLoopEnd?.Invoke();
                 // if(now >= loopEnd)
                 //     m_OnLoopEnd?.Invoke();
-                SetTime(m_TimeConfig.m_LoopEnd);
+                // SetTime(m_TimeConfig.m_LoopEnd);
                 return null;
             }
+            RouteManager.Instance.RemovePausedRoute();
             SetTime(nextEvent.m_Start);
             return nextEvent;
         }

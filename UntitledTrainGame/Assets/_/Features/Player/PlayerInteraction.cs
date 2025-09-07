@@ -38,6 +38,12 @@ namespace Player.Runtime
         [SerializeField] private GameObject _waitUnselected;
         [SerializeField] private GameObject _waitSelected;
         
+        
+        // New: decoupled UI controller (assign your BenchChoiceUI here)
+        [Header("Decoupled Bench Choice UI (Optional)")]
+        [SerializeField] private MonoBehaviour _benchChoiceUIBehaviour; // must implement IBenchChoiceUI
+        private IBenchChoiceUI _benchChoiceUI;
+
         // Bench choice state
         private bool _isBenchChoiceOpen = false;
         // 0 = Sleep, 1 = Wait
@@ -88,11 +94,22 @@ namespace Player.Runtime
             _interactionResults = new NativeArray<RaycastHit>(_numInteractionRaycasts * _maxRayHits, Allocator.Persistent);
             // SetupInteractionRaycasts();
             
+            // Ensure bench choice UI is hidden at start and visuals initialized
+            _isBenchChoiceOpen = false;
+            if(_benchChoiceUI != null) _benchChoiceUI.Close();
+            if(_benchChoice != null) _benchChoice.SetActive(false);
         }
         private void OnDisable()
         {
             if(_interactionCommands.IsCreated) _interactionCommands.Dispose();
             if (_interactionResults.IsCreated) _interactionResults.Dispose();
+            
+            // Extra safety: make sure choice UI is closed when object is disabled (scene change, etc.)
+            _isBenchChoiceOpen = false;
+            if (_benchChoiceUI != null) _benchChoiceUI.Close();
+            if (_benchChoice != null) _benchChoice.SetActive(false);
+            CustomInputManager.Instance.SwitchToPlayer();
+
         }
         
         // Start is called once before the first execution of Update after the MonoBehaviour is created
@@ -109,23 +126,34 @@ namespace Player.Runtime
             if (_benchChoice != null) _benchChoice.SetActive(false);
             _benchSelectedIndex = 0;
             UpdateBenchChoiceVisuals();
+            
+            // Ensure bench choice UI is hidden at start and visuals initialized
+            if (_benchChoiceUIBehaviour != null) _benchChoiceUI = _benchChoiceUIBehaviour as IBenchChoiceUI;
+            if (_benchChoiceUI != null) _benchChoiceUI.Close();
+            _isBenchChoiceOpen = false;
         }
 
         private void OnDestroy()
         {
             GDControlPanel.OnValuesUpdated -= OnControlPanelUpdated;
             _inputRouter.OnInteract -= OnInteract;
+
+            if (_benchChoiceUI != null)
+            {
+                _benchChoiceUI.OnChoiceSelected -= OnBenchChoiceSelected;
+                _benchChoiceUI.OnCancelled -= OnBenchChoiceCancelled;
+            }
         }
 
         // Update is called once per frame
         void Update()
         {
-            if (_isBenchChoiceOpen)
+            if (_isBenchChoiceOpen && _benchChoiceUI != null)
             {
-                HandleBenchChoiceInput();
+                // HandleBenchChoiceInput();
                 return;
             }
-            
+
             // var last_pos = transform.position;
             // HandleMovement();
             SetupInteractionRaycasts(); 
@@ -143,11 +171,11 @@ namespace Player.Runtime
         private void OnInteract()
         {
             // If bench choice is open, confirm selection with E
-            if (_isBenchChoiceOpen)
-            {
-                ConfirmBenchChoice();
-                return;
-            }
+            // if (_isBenchChoiceOpen)
+            // {
+            //     if(_benchChoiceUI == null)
+            //     return;
+            // }
 
             if (!_canInteract || _interactable == null)
             {
@@ -156,11 +184,11 @@ namespace Player.Runtime
             }
             
             // If interacting with bench, open bench choice UI
-            // if (_interactable.InteractionType == InteractionType.Bench)
-            // {
-            //     OpenBenchChoice();
-            //     return;
-            // }
+            if (_interactable.InteractionType == InteractionType.Bench)
+            {
+                OpenBenchChoice();
+                return;
+            }
             Info($"Interacting with {_interactable.InteractionType}");
             _interactable.Interact();
         }
@@ -270,23 +298,110 @@ namespace Player.Runtime
             if (_isBenchChoiceOpen) return;
             //store interactable bench
             _interactionBubble.SetActive(false);
-            _benchSelectedIndex = 0;
-            UpdateBenchChoiceVisuals();
-             
-            _benchChoice.SetActive(true);
-             
+
+            if (_benchChoiceUI == null) return;
+            
+            InfoInProgress($"Inside new BenchChoiceUI.");
+            // Build model: labels + optional targets from _benchChoice children
+            var model = BuildBenchChoiceModel();
+
+            // Ensure no double-subscribe
+            _benchChoiceUI.OnChoiceSelected -= OnBenchChoiceSelected;
+            _benchChoiceUI.OnCancelled -= OnBenchChoiceCancelled;
+            _benchChoiceUI.OnChoiceSelected += OnBenchChoiceSelected;
+            _benchChoiceUI.OnCancelled += OnBenchChoiceCancelled;
+
+            // Switch to UI action map and open UI
             CustomInputManager.Instance.SwitchToUI();
-             
+            _benchChoiceUI.Open(model);
+
             _isBenchChoiceOpen = true;
         }
+        private IBenchChoiceUI.BenchChoiceModel BuildBenchChoiceModel()
+        {
+            IInteractable[] targets = null;
+            
+            // Ensure we have a bench interactable selected
+            var benchMono = _interactable as MonoBehaviour;
+            if (benchMono != null && _interactable.InteractionType == InteractionType.Bench)
+            {
+                // Collect IInteractable components from children of the bench
+                var allChildInteractables = benchMono.GetComponentsInChildren<IInteractable>(true);
+                
+                // Filter out the bench root itself (we only want choice-specific wrappers under it
+                // Also only keep those that are InteractionType.Bench
+                var list = new System.Collections.Generic.List<IInteractable>(2);
+                foreach (var it in allChildInteractables)
+                {
+                    if(ReferenceEquals(it, _interactable))continue; // skip root bench
+                    if(it == null) continue;
+                    
+                    list.Add(it);
+                    if(list.Count == 2) break;
+                }
+
+                if (list.Count > 0)
+                {
+                    targets = new IInteractable[2];
+                    targets[0] = list.Count > 0 ? list[0] : null; // Sleep
+                    targets[1] = list.Count > 1 ? list[1] : null; // Wait
+                }
+                
+            }
+            // if (_benchChoice != null && _benchChoice.transform.childCount >= 2)
+            // {
+            //     targets = new IInteractable[2];
+            //     targets[0] = _benchChoice.transform.GetChild(0).GetComponent<IInteractable>(); // Sleep
+            //     targets[1] = _benchChoice.transform.GetChild(1).GetComponent<IInteractable>(); // Wait
+            // }
+            return new IBenchChoiceUI.BenchChoiceModel
+            {
+                Options = new[] { "Sleep", "Wait" },
+                Targets = targets
+            };
+        }
+
+        
         private void CloseBenchChoice()
         {
             if (!_isBenchChoiceOpen) return;
-            _benchChoice.SetActive(false);
+            if (_benchChoiceUI != null)
+            {
+                _benchChoiceUI.Close();
+                CustomInputManager.Instance.SwitchToPlayer();
+                _isBenchChoiceOpen = false;
+                return;
+            }
+
+            if (_benchChoice == null)
+                _benchChoice.SetActive(false);
             
             CustomInputManager.Instance.SwitchToPlayer();
 
             _isBenchChoiceOpen = false;
+        }
+
+        private void OnBenchChoiceSelected(int index)
+        {
+            // If specific targets are wired, use them
+            var model = BuildBenchChoiceModel();
+            // 0 = Sleep, 1 = Wait
+            if (model.Targets != null
+                && index >= 0
+                && index < model.Targets.Length
+                && model.Targets[index] != null)
+            {
+                model.Targets[index].Interact();
+            }
+            else _interactable?.Interact();
+            
+            CloseBenchChoice();
+            
+        }
+
+        private void OnBenchChoiceCancelled()
+        {
+            CloseBenchChoice();
         }
 
         private void UpdateBenchChoiceVisuals()
@@ -298,32 +413,6 @@ namespace Player.Runtime
             bool waitSelected = _benchSelectedIndex == 1;
             if(_waitSelected != null) _waitSelected.SetActive(waitSelected);
             if(_waitUnselected != null) _waitUnselected.SetActive(!waitSelected);
-        }
-        
-        private void HandleBenchChoiceInput()
-        {
-            var kb = Keyboard.current;
-            if (kb == null) return;
-            
-            // Toogle selection on W or S
-            if (kb.wKey.wasPressedThisFrame || kb.sKey.wasPressedThisFrame)
-            {
-                _benchSelectedIndex = _benchSelectedIndex == 0 ? 1 : 0;
-                UpdateBenchChoiceVisuals();
-            }
-            
-            // Confirm with E
-            {
-                ConfirmBenchChoice();
-            }
-        }
-        private void ConfirmBenchChoice()
-        {
-            if (_benchChoice == null) return;
-            var interactable = _benchChoice.transform.GetChild(_benchSelectedIndex).GetComponent<IInteractable>();
-            if (interactable == null) return;
-            interactable.Interact();
-            CloseBenchChoice();
         }
         
         #endregion
