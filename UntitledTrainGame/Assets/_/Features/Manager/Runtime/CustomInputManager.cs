@@ -41,10 +41,6 @@ namespace Manager.Runtime
             // Now that we have (or tried to get) a PlayerInput, cache what we can
             CacheOrInferSchemeAndDevices();
             CacheCurrentActionMap();
-
-            // _playerInput = FindAnyObjectByType<PlayerInput>();
-            // if (_playerInput != null)
-            //     _playerInput.onControlsChanged += OnControlsChanged;
         }
 
         private void OnDestroy()
@@ -74,7 +70,6 @@ namespace Manager.Runtime
 
             CacheOrInferSchemeAndDevices();
             CacheCurrentActionMap();
-            // CacheSchemeAndDevices();
         }
 
         
@@ -88,8 +83,6 @@ namespace Manager.Runtime
             
             // Try to reapply scheme/devices if we have them, otherwise they'll be captured on next controlsChanged
             ReapplySchemeAndDevicesIfCached();
-
-            // _playerInput.SwitchCurrentControlScheme(_cachedScheme, _cachedDevices);
         }
 
         public void SwitchToPlayer()
@@ -102,8 +95,8 @@ namespace Manager.Runtime
             
             // Try to reapply scheme/devices if we have them, otherwise they'll be captured on next controlsChanged
             ReapplySchemeAndDevicesIfCached();
-            // _playerInput.SwitchCurrentControlScheme(_cachedScheme, _cachedDevices);
         }
+        
         #endregion
         
         #region Utils
@@ -112,29 +105,7 @@ namespace Manager.Runtime
         {
             EnsurePlayerInputBound();
             
-            // Reapply scheme and devices after a scene load
-            // if (!string.IsNullOrEmpty(_cachedScheme) && _cachedDevices != null && _playerInput != null)
-            // {
-            //     _playerInput.SwitchCurrentControlScheme(_cachedScheme, _cachedDevices);
-            // }
-            
-            // Reapply cached action map (defaults to Player if unknown)
-            // if (string.IsNullOrEmpty(_cachedActionMap))
-            //     _cachedActionMap = "Player";
-            // if (_playerInput != null && _playerInput.currentActionMap?.name != _cachedActionMap)
-            // {
-            //     _playerInput.SwitchCurrentActionMap(_cachedActionMap);
-            // }
-            //
-            // // Reapply scheme and devices if we have them, or try to infer again if we don't
-            // if (!ReapplySchemeAndDevicesIfCached())
-            // {
-            //     CacheOrInferSchemeAndDevices();
-            //     ReapplySchemeAndDevicesIfCached();
-            // }
-
             StartCoroutine(ReapplyInputNextFrame());
-
         }
         
         private System.Collections.IEnumerator ReapplyInputNextFrame()
@@ -215,34 +186,6 @@ namespace Manager.Runtime
                 return;
             }
 
-            // Try to read current scheme/devices; these can be null/empty during scene loads
-            // var scheme = _playerInput.currentControlScheme;
-            // var devices = _playerInput.devices;
-            //
-            // if (!string.IsNullOrEmpty(scheme) && devices is { Count: > 0})
-            // {
-            //     _cachedScheme = scheme;
-            //     _cachedDevices = devices.ToArray();
-            //     Info($"Cached scheme '{_cachedScheme}' with {_cachedDevices.Length} device(s).");
-            //     return;
-            // }
-            //
-            // // Attempt to infer from PlayerInput default or from paired devices
-            // if (string.IsNullOrEmpty(_cachedScheme))
-            // {
-            //     // Use defaultControlScheme if provided, else keep last known or fallback to "Keyboard&Mouse"/"Gamepad" heuristic if needed
-            //     if (!string.IsNullOrEmpty(_playerInput.defaultControlScheme))
-            //         _cachedScheme = _playerInput.defaultControlScheme;
-            //     else if (!string.IsNullOrEmpty(scheme))
-            //         _cachedScheme = scheme;
-            //     else if (Keyboard.current != null && Mouse.current != null)
-            //         _cachedScheme = "Keyboard&Mouse";
-            //     else if (Gamepad.current != null)
-            //         _cachedScheme = "Gamepad";
-            //     else
-            //         _cachedScheme = scheme; // may be null until controls resolve; okay, we’ll update on OnControlsChanged
-            // }
-            
             // Scheme may be null mid-load; keep last known or default
             var scheme = _playerInput.currentControlScheme;
             if (!string.IsNullOrEmpty(scheme))
@@ -258,24 +201,6 @@ namespace Manager.Runtime
                 _cachedDevices = paired is { Count: > 0 } ? paired.ToArray() : System.Array.Empty<InputDevice>();
             }
             else _cachedDevices = System.Array.Empty<InputDevice>();
-
-            // // As a last resort, build devices array from common devices
-            // if (_cachedDevices == null || _cachedDevices.Length == 0)
-            // {
-            //     if (_cachedScheme != null && _cachedScheme.Contains("Keyboard") && Keyboard.current != null && Mouse.current != null)
-            //     {
-            //         _cachedDevices = new InputDevice[] { Keyboard.current, Mouse.current };
-            //     }
-            //     else if (_cachedScheme != null && _cachedScheme.Contains("Gamepad") && Gamepad.current != null)
-            //     {
-            //         _cachedDevices = new InputDevice[] { Gamepad.current };
-            //     }
-            //     else
-            //     {
-            //         // Leave devices null/empty; when Input auto-detects and raises onControlsChanged, we’ll cache real ones.
-            //         _cachedDevices = System.Array.Empty<InputDevice>();
-            //     }
-            // }
 
             Info($"Inferred scheme '{_cachedScheme}' with {_cachedDevices.Length} device(s) (user.valid={_playerInput.user.valid}).");
         }
@@ -313,7 +238,6 @@ namespace Manager.Runtime
             _playerInput.SwitchCurrentControlScheme(_cachedScheme, _cachedDevices);
             return true;
         }
-
 
         #endregion
     }
