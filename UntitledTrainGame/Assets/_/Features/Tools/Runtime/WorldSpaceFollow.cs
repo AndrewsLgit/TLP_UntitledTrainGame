@@ -1,0 +1,69 @@
+namespace Tools.Runtime
+{
+    using UnityEngine;
+
+    public class CLASS_NAME : MonoBehaviour
+    {
+        #region Variables
+
+        #region Private
+
+        // --- Start of Private Variables ---
+
+
+        // --- End of Private Variables --- 
+
+        #endregion
+
+        #region Public
+
+        // --- Start of Public Variables ---
+
+
+        // --- End of Public Variables --- 
+
+        #endregion
+
+        #endregion
+
+        #region Unity API
+
+        private void Awake()
+        {
+        }
+
+        private void Start()
+        {
+        }
+
+        private void Update()
+        {
+        }
+
+        private void FixedUpdate()
+        {
+        }
+
+        private void OnEnable()
+        {
+        }
+
+        private void OnDisable()
+        {
+        }
+
+        private void OnDestroy()
+        {
+        }
+
+        #endregion
+
+        #region Main Methods
+
+        #endregion
+
+        #region Helpers/Utils
+
+        #endregion
+    }
+}
