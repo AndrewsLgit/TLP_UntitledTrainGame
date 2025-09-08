@@ -60,6 +60,6 @@ Material:
     - _RefractionStrength: 0.025
     - _Speed: 1
     m_Colors:
-    - _Color: {r: 0.3244357, g: 0.7744694, b: 0.93962264, a: 1}
+    - _Color: {r: 0, g: 0.7548108, b: 1, a: 1}
   m_BuildTextureStacks: []
   m_AllowLocking: 1
