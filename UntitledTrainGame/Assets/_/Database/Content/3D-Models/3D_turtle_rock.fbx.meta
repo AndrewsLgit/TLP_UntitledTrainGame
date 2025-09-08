@@ -1,5 +1,5 @@
 fileFormatVersion: 2
-guid: 850170bac9a82ef4293ddb9f9bdc623d
+guid: b40c1601497475b40872a4bd10a0d32a
 ModelImporter:
   serializedVersion: 22200
   internalIDToNameTable: []
@@ -7,8 +7,8 @@ ModelImporter:
   - first:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
-      name: M_PROPS-color-palette
-    second: {fileID: 2100000, guid: 9b7cbd4ef0fa4f64eabef5397d0dc78a, type: 2}
+      name: T_Turtle
+    second: {fileID: 2100000, guid: 821582f0cbc321d44b3d3e697d6286e6, type: 2}
   materials:
     materialImportMode: 2
     materialName: 0
