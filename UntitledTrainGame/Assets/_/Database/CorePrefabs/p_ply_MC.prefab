@@ -180,6 +180,18 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: -3792311373566652663, guid: 8cd174534d9f8164ab1c0a6e66d1e1e8, type: 3}
+      propertyPath: m_Mesh
+      value: 
+      objectReference: {fileID: -7546563052315264092, guid: 8cd174534d9f8164ab1c0a6e66d1e1e8, type: 3}
+    - target: {fileID: -3792311373566652663, guid: 8cd174534d9f8164ab1c0a6e66d1e1e8, type: 3}
+      propertyPath: m_AABB.m_Center.z
+      value: 0.51374036
+      objectReference: {fileID: 0}
+    - target: {fileID: -3792311373566652663, guid: 8cd174534d9f8164ab1c0a6e66d1e1e8, type: 3}
+      propertyPath: m_AABB.m_Extent.z
+      value: 0.5106465
+      objectReference: {fileID: 0}
+    - target: {fileID: -3792311373566652663, guid: 8cd174534d9f8164ab1c0a6e66d1e1e8, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
       objectReference: {fileID: 2100000, guid: 96b12dc400028f647ab0d29c6b3ba73f, type: 2}
