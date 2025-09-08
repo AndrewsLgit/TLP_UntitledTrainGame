@@ -307,7 +307,7 @@ PrefabInstance:
     - target: {fileID: 8053136215402187809, guid: d8e9f92f8780447b28f7475513cdaa9d, type: 3}
       propertyPath: _startScene
       value: 
-      objectReference: {fileID: 11400000, guid: 6b9f0f212f0904d27b495fbc93acb60e, type: 2}
+      objectReference: {fileID: 11400000, guid: bb7d8ee6a59f3d74f9ef4252c02b113d, type: 2}
     - target: {fileID: 8053136215402187809, guid: d8e9f92f8780447b28f7475513cdaa9d, type: 3}
       propertyPath: m_isVerbose
       value: 0
