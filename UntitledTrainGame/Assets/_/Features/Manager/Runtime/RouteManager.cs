@@ -107,6 +107,7 @@ namespace Manager.Runtime
         {
             if (_currentSegmentTimer is { IsRunning: true }) return;
             CleanupCurrentJourney();
+            //RemovePausedRoute();
             _stationNetwork = stationNetwork;
             // get all stations from route.start to route.end from StationGraphSO
             _segments = _stationNetwork.CalculatePath(trainRoute.StartStation, trainRoute.EndStation);
@@ -260,6 +261,8 @@ namespace Manager.Runtime
             _isExpress = false;
             //test
             _sceneManager.ActivateScene();
+            
+            RemovePausedRoute();
         }
 
         public void StopJourneyEarly()

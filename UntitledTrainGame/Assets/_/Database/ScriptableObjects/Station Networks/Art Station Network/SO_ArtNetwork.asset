@@ -18,8 +18,8 @@ MonoBehaviour:
   - From: {fileID: 11400000, guid: d30c500b3fa2f479985d6b0adab856b4, type: 2}
     To: {fileID: 11400000, guid: f173ae28e30004431afd2e9a6c826ed7, type: 2}
     TravelTime:
-      Hours: 1
-      Minutes: 0
+      Hours: 0
+      Minutes: 30
   - From: {fileID: 11400000, guid: f173ae28e30004431afd2e9a6c826ed7, type: 2}
     To: {fileID: 11400000, guid: f8c9b4a7d36a447ada4f548a53ffa1b3, type: 2}
     TravelTime:

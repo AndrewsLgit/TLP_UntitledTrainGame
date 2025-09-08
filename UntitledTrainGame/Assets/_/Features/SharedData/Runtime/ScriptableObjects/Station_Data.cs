@@ -1,6 +1,4 @@
-using JetBrains.Annotations;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 using UnityEngine.Assertions;
 #if UNITY_EDITOR
 using UnityEditor;

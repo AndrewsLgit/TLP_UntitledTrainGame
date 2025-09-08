@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 1731749694576427731}
   - component: {fileID: 8397048955470582326}
   - component: {fileID: 4898184797950366633}
+  - component: {fileID: 7258825356743489293}
   m_Layer: 0
   m_Name: p_TrainGroupSchedule_B
   m_TagString: Untagged
@@ -233,6 +234,19 @@ MonoBehaviour:
   fontStyle: 0
   alignment: 0
   textDropShadow: 0
+--- !u!114 &7258825356743489293
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6329061466236294378}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0efb1fd413ddc41a9a1d350ec724f686, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _pendingTrainPrefab: {fileID: 7070004038322937664}
 --- !u!1001 &2330175388693964081
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -602,6 +616,11 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: a277e396b28c9ca498ccfab9fcd88eae, type: 3}
+--- !u!1 &7070004038322937664 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 3668515407766084521, guid: a277e396b28c9ca498ccfab9fcd88eae, type: 3}
+  m_PrefabInstance: {fileID: 5833459376100279529}
+  m_PrefabAsset: {fileID: 0}
 --- !u!4 &8962455450667131005 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 3212638672875037844, guid: a277e396b28c9ca498ccfab9fcd88eae, type: 3}
