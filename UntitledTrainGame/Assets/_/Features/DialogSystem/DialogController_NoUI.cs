@@ -2,7 +2,7 @@ using Foundation.Runtime;
 using SharedData.Runtime;
 using UnityEngine;
 
-namespace DialogSystem.Runtime._.Features.DialogSystem
+namespace DialogSystem.Runtime
 {
     /// <summary>
     /// Minimal DialogueController variant without UIManager.
@@ -110,10 +110,15 @@ namespace DialogSystem.Runtime._.Features.DialogSystem
 
         #region Helpers/Utils
 
+        [ContextMenu("Choose Response from serialized index")]
+        public void ChooseResponse()
+        {
+            ChooseResponse(_testResponseIndex);
+        }
+
         /// <summary>
         /// Simulate player selecting a response by index.
         /// </summary>
-        [ContextMenu("Choose Response from serialized index")]
         public void ChooseResponse(int index)
         {
             _nodeManager.SelectResponse(index);
