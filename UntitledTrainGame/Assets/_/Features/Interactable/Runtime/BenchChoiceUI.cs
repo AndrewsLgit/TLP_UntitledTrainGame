@@ -209,8 +209,8 @@ namespace Interactable.Runtime
             
             int selectedIndex = _selector.SelectedIndex;
             Info($"Selected index: {selectedIndex}");
-            bool sleepSelected = selectedIndex == 1;
-            bool waitSelected = selectedIndex == 0;
+            bool sleepSelected = selectedIndex == 0;
+            bool waitSelected = selectedIndex == 1;
             
             if(_sleepSelected != null) _sleepSelected.SetActive(sleepSelected);
             if(_sleepUnselected != null) _sleepUnselected.SetActive(!sleepSelected);
