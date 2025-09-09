@@ -80,10 +80,10 @@ namespace Tools.Runtime
             switch (dir.y)
             {
                 case > 0f:
-                    MovePrev();
+                    MoveNext();
                     break;
                 case < 0f:
-                    MoveNext();
+                    MovePrev();
                     break;
             }
         }
