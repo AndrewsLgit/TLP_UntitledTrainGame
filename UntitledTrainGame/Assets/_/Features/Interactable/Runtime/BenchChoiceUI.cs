@@ -2,6 +2,7 @@ using System;
 using Foundation.Runtime;
 using Player.Runtime;
 using SharedData.Runtime;
+using Tools.Runtime;
 using UnityEngine;
 using UnityEngine.Assertions;
 
@@ -31,12 +32,14 @@ namespace Interactable.Runtime
 
         // State
         private IBenchChoiceUI.BenchChoiceModel _model;
-        private int _selectedIndex = 0;        // 0 = Sleep, 1 = Wait
-        private bool _isOpen = false;
-
-        // Small cooldown to avoid rapid repeats when holding the nav key/stick
-        private float _navRepeatCooldown = 0.18f;
-        private float _navRepeatTimer = 0f;
+        // private int _selectedIndex = 0;        // 0 = Sleep, 1 = Wait
+        // private bool _isOpen = false;
+        //
+        // // Small cooldown to avoid rapid repeats when holding the nav key/stick
+        // private float _navRepeatCooldown = 0.18f;
+        // private float _navRepeatTimer = 0f;
+        
+        private readonly ChoiceSelectionController _selector = new ChoiceSelectionController(0.18f);
 
         // End of Private Variables
         #endregion
@@ -57,6 +60,10 @@ namespace Interactable.Runtime
         private void Awake()
         {
             if(_rootPanel != null) _rootPanel.SetActive(false);
+            
+            _selector.OnSelectionChanged += _ => UpdateVisuals();
+            _selector.OnSubmit += index => OnChoiceSelected?.Invoke(index);
+            _selector.OnCancel += () => OnCancelled?.Invoke();
         }
 
         private void Start()
@@ -72,9 +79,7 @@ namespace Interactable.Runtime
 
         private void Update()
         {
-            // Cooldown tick for repeating nav key/stick
-            if(_navRepeatTimer > 0f)
-                _navRepeatTimer -= Time.deltaTime;
+            _selector.Tick(Time.deltaTime);
         }
 
         #endregion
@@ -93,11 +98,6 @@ namespace Interactable.Runtime
             if (_model.Options == null || _model.Options.Length < 2)
                 _model.Options = new[] { "Sleep, Wait" };
             
-            // Set initial state
-            _selectedIndex = 0;
-            _isOpen = true;
-            _navRepeatTimer = 0f;
-            
             // Find the router if not assigned
             if (_inputRouter == null)
                 _inputRouter = FindAnyObjectByType<PlayerInputRouter>();
@@ -108,8 +108,15 @@ namespace Interactable.Runtime
             // Show the panel
             if(_rootPanel != null)
                 _rootPanel.SetActive(true);
+            
+            _selector.Open(_model.Options.Length);
 
-            UpdateVisuals();
+            // UpdateVisuals();
+            // Start with all options Unselected
+            _sleepSelected.SetActive(false);
+            _waitSelected.SetActive(false);
+            _sleepUnselected.SetActive(true);
+            _waitUnselected.SetActive(true);
         }
 
         // Close is called by PlayerInteraction after selection/cancel.
@@ -120,8 +127,10 @@ namespace Interactable.Runtime
                 _rootPanel.SetActive(false);
             
             // Reset state
-            _isOpen = false;
+            // _isOpen = false;
             _model = null;
+            
+            _selector.Close();
             
             // Unsubscribe from UI action map events (PlayerInteraction will switch action map)
             UnsubscribeInput();
@@ -167,36 +176,28 @@ namespace Interactable.Runtime
         // Navigate handler: we only care about vertical axis (W/S, Up/Down, DPad Y, etc.)
         private void HandleUINavigate(Vector2 direction)
         {
-            if (!_isOpen) return;
+            if (!_selector.IsOpen) return;
             
-            // Ignore tiny input/noise
-            if(Mathf.Abs(direction.y) < 0.05f) return;
-            
-            // Simple repeat gating so holding down doesn't spam every frame
-            if (_navRepeatTimer > 0f) return;
-            _navRepeatTimer = _navRepeatCooldown;
-            
-            // Toggle selection index between 0 and 1
-            _selectedIndex = (_selectedIndex == 0) ? 1 : 0;
+            _selector.HandleNavigate(direction);
             UpdateVisuals();
         }
         
         // Submit handler: confirm selection (0 = Sleep, 1 = Wait)
         private void HandleUISubmit()
         {
-            if (!_isOpen) return;
+            if (!_selector.IsOpen) return;
             
             // Notify PlayerInteraction of selection (Close() and switch action maps)
-            OnChoiceSelected?.Invoke(_selectedIndex);
+            _selector.Submit();
         }
         
         // Cancel handler: dismiss the UI without selecting
         private void HandleUICancel()
         {
-            if (!_isOpen) return;
+            if (!_selector.IsOpen) return;
             
             // Notify PlayerInteraction of cancel (Close() and switch action maps)
-            OnCancelled?.Invoke();
+            _selector.Cancel();
         }
         
         #endregion
@@ -205,8 +206,11 @@ namespace Interactable.Runtime
 
         private void UpdateVisuals()
         {
-            bool sleepSelected = _selectedIndex == 0;
-            bool waitSelected = _selectedIndex == 1;
+            
+            int selectedIndex = _selector.SelectedIndex;
+            Info($"Selected index: {selectedIndex}");
+            bool sleepSelected = selectedIndex == 1;
+            bool waitSelected = selectedIndex == 0;
             
             if(_sleepSelected != null) _sleepSelected.SetActive(sleepSelected);
             if(_sleepUnselected != null) _sleepUnselected.SetActive(!sleepSelected);
