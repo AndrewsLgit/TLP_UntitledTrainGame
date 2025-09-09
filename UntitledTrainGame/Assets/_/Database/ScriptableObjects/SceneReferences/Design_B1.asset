@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: d05b88686afbc4b009df1d3b2d6e44a4, type: 3}
-  m_Name: Design_B4
+  m_Name: Design_B1
   m_EditorClassIdentifier: 
   SceneName: Design_B4
   SceneAsset: {fileID: 102900000, guid: ded93694c7633ef4e819a5a9aeb1c8fc, type: 3}

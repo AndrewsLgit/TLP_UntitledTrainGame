@@ -42,10 +42,10 @@ EditorBuildSettings:
     path: Assets/_/Features/Levels/Design_B0.unity
     guid: c6232c7f7fda5674291a1ee01c007f89
   - enabled: 1
-    path: Assets/_/Features/Levels/Design_B3.unity
+    path: Assets/_/Features/Levels/Design_B2.unity
     guid: 876c8f1041a4b02489000b591b1bc489
   - enabled: 1
-    path: Assets/_/Features/Levels/Design_B4.unity
+    path: Assets/_/Features/Levels/Design_B1.unity
     guid: ded93694c7633ef4e819a5a9aeb1c8fc
   - enabled: 1
     path: Assets/_/Features/Levels/Design_C3.unity
