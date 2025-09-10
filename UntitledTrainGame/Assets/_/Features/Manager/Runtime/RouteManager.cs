@@ -27,6 +27,7 @@ namespace Manager.Runtime
         private List<Station_Data> _segments = new List<Station_Data>();
         private int _currentStationIndex = 0;
         private float _compressionFactor = 0.02f;
+        private float _minTravelTime = 5f;
         private CountdownTimer _currentSegmentTimer;
         private bool _isExpress = false;
         private bool _stopEarly = false;
@@ -85,7 +86,7 @@ namespace Manager.Runtime
         // Update is called once per frame
         void Update()
         {
-            if (_currentSegmentTimer != null && _currentSegmentTimer.IsRunning)
+            if (_currentSegmentTimer is { IsRunning: true })
             {
                 _currentSegmentTimer.Tick(Time.deltaTime);
             }
@@ -125,6 +126,7 @@ namespace Manager.Runtime
             
             // test
             UIManager.Instance?.CreateProgressBarsForRoute(_segments, _stationNetwork, _compressionFactor);
+            CustomInputManager.Instance.SwitchToUI();
             //test
             
             _isExpress = trainRoute.IsExpress;
@@ -156,6 +158,7 @@ namespace Manager.Runtime
 
             Info($"Starting journey from {_segments[0].GetStationName()} to {_segments[^1].GetStationName()}");
             UIManager.Instance?.CreateProgressBarsForRoute(_segments, _stationNetwork, _compressionFactor);
+            CustomInputManager.Instance.SwitchToUI();
 
             _isExpress = false;
             StartSegment(_currentStationIndex);
@@ -180,7 +183,9 @@ namespace Manager.Runtime
                 _segmentTime = GameTime.FromTotalMinutes(_segmentTime.ToTotalMinutes()/2);
             
             Info($"Real time: {_segmentTime}");
-            var uiTime = _segmentTime.ToTotalMinutes() * _compressionFactor;
+            // var uiTime = Mathf.Max(5f, _segmentTime.ToTotalMinutes() * _compressionFactor);
+            var compressionFactor = _trainRoute != null ? _trainRoute.CompressionFactor : _compressionFactor;
+            var uiTime = Mathf.Max(_minTravelTime, _segmentTime.ToTotalMinutes() * compressionFactor);
             //if (_isExpress) uiTime /= 2;
             Info($"UI time: {uiTime}");
             
@@ -237,6 +242,7 @@ namespace Manager.Runtime
                 _currentSegmentTimer = null;
             }
             UIManager.Instance?.ClearProgressBars();
+            CustomInputManager.Instance?.SwitchToPlayer();
             
             // Load and activate the scene
             _sceneManager = GetSceneLoader();
@@ -255,6 +261,7 @@ namespace Manager.Runtime
             _segments[_currentStationIndex].IsDiscovered = true;
             //test
             UIManager.Instance?.ClearProgressBars();
+            CustomInputManager.Instance?.SwitchToPlayer();
             // _currentSegmentTimer.Stop();
             // timer stop is done in the uiManager
             _currentSegmentTimer = null;
@@ -360,6 +367,7 @@ namespace Manager.Runtime
         private void OnControlPanelUpdated(GDControlPanel controlPanel)
         {
             _compressionFactor = _controlPanel.CompressionFactor;
+            _minTravelTime = _controlPanel.MinTravelTime;
         }
 
         #endregion

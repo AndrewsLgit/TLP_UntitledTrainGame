@@ -114,24 +114,25 @@ namespace Game.Runtime
         }
 
         public void StartSegmentProgress(int segmentIndex, CountdownTimer timer)
-            {
-                // Unsub from previous timer
-                if(_currentTimer != null) _currentTimer.OnTimerTick -= UpdateCurrentProgress;
+        {
+            // Unsub from previous timer
+            if(_currentTimer != null) _currentTimer.OnTimerTick -= UpdateCurrentProgress;
             
-                _currentSegmentIndex = segmentIndex;
-                _currentTimer = timer;
+            _currentSegmentIndex = segmentIndex;
+            _currentTimer = timer;
             
-                if(_currentTimer != null) _currentTimer.OnTimerTick += UpdateCurrentProgress;
+            if(_currentTimer != null) _currentTimer.OnTimerTick += UpdateCurrentProgress;
                 
-                Info($"Started progress tracking for segment {segmentIndex}");
-            }
+            Info($"Started progress tracking for segment {segmentIndex}");
+        }
         
         private void UpdateCurrentProgress(float progress)
         {
             // Update current segment progress (0 -> 1)
             if (_currentSegmentIndex >= 0 && _currentSegmentIndex < _progressBarsSliders.Count)
             {
-                _progressBarsSliders[_currentSegmentIndex].value = 1f- progress;
+                _progressBarsSliders[_currentSegmentIndex].value = 1f - progress;
+                InfoInProgress($"Timer progress: {progress:P0}");
             }
 
             MarkCompletedSegments();
