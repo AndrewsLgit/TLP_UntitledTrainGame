@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Foundation.Runtime;
 using Game.Runtime;
 using SharedData.Runtime;
@@ -36,6 +37,8 @@ namespace Manager.Runtime
         private bool _routePaused = false;
         private int _routePausedIndex = -1;
 
+        private HashSet<Station_Data> _discoveredStations = new HashSet<Station_Data>();
+
         // Private Variables
         #endregion
         
@@ -44,6 +47,7 @@ namespace Manager.Runtime
         
         public static RouteManager Instance { get; private set; }
         public event Action m_onPausedRouteRemoved;
+        public event Action<Station_Data> OnTrainStationDiscovered;
         
         // Public Variables
         #endregion
@@ -76,6 +80,7 @@ namespace Manager.Runtime
             
             Assert.IsNotNull(_controlPanel, "ControlPanel not found! Please add it to the GameManager object!");
             GDControlPanel.OnValuesUpdated += OnControlPanelUpdated;
+            FactExists("DiscoveredStations", out _discoveredStations);
         }
 
         private void OnDestroy()
@@ -112,6 +117,12 @@ namespace Manager.Runtime
             _stationNetwork = stationNetwork;
             // get all stations from route.start to route.end from StationGraphSO
             _segments = _stationNetwork.CalculatePath(trainRoute.StartStation, trainRoute.EndStation);
+            
+            if(FactExists("DiscoveredStations", out _discoveredStations))
+                foreach (var stationData in _segments.FindAll(x => x.IsDiscovered)
+                             .Where(x => !_discoveredStations.Contains(x)))
+                    _discoveredStations.Add(stationData);
+            
             if (_segments == null)
             {
                 Error($"Path not calculated!");
@@ -236,6 +247,7 @@ namespace Manager.Runtime
             
             //Mark discovered on arrival
             _segments[stationIndex].IsDiscovered = true;
+            OnTrainStationDiscovered?.Invoke(_segments[stationIndex]);
             
             // Clear any running UI/timers for the traveling segment
             if (_currentSegmentTimer != null)
@@ -262,6 +274,17 @@ namespace Manager.Runtime
             //todo: make the Station_Data.isDiscovered = true;
             // once we arrive at the destination
             _segments[_currentStationIndex].IsDiscovered = true;
+            // _discoveredStations = _segments.FindAll(x => x.IsDiscovered);
+            //todo: turn this into a proper method
+            if (FactExists("DiscoveredStations", out _discoveredStations) &&
+                _discoveredStations.Add(_segments[_currentStationIndex]))
+            {
+                SetFact("DiscoveredStations", _discoveredStations, false);
+            }
+            // _discoveredStations.Add(_segments[_currentStationIndex]);
+            // SetFact("DiscoveredStations", _discoveredStations, false);
+            
+            OnTrainStationDiscovered?.Invoke(_segments[_currentStationIndex]);
             //test
             UIManager.Instance?.ClearProgressBars();
             CustomInputManager.Instance?.SwitchToPlayer();

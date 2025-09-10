@@ -57,6 +57,9 @@ namespace Game.Runtime
         private int _currentSegmentIndex = -1;
         private List<Station_Data> _segments = new List<Station_Data>();
         private List<Transform> _segmentsToLoad = new List<Transform>();
+        private Transform _currentStationInMap;
+        private string _currentStationLabel;
+        private bool _isCurrentInverted = false;
 
         // Private variables
         #endregion
@@ -89,17 +92,20 @@ namespace Game.Runtime
         private void Start()
         {
             SetupMapItems();
-            
+            DisableAllMapItems(); 
             Info($"UIManager started. Found {_trainStations.Count} stations and {_stationPathLines.Count} lines.");
-            
+
+
+            RouteManager.Instance.OnTrainStationDiscovered += OnTrainStationDiscovered;
             // Subscribe to clock event
-            // ClockManager.Instance.m_OnTimeUpdated += UpdateClockTime;
-            // UpdateClockTime(ClockManager.Instance.m_CurrentTime);
+            ClockManager.Instance.m_OnTimeUpdated += UpdateClockTime;
+            UpdateClockTime(ClockManager.Instance.m_CurrentTime);
         }
 
         private void OnDestroy()
         {
-            // ClockManager.Instance.m_OnTimeUpdated -= UpdateClockTime;
+            ClockManager.Instance.m_OnTimeUpdated -= UpdateClockTime;
+            RouteManager.Instance.OnTrainStationDiscovered -= OnTrainStationDiscovered;
         }
 
         private void Update()
@@ -120,25 +126,37 @@ namespace Game.Runtime
 
             DisableAllMapItems();
             _segmentsToLoad.Clear();
+            var from = segments[0];
+            var fromLabel = $"{from.LinePrefix}{from.Id}";
             
-            _trainStations.FirstOrDefault(x => x.name.Contains("A3") /*segments[0].StationScene.name.Contains(x.name)*/).gameObject.SetActive(true);
+            _currentStationInMap = _trainStations.FirstOrDefault(x =>
+                x.name.Contains(fromLabel) /*segments[0].StationScene.name.Contains(x.name)*/);
+            _currentStationInMap.gameObject.SetActive(true);
             
             for (var i = 0; i < segments.Count - 1; i++)
             {
-                var from = segments[i];
+                from = segments[i];
                 var to = segments[i + 1];
+
+                fromLabel = $"{from.LinePrefix}{from.Id}";
+                var toLabel = $"{to.LinePrefix}{to.Id}";
+                
+                _isCurrentInverted = from.Id < to.Id;
                 
                 _segmentsToLoad.Add(
-                    _stationPathLines.FirstOrDefault(x => x.name.Contains($"{from.GetStationName()}_{to.GetStationName()}") 
-                                                              || x.name.Contains($"{to.GetStationName()}_{from.GetStationName()}")));
+                    _stationPathLines.FirstOrDefault(x => (x.name.Contains($"{fromLabel}") && x.name.Contains($"{toLabel}")) 
+                                                          || x.name.Contains($"{toLabel}_{fromLabel}")));
                 
-                Info($"Created path line for segment {segments[i].GetStationName()} -> {segments[i + 1].GetStationName()}");
+                Info($"Created path line for segment {fromLabel} -> {toLabel}");
             }
         }
         public void StartMapSegmentProgress(int segmentIndex, CountdownTimer timer)
         {
             // Unsub from previous timer
             if(_currentTimer != null) _currentTimer.OnTimerTick -= UpdateCurrentMapProgress;
+            
+            
+            _currentStationInMap.gameObject.SetActive(true); 
             
             _currentSegmentIndex = segmentIndex;
             _currentTimer = timer;
@@ -150,10 +168,14 @@ namespace Game.Runtime
         private void UpdateCurrentMapProgress(float progress)
         {
             // Update current segment progress (0 -> 1)
-            if (_currentSegmentIndex >= 0 && _currentSegmentIndex < _progressBarsSliders.Count)
+            if (_currentSegmentIndex >= 0 && _currentSegmentIndex < _segmentsToLoad.Count)
             {
                 var bar = _segmentsToLoad[_currentSegmentIndex].GetComponent<Image>();
-                    bar.fillAmount = 1f - progress;
+                if (_isCurrentInverted)
+                    bar.fillClockwise = true;
+                bar.fillAmount = 0f;
+                _segmentsToLoad[_currentSegmentIndex].gameObject.SetActive(true);
+                bar.fillAmount = 1f - progress;
                 InfoInProgress($"Timer progress: {progress:P0}");
             }
 
@@ -166,6 +188,10 @@ namespace Game.Runtime
                 if (i < _segmentsToLoad.Count)
                 {
                     _segmentsToLoad[i].GetComponent<Image>().fillAmount = 1f;
+                    // var currentStation = _segments[_currentSegmentIndex];
+                    // _currentStationLabel = $"{currentStation.LinePrefix}{currentStation.Id}"; 
+                    // _trainStations.FirstOrDefault(x => x.name.Contains(_currentStationLabel))
+                    //     .gameObject.SetActive(true);
                 }
             }
         }
@@ -352,6 +378,18 @@ namespace Game.Runtime
             _stationPathLines.Select(x => x.gameObject).ToList().ForEach(x => x.SetActive(false));
             _travelTimes.Select(x => x.gameObject).ToList().ForEach(x => x.SetActive(false));
             _trainStations.Select(x => x.gameObject).ToList().ForEach(x => x.SetActive(false));
+
+            if(FactExists<HashSet<Station_Data>>("DiscoveredStations", out var discovered))
+            discovered = GetFact<HashSet<Station_Data>>("DiscoveredStations");
+            
+            if (discovered == null) return;
+            {
+                foreach (var label in discovered.Select(station => $"{station.LinePrefix}{station.Id}"))
+                {
+                    _trainStations.FirstOrDefault(x => x.name.Contains(label))
+                        .gameObject.SetActive(true);
+                }
+            }
         }
 
         private void UpdateClockTime(GameTime time)
@@ -359,15 +397,29 @@ namespace Game.Runtime
             int[] numbers = time.Minutes.ToString()
                 .Select(c => int.Parse(c.ToString()))
                 .ToArray();
+            if (numbers.Length == 1)
+            {
+                numbers = new[] {0, numbers[0]};
+            }
             
-            _clockMinuteUnit.text = numbers[0].ToString();
-            _clockMinuteTens.text = numbers[1].ToString();
+            _clockMinuteUnit.text = numbers[1].ToString();
+            _clockMinuteTens.text = numbers[0].ToString();
 
             numbers = time.Hours.ToString()
                 .Select(c => int.Parse(c.ToString()))
                 .ToArray();
-            _clockHourUnit.text = numbers[0].ToString();
-            _clockHourTens.text = numbers[1].ToString();
+            if (numbers.Length == 1)
+                numbers = new[] {0, numbers[0]};
+            
+            _clockHourUnit.text = numbers[1].ToString();
+            _clockHourTens.text = numbers[0].ToString();
+        }
+
+        private void OnTrainStationDiscovered(Station_Data station)
+        {
+            _currentStationLabel = $"{station.LinePrefix}{station.Id}"; 
+            _trainStations.FirstOrDefault(x => x.name.Contains(_currentStationLabel))
+                .gameObject.SetActive(true);
         }
         #endregion
     }
