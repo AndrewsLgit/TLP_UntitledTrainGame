@@ -323,9 +323,17 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 870775785584561610, guid: e17302e8239d14d8facdb270cb35d404, type: 3}
+      propertyPath: _compressionFactor
+      value: 0.5
+      objectReference: {fileID: 0}
     - target: {fileID: 4928777450702166291, guid: e17302e8239d14d8facdb270cb35d404, type: 3}
       propertyPath: m_Name
       value: p_TEST_Station
+      objectReference: {fileID: 0}
+    - target: {fileID: 4947927042764610631, guid: e17302e8239d14d8facdb270cb35d404, type: 3}
+      propertyPath: m_IsActive
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 5254944252054914963, guid: e17302e8239d14d8facdb270cb35d404, type: 3}
       propertyPath: _trainRoute

@@ -252,6 +252,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: p_TEST_Station
       objectReference: {fileID: 0}
+    - target: {fileID: 7227251282503685941, guid: e17302e8239d14d8facdb270cb35d404, type: 3}
+      propertyPath: _sceneToLoad
+      value: 
+      objectReference: {fileID: 11400000, guid: 02a96df2cea0edb4096c8b0df1cc4c77, type: 2}
     - target: {fileID: 8218516033108555164, guid: e17302e8239d14d8facdb270cb35d404, type: 3}
       propertyPath: m_LocalPosition.x
       value: -5.6369867

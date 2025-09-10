@@ -307,6 +307,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: p_TEST_Station
       objectReference: {fileID: 0}
+    - target: {fileID: 4947927042764610631, guid: e17302e8239d14d8facdb270cb35d404, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 7227251282503685941, guid: e17302e8239d14d8facdb270cb35d404, type: 3}
       propertyPath: _sceneToLoad
       value: 
@@ -354,6 +358,7 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects:
     - {fileID: 3209930930952358121, guid: e17302e8239d14d8facdb270cb35d404, type: 3}
+    - {fileID: 8406628394109839925, guid: e17302e8239d14d8facdb270cb35d404, type: 3}
     m_AddedGameObjects:
     - targetCorrespondingSourceObject: {fileID: 8218516033108555164, guid: e17302e8239d14d8facdb270cb35d404, type: 3}
       insertIndex: 0

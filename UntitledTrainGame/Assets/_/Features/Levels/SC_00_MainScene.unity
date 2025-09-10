@@ -313,6 +313,10 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8343106658253979835, guid: d8e9f92f8780447b28f7475513cdaa9d, type: 3}
+      propertyPath: _compressionFactor
+      value: 0.105
+      objectReference: {fileID: 0}
+    - target: {fileID: 8343106658253979835, guid: d8e9f92f8780447b28f7475513cdaa9d, type: 3}
       propertyPath: _detectionDistance
       value: 2
       objectReference: {fileID: 0}
