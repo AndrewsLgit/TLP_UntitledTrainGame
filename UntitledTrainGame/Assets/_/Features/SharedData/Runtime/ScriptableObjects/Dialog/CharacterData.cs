@@ -9,7 +9,7 @@ namespace SharedData.Runtime
         public string Id;
         public string Name;
         [CanBeNull] public Sprite PortraitSprite;
-        [CanBeNull] public Sprite NamePlateSprite;
+        [CanBeNull] public GameObject NamePlatePrefab;
         public Sprite DefaultTextBoxSprite;
         public GameObject UIPrefab;
         public AudioClip VoiceClip;
