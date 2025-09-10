@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Foundation.Runtime;
+using Manager.Runtime;
 using SharedData.Runtime;
 using TMPro;
 using Tools.Runtime;
@@ -27,11 +29,34 @@ namespace Game.Runtime
         [Header("Progress Bar")] 
         [SerializeField] private Transform _progressBarsParent;
         [SerializeField] private GameObject _progressBarPrefab;
+
+        [Header("Main Map UI")]
+        [SerializeField] Transform _mainMapUIParent;
+        [Header("Layer Train Stations")]
+        [SerializeField] private string _trainStationLayerName = "Layer_Stations";
+        private HashSet<Transform> _trainStations;
+        [SerializeField] private Transform[] _trains;
+        [Header("Layer Station Lines")]
+        [SerializeField] private string _stationLineLayerName = "Layer_Network";
+        private HashSet<Transform> _stationPathLines;
+        [SerializeField] private Transform[] _stationPathLinesList;
+        [Header("Layer Travel Times")]
+        [SerializeField] private string _travelTimeLayerName = "Layer_TravelTime";
+        private HashSet<Transform> _travelTimes;
+        [SerializeField] private Transform[] _travelTimesList;
+
+        [Header("Map Clock")] 
+        [SerializeField] private TextMeshProUGUI _clockMinuteUnit;
+        [SerializeField] private TextMeshProUGUI _clockMinuteTens;
+        [SerializeField] private TextMeshProUGUI _clockHourUnit;
+        [SerializeField] private TextMeshProUGUI _clockHourTens;
         
         private List<GameObject> _progressBars = new List<GameObject>();
         private List<Slider> _progressBarsSliders = new List<Slider>();
         private CountdownTimer _currentTimer;
         private int _currentSegmentIndex = -1;
+        private List<Station_Data> _segments = new List<Station_Data>();
+        private List<Transform> _segmentsToLoad = new List<Transform>();
 
         // Private variables
         #endregion
@@ -61,6 +86,22 @@ namespace Game.Runtime
             // some UI setup
         }
 
+        private void Start()
+        {
+            SetupMapItems();
+            
+            Info($"UIManager started. Found {_trainStations.Count} stations and {_stationPathLines.Count} lines.");
+            
+            // Subscribe to clock event
+            // ClockManager.Instance.m_OnTimeUpdated += UpdateClockTime;
+            // UpdateClockTime(ClockManager.Instance.m_CurrentTime);
+        }
+
+        private void OnDestroy()
+        {
+            // ClockManager.Instance.m_OnTimeUpdated -= UpdateClockTime;
+        }
+
         private void Update()
         {
             // don't execute logic if the game is paused
@@ -72,6 +113,64 @@ namespace Game.Runtime
         #region Main Methods
 
         #region Train Travel UI
+
+        public void CreateProgressBarsForRoute(List<Station_Data> segments)
+        {
+            _segments = segments;
+
+            DisableAllMapItems();
+            _segmentsToLoad.Clear();
+            
+            _trainStations.FirstOrDefault(x => x.name.Contains("A3") /*segments[0].StationScene.name.Contains(x.name)*/).gameObject.SetActive(true);
+            
+            for (var i = 0; i < segments.Count - 1; i++)
+            {
+                var from = segments[i];
+                var to = segments[i + 1];
+                
+                _segmentsToLoad.Add(
+                    _stationPathLines.FirstOrDefault(x => x.name.Contains($"{from.GetStationName()}_{to.GetStationName()}") 
+                                                              || x.name.Contains($"{to.GetStationName()}_{from.GetStationName()}")));
+                
+                Info($"Created path line for segment {segments[i].GetStationName()} -> {segments[i + 1].GetStationName()}");
+            }
+        }
+        public void StartMapSegmentProgress(int segmentIndex, CountdownTimer timer)
+        {
+            // Unsub from previous timer
+            if(_currentTimer != null) _currentTimer.OnTimerTick -= UpdateCurrentMapProgress;
+            
+            _currentSegmentIndex = segmentIndex;
+            _currentTimer = timer;
+            
+            if(_currentTimer != null) _currentTimer.OnTimerTick += UpdateCurrentMapProgress;
+                
+            Info($"Started progress tracking for segment {segmentIndex}");
+        }
+        private void UpdateCurrentMapProgress(float progress)
+        {
+            // Update current segment progress (0 -> 1)
+            if (_currentSegmentIndex >= 0 && _currentSegmentIndex < _progressBarsSliders.Count)
+            {
+                var bar = _segmentsToLoad[_currentSegmentIndex].GetComponent<Image>();
+                    bar.fillAmount = 1f - progress;
+                InfoInProgress($"Timer progress: {progress:P0}");
+            }
+
+            MarkCompletedMapSegments();
+        }
+        private void MarkCompletedMapSegments()
+        {
+            for (int i = 0; i < _currentSegmentIndex; i++)
+            {
+                if (i < _segmentsToLoad.Count)
+                {
+                    _segmentsToLoad[i].GetComponent<Image>().fillAmount = 1f;
+                }
+            }
+        }
+        
+        
 
         public void CreateProgressBarsForRoute(List<Station_Data> segments, StationNetwork_Data network,
             float compressionFactor)
@@ -137,6 +236,7 @@ namespace Game.Runtime
 
             MarkCompletedSegments();
         }
+        
 
         private void MarkCompletedSegments()
         {
@@ -221,5 +321,54 @@ namespace Game.Runtime
         }
         
         #endregion 
+        
+        #region Helper Methods
+
+        private void SetupMapItems()
+        {
+            _trainStations = _mainMapUIParent.GetComponentsInChildren<Transform>()
+                .Where(c => c.parent.name == _trainStationLayerName)
+                .Select(c => c).ToHashSet();
+
+            // _trains = _trainStations.ToArray();
+            
+            _stationPathLines = _mainMapUIParent.GetComponentsInChildren<Transform>()
+                .Where(x => x.parent.name == _stationLineLayerName)
+                .Select(c => c).ToHashSet();
+            
+            // _stationPathLinesList = _stationPathLines.ToArray();
+            
+            _travelTimes = _mainMapUIParent.GetComponentsInChildren<Transform>()
+                .Where(c => c.parent.name == _travelTimeLayerName)
+                .Select(c => c).ToHashSet();
+            
+            _trains = _trainStations.ToArray();
+            _stationPathLinesList = _stationPathLines.ToArray();
+            _travelTimesList = _travelTimes.ToArray();
+        }
+
+        private void DisableAllMapItems()
+        {
+            _stationPathLines.Select(x => x.gameObject).ToList().ForEach(x => x.SetActive(false));
+            _travelTimes.Select(x => x.gameObject).ToList().ForEach(x => x.SetActive(false));
+            _trainStations.Select(x => x.gameObject).ToList().ForEach(x => x.SetActive(false));
+        }
+
+        private void UpdateClockTime(GameTime time)
+        {
+            int[] numbers = time.Minutes.ToString()
+                .Select(c => int.Parse(c.ToString()))
+                .ToArray();
+            
+            _clockMinuteUnit.text = numbers[0].ToString();
+            _clockMinuteTens.text = numbers[1].ToString();
+
+            numbers = time.Hours.ToString()
+                .Select(c => int.Parse(c.ToString()))
+                .ToArray();
+            _clockHourUnit.text = numbers[0].ToString();
+            _clockHourTens.text = numbers[1].ToString();
+        }
+        #endregion
     }
 }
