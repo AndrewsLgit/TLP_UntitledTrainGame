@@ -125,7 +125,8 @@ namespace Manager.Runtime
             Info($"Starting journey from {_segments[0].GetStationName()} to {_segments[^1].GetStationName()}");
             
             // test
-            UIManager.Instance?.CreateProgressBarsForRoute(_segments, _stationNetwork, _compressionFactor);
+            // UIManager.Instance?.CreateProgressBarsForRoute(_segments, _stationNetwork, _compressionFactor);
+            UIManager.Instance?.CreateProgressBarsForRoute(_segments);
             CustomInputManager.Instance.SwitchToUI();
             //test
             
@@ -157,7 +158,8 @@ namespace Manager.Runtime
             _sceneManager = GetSceneLoader();
 
             Info($"Starting journey from {_segments[0].GetStationName()} to {_segments[^1].GetStationName()}");
-            UIManager.Instance?.CreateProgressBarsForRoute(_segments, _stationNetwork, _compressionFactor);
+            // UIManager.Instance?.CreateProgressBarsForRoute(_segments, _stationNetwork, _compressionFactor);
+            UIManager.Instance?.CreateProgressBarsForRoute(_segments);
             CustomInputManager.Instance.SwitchToUI();
 
             _isExpress = false;
@@ -193,7 +195,8 @@ namespace Manager.Runtime
             _currentSegmentTimer = new CountdownTimer(uiTime);
             _currentSegmentTimer.OnTimerStop += EndSegment;
             
-            UIManager.Instance?.StartSegmentProgress(index, _currentSegmentTimer);
+            // UIManager.Instance?.StartSegmentProgress(index, _currentSegmentTimer);
+            UIManager.Instance?.StartMapSegmentProgress(index, _currentSegmentTimer);
             
             _currentSegmentTimer.Start();
             //test
@@ -241,7 +244,7 @@ namespace Manager.Runtime
                 _currentSegmentTimer.Stop();
                 _currentSegmentTimer = null;
             }
-            UIManager.Instance?.ClearProgressBars();
+            // UIManager.Instance?.ClearProgressBars();
             CustomInputManager.Instance?.SwitchToPlayer();
             
             // Load and activate the scene
