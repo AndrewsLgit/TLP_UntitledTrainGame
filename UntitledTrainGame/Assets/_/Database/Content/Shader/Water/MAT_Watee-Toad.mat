@@ -1,0 +1,90 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &-8803673503322680417
+MonoBehaviour:
+  m_ObjectHideFlags: 11
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d0353a89b1f911e48b9e16bdc9f2e058, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  version: 9
+--- !u!21 &2100000
+Material:
+  serializedVersion: 8
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: MAT_Watee-Toad
+  m_Shader: {fileID: -6465566751694194690, guid: aae128a314745ad48a2fb51dcf27bd1e, type: 3}
+  m_Parent: {fileID: 0}
+  m_ModifiedSerializedProperties: 0
+  m_ValidKeywords: []
+  m_InvalidKeywords: []
+  m_LightmapFlags: 4
+  m_EnableInstancingVariants: 0
+  m_DoubleSidedGI: 0
+  m_CustomRenderQueue: 3000
+  stringTagMap: {}
+  disabledShaderPasses:
+  - MOTIONVECTORS
+  m_LockedProperties: 
+  m_SavedProperties:
+    serializedVersion: 3
+    m_TexEnvs:
+    - _FlowTexture:
+        m_Texture: {fileID: 2800000, guid: a92ff6cb06d28f546bd8a2d3a994ad6d, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _FoamTexture:
+        m_Texture: {fileID: 2800000, guid: c6278611d9e3da64d98e0ebc311516d1, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _SampleTexture2D_d37a6990072c4686aa115d52be55717a_Texture_1_Texture2D:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - unity_Lightmaps:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - unity_LightmapsInd:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - unity_ShadowMasks:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    m_Ints: []
+    m_Floats:
+    - _Alpha: 1
+    - _Depth_Bias: 1
+    - _Depth_Fade: 0.7
+    - _Depth_Power: 1
+    - _Flow_Speed: 0.02
+    - _Flow_Strength: 0.008
+    - _Foam_Depth: 2
+    - _Foam_Distance: 1
+    - _Max_Depth: 0.5
+    - _QueueControl: 1
+    - _QueueOffset: 0
+    - _Size: 4
+    - _Wave_Chopiness: 0.02
+    - _Wave_intensity: 0.02
+    - _depth: 26.77
+    m_Colors:
+    - _Dark_Depth_Color: {r: 0.453364, g: 0.7038484, b: 0.8490566, a: 1}
+    - _Dark_Foam_Color: {r: 0.24313727, g: 0.5137255, b: 0.20000002, a: 1}
+    - _Deep_Depth_Color: {r: 0.5411765, g: 0.87843144, b: 0.5294118, a: 1}
+    - _Depth_Color: {r: 0.23529413, g: 0.5019608, b: 0.20000002, a: 1}
+    - _Ligth_Depth_Color: {r: 0.20281236, g: 0.39905015, b: 0.509434, a: 1}
+    - _Ligth_Foam_Color: {r: 1, g: 1, b: 1, a: 1}
+    - _Water_Color: {r: 0.50980395, g: 0.8431373, b: 0.48627454, a: 1}
+  m_BuildTextureStacks: []
+  m_AllowLocking: 1
