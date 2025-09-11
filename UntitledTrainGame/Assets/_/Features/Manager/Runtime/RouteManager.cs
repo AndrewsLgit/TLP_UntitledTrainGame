@@ -275,7 +275,7 @@ namespace Manager.Runtime
                 _currentSegmentTimer.Stop();
                 _currentSegmentTimer = null;
             }
-            // UIManager.Instance?.ClearProgressBars();
+            // UIManager.Instance?.ResetInternalState();
             CustomInputManager.Instance?.SwitchToPlayer();
             
             // Load and activate the scene
@@ -305,7 +305,7 @@ namespace Manager.Runtime
             
             OnTrainStationDiscovered?.Invoke(_segments[_currentStationIndex]);
             //test
-            UIManager.Instance?.ClearProgressBars();
+            UIManager.Instance?.ResetInternalState();
             CustomInputManager.Instance?.SwitchToPlayer();
             // _currentSegmentTimer.Stop();
             // timer stop is done in the uiManager
@@ -403,7 +403,7 @@ namespace Manager.Runtime
                 _currentSegmentTimer = null;
             }
             
-            UIManager.Instance?.ClearProgressBars();
+            UIManager.Instance?.ResetInternalState();
             
             _segments.Clear();
             _currentStationIndex = 0;
