@@ -80,7 +80,12 @@ namespace Manager.Runtime
             
             Assert.IsNotNull(_controlPanel, "ControlPanel not found! Please add it to the GameManager object!");
             GDControlPanel.OnValuesUpdated += OnControlPanelUpdated;
-            FactExists("DiscoveredStations", out _discoveredStations);
+            if (!FactExists("DiscoveredStations", out _discoveredStations))
+            {
+                _discoveredStations = new HashSet<Station_Data>();
+                SetFact("DiscoveredStations", _discoveredStations, false);
+            }
+            
         }
 
         private void OnDestroy()
@@ -115,14 +120,22 @@ namespace Manager.Runtime
             CleanupCurrentJourney();
             //RemovePausedRoute();
             _stationNetwork = stationNetwork;
+            
             // get all stations from route.start to route.end from StationGraphSO
             _segments = _stationNetwork.CalculatePath(trainRoute.StartStation, trainRoute.EndStation);
+            _segments[0].IsDiscovered = true;
             
-            if(FactExists("DiscoveredStations", out _discoveredStations))
-                foreach (var stationData in _segments.FindAll(x => x.IsDiscovered)
-                             .Where(x => !_discoveredStations.Contains(x)))
-                    _discoveredStations.Add(stationData);
+            // _discoveredStations.Add(_segments[0]);
+
+            foreach (var stationData in _segments.FindAll(x => x.IsDiscovered)
+                         .Where(x => !_discoveredStations.Contains(x)))
+                _discoveredStations.Add(stationData);
             
+            if (FactExists("DiscoveredStations", out _discoveredStations))
+            {
+                SetFact("DiscoveredStations", _discoveredStations, false);
+            }
+
             if (_segments == null)
             {
                 Error($"Path not calculated!");
