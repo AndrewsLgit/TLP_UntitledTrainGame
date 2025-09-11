@@ -522,20 +522,29 @@ namespace Game.Runtime
                     break;
                 case Image.FillMethod.Vertical:
                     // Start from Bottom when forward, Top when inverted
-                    vis.Image.fillOrigin = vis.Inverted
-                        ? (int)Image.OriginVertical.Top
-                        : (int)Image.OriginVertical.Bottom;
+                    if (vis.Inverted)
+                    {
+                        vis.Image.fillOrigin = vis.Image.fillOrigin == (int)Image.OriginVertical.Top 
+                            ? (int)Image.OriginVertical.Bottom : (int)Image.OriginVertical.Top;
+                    }
+                    // vis.Image.fillOrigin = vis.Inverted
+                    //     ? (int)Image.OriginVertical.Top
+                    //     : (int)Image.OriginVertical.Bottom;
                     vis.Image.fillClockwise = true;
                     break;
                 case Image.FillMethod.Radial90:
                     // Keep the asset's corner origin; flip clockwise when inverted so it fills from the opposite end.
                     vis.Image.fillOrigin = vis.OriginalFillOrigin;
-                    vis.Image.fillClockwise = vis.Inverted ? vis.OriginalFillClockwise : !vis.OriginalFillClockwise;
+                    if(vis.Inverted)
+                        vis.Image.fillClockwise = vis.Image.fillClockwise ? !vis.OriginalFillClockwise : vis.OriginalFillClockwise;
+                    // vis.Image.fillClockwise = vis.Inverted ? !vis.OriginalFillClockwise : vis.OriginalFillClockwise;
                     break;
                 default:
                     // Fallback: preserve origin, flip clockwise when inverted
-                    vis.Image.fillOrigin = vis.OriginalFillOrigin;
-                    vis.Image.fillClockwise = vis.Inverted ? vis.OriginalFillClockwise : !vis.OriginalFillClockwise;
+                    // vis.Image.fillOrigin = vis.OriginalFillOrigin;
+                    if(vis.Inverted)
+                        vis.Image.fillClockwise = vis.Image.fillClockwise ? !vis.Image.fillClockwise : vis.Image.fillClockwise;;
+                    // vis.Image.fillClockwise = vis.Inverted ? vis.OriginalFillClockwise : !vis.OriginalFillClockwise;
                     break;
             }
         }
