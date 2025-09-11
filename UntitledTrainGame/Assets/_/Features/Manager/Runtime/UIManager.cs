@@ -457,8 +457,8 @@ namespace Game.Runtime
             _travelTimes.Select(x => x.gameObject).ToList().ForEach(x => x.SetActive(false));
             _trainStations.Select(x => x.gameObject).ToList().ForEach(x => x.SetActive(false));
 
-            // if(FactExists<HashSet<Station_Data>>("DiscoveredStations", out var discovered))
-            // discovered = GetFact<HashSet<Station_Data>>("DiscoveredStations");
+            // if(FactExists<HashSet<Station_Data>>(RouteManager.Instance.StationFacts, out var discovered))
+            // discovered = GetFact<HashSet<Station_Data>>(RouteManager.Instance.StationFacts);
             //
             // if (discovered == null) return;
             // {
@@ -543,8 +543,8 @@ namespace Game.Runtime
         // Load discovered stations from FactSystem into local cache
         private void LoadDiscoveredStationsFromFacts()
         {
-            if(FactExists<HashSet<Station_Data>>("DiscoveredStations", out var discovered))
-                discovered = GetFact<HashSet<Station_Data>>("DiscoveredStations");
+            if(FactExists<HashSet<Station_Data>>(RouteManager.Instance.StationFacts, out var discovered))
+                discovered = GetFact<HashSet<Station_Data>>(RouteManager.Instance.StationFacts);
             
             _discoveredStationLabels.Clear();
             if(discovered == null) return;
@@ -555,8 +555,8 @@ namespace Game.Runtime
 
         private void RefreshDiscoveredStationsVisibility()
         {
-            // if (FactExists<HashSet<Station_Data>>("DiscoveredStations", out var discovered))
-            //     discovered = GetFact<HashSet<Station_Data>>("DiscoveredStations");
+            // if (FactExists<HashSet<Station_Data>>(RouteManager.Instance.StationFacts, out var discovered))
+            //     discovered = GetFact<HashSet<Station_Data>>(RouteManager.Instance.StationFacts);
             //
             // if (discovered == null) return;
             //
