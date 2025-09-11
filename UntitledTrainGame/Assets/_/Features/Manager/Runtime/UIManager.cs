@@ -72,6 +72,9 @@ namespace Game.Runtime
         }
 
         private readonly List<SegmentPathVisual> _segmentVisuals = new List<SegmentPathVisual>();
+        
+        // Keep a local cache of discovered station labels so we re-apply visibility after bulk hides
+        private readonly HashSet<string> _discoveredStationLabels = new HashSet<string>(StringComparer.Ordinal);
 
         // Private variables
         #endregion
@@ -105,6 +108,9 @@ namespace Game.Runtime
         {
             SetupMapItems();
             DisableAllMapItems(); 
+            
+            LoadDiscoveredStationsFromFacts();
+            RefreshDiscoveredStationsVisibility();
             Info($"UIManager started. Found {_trainStations.Count} stations and {_stationPathLines.Count} lines.");
 
 
@@ -137,6 +143,10 @@ namespace Game.Runtime
             _segments = segments;
 
             DisableAllMapItems();
+            
+            // Reload discovered stations from facts
+            LoadDiscoveredStationsFromFacts();
+            RefreshDiscoveredStationsVisibility(); // Keep any discovered stations visible
             _segmentsToLoad.Clear();
             _segmentVisuals.Clear();
             var from = segments[0];
@@ -159,9 +169,7 @@ namespace Game.Runtime
 
                 var lineTransform = _stationPathLines.FirstOrDefault(x =>
                     (x.name.Contains($"{fromLabel}") && x.name.Contains($"{toLabel}")));
-                // _segmentsToLoad.Add(
-                //     _stationPathLines.FirstOrDefault(x => (x.name.Contains($"{fromLabel}") && x.name.Contains($"{toLabel}")) 
-                //                                           || x.name.Contains($"{toLabel}_{fromLabel}")));
+                
                 _segmentsToLoad.Add(lineTransform);
                 
                 var img = lineTransform != null ? lineTransform.GetComponent<Image>() : null;
@@ -353,12 +361,12 @@ namespace Game.Runtime
 
         public void ClearProgressBars()
         {
-            foreach (var bar in _progressBars)
-            {
-                if (bar != null) Destroy(bar);
-            }
-            _progressBars.Clear();
-            _progressBarsSliders.Clear();
+            // foreach (var bar in _progressBars)
+            // {
+            //     if (bar != null) Destroy(bar);
+            // }
+            // _progressBars.Clear();
+            // _progressBarsSliders.Clear();
             _currentSegmentIndex = -1;
             
             // if (_currentTimer != null)
@@ -370,6 +378,8 @@ namespace Game.Runtime
             
             _currentTimer = null;
             _segmentVisuals.Clear();
+            _segmentsToLoad.Clear();
+            RefreshDiscoveredStationsVisibility();
         }
 
         #endregion
@@ -447,17 +457,20 @@ namespace Game.Runtime
             _travelTimes.Select(x => x.gameObject).ToList().ForEach(x => x.SetActive(false));
             _trainStations.Select(x => x.gameObject).ToList().ForEach(x => x.SetActive(false));
 
-            if(FactExists<HashSet<Station_Data>>("DiscoveredStations", out var discovered))
-            discovered = GetFact<HashSet<Station_Data>>("DiscoveredStations");
+            // if(FactExists<HashSet<Station_Data>>("DiscoveredStations", out var discovered))
+            // discovered = GetFact<HashSet<Station_Data>>("DiscoveredStations");
+            //
+            // if (discovered == null) return;
+            // {
+            //     foreach (var label in discovered.Select(station => $"{station.LinePrefix}{station.Id}"))
+            //     {
+            //         _trainStations.FirstOrDefault(x => x.name.Contains(label))
+            //             .gameObject.SetActive(true);
+            //     }
+            // }
             
-            if (discovered == null) return;
-            {
-                foreach (var label in discovered.Select(station => $"{station.LinePrefix}{station.Id}"))
-                {
-                    _trainStations.FirstOrDefault(x => x.name.Contains(label))
-                        .gameObject.SetActive(true);
-                }
-            }
+            // Re-enable any discovered stations
+            RefreshDiscoveredStationsVisibility();
         }
 
         private void UpdateClockTime(GameTime time)
@@ -485,9 +498,12 @@ namespace Game.Runtime
 
         private void OnTrainStationDiscovered(Station_Data station)
         {
-            _currentStationLabel = $"{station.LinePrefix}{station.Id}"; 
-            _trainStations.FirstOrDefault(x => x.name.Contains(_currentStationLabel))
-                .gameObject.SetActive(true);
+            _currentStationLabel = $"{station.LinePrefix}{station.Id}";
+            _discoveredStationLabels.Add(_currentStationLabel);
+            var t = _trainStations.FirstOrDefault(x => x.name.Contains(_currentStationLabel));
+            if(t != null) t.gameObject.SetActive(true);
+            // _trainStations.FirstOrDefault(x => x.name.Contains(_currentStationLabel))
+                // .gameObject.SetActive(true);
         }
         
         // Configure the Image to fill from the correct start depending on direction and shape.
@@ -521,6 +537,41 @@ namespace Game.Runtime
                     vis.Image.fillOrigin = vis.OriginalFillOrigin;
                     vis.Image.fillClockwise = vis.Inverted ? vis.OriginalFillClockwise : !vis.OriginalFillClockwise;
                     break;
+            }
+        }
+        
+        // Load discovered stations from FactSystem into local cache
+        private void LoadDiscoveredStationsFromFacts()
+        {
+            if(FactExists<HashSet<Station_Data>>("DiscoveredStations", out var discovered))
+                discovered = GetFact<HashSet<Station_Data>>("DiscoveredStations");
+            
+            _discoveredStationLabels.Clear();
+            if(discovered == null) return;
+
+            foreach (var label in discovered.Select(station => $"{station.LinePrefix}{station.Id}"))
+                _discoveredStationLabels.Add(label);
+        }
+
+        private void RefreshDiscoveredStationsVisibility()
+        {
+            // if (FactExists<HashSet<Station_Data>>("DiscoveredStations", out var discovered))
+            //     discovered = GetFact<HashSet<Station_Data>>("DiscoveredStations");
+            //
+            // if (discovered == null) return;
+            //
+            // foreach (var label in discovered.Select(station => $"{station.LinePrefix}{station.Id}"))
+            // {
+            //     var t = _trainStations.FirstOrDefault(x => x.name.Contains(label));
+            //     if (t != null) t.gameObject.SetActive(true);
+            // }
+            
+            if(_trainStations == null) return;
+
+            foreach (var label in _discoveredStationLabels)
+            {
+                var t = _trainStations.FirstOrDefault(x => x.name.Contains(label));
+                if (t != null) t.gameObject.SetActive(true);
             }
         }
 
