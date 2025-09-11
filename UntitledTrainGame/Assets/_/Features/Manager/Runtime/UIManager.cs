@@ -60,6 +60,18 @@ namespace Game.Runtime
         private Transform _currentStationInMap;
         private string _currentStationLabel;
         private bool _isCurrentInverted = false;
+        
+        // Per-segment visual info to handle direction/orientation
+        private struct SegmentPathVisual
+        {
+            public Transform Transform;
+            public Image Image;
+            public bool Inverted;
+            public int OriginalFillOrigin;
+            public bool OriginalFillClockwise;
+        }
+
+        private readonly List<SegmentPathVisual> _segmentVisuals = new List<SegmentPathVisual>();
 
         // Private variables
         #endregion
@@ -126,6 +138,7 @@ namespace Game.Runtime
 
             DisableAllMapItems();
             _segmentsToLoad.Clear();
+            _segmentVisuals.Clear();
             var from = segments[0];
             var fromLabel = $"{from.LinePrefix}{from.Id}";
             
@@ -141,11 +154,40 @@ namespace Game.Runtime
                 fromLabel = $"{from.LinePrefix}{from.Id}";
                 var toLabel = $"{to.LinePrefix}{to.Id}";
                 
-                _isCurrentInverted = from.Id < to.Id;
+                // _isCurrentInverted = from.Id > to.Id;
+                var inverted = from.Id > to.Id;
+
+                var lineTransform = _stationPathLines.FirstOrDefault(x =>
+                    (x.name.Contains($"{fromLabel}") && x.name.Contains($"{toLabel}")));
+                // _segmentsToLoad.Add(
+                //     _stationPathLines.FirstOrDefault(x => (x.name.Contains($"{fromLabel}") && x.name.Contains($"{toLabel}")) 
+                //                                           || x.name.Contains($"{toLabel}_{fromLabel}")));
+                _segmentsToLoad.Add(lineTransform);
                 
-                _segmentsToLoad.Add(
-                    _stationPathLines.FirstOrDefault(x => (x.name.Contains($"{fromLabel}") && x.name.Contains($"{toLabel}")) 
-                                                          || x.name.Contains($"{toLabel}_{fromLabel}")));
+                var img = lineTransform != null ? lineTransform.GetComponent<Image>() : null;
+                if (img == null)
+                {
+                    Warning($"No Image found for path line {fromLabel}->{toLabel}");
+                }
+                else
+                {
+                    // Ensure we start hidden
+                    img.fillAmount = 0f;
+                    lineTransform.gameObject.SetActive(false);
+                }
+
+                if (lineTransform != null)
+                {
+                    _segmentVisuals.Add(new SegmentPathVisual
+                    {
+                        Transform = lineTransform,
+                        Image = img,
+                        Inverted = inverted,
+                        OriginalFillOrigin = img != null ? img.fillOrigin : 0,
+                        OriginalFillClockwise = img != null && img.fillClockwise
+                    });
+                }
+
                 
                 Info($"Created path line for segment {fromLabel} -> {toLabel}");
             }
@@ -161,6 +203,18 @@ namespace Game.Runtime
             _currentSegmentIndex = segmentIndex;
             _currentTimer = timer;
             
+            // Prepare visual for this segment with proper direction/origin
+            if (_currentSegmentIndex >= 0 && _currentSegmentIndex < _segmentVisuals.Count)
+            {
+                var vis = _segmentVisuals[_currentSegmentIndex];
+                if (vis.Image != null)
+                {
+                    ApplyDirectionToImage(vis);
+                    vis.Image.fillAmount = 0f;
+                    vis.Transform.gameObject.SetActive(true);
+                }
+            }
+            
             if(_currentTimer != null) _currentTimer.OnTimerTick += UpdateCurrentMapProgress;
                 
             Info($"Started progress tracking for segment {segmentIndex}");
@@ -170,13 +224,23 @@ namespace Game.Runtime
             // Update current segment progress (0 -> 1)
             if (_currentSegmentIndex >= 0 && _currentSegmentIndex < _segmentsToLoad.Count)
             {
-                var bar = _segmentsToLoad[_currentSegmentIndex].GetComponent<Image>();
-                if (_isCurrentInverted)
-                    bar.fillClockwise = true;
-                bar.fillAmount = 0f;
-                _segmentsToLoad[_currentSegmentIndex].gameObject.SetActive(true);
-                bar.fillAmount = 1f - progress;
-                InfoInProgress($"Timer progress: {progress:P0}");
+                // var bar = _segmentsToLoad[_currentSegmentIndex].GetComponent<Image>();
+                // if (_isCurrentInverted)
+                //     bar.fillClockwise = true;
+                // bar.fillAmount = 0f;
+                // _segmentsToLoad[_currentSegmentIndex].gameObject.SetActive(true);
+                // bar.fillAmount = 1f - progress;
+                // InfoInProgress($"Timer progress: {progress:P0}");
+                
+                var vis = _segmentVisuals[_currentSegmentIndex];
+                var bar = vis.Image;
+                if (bar != null)
+                {
+                    // With origin/clockwise adjusted per direction, we can set fill directly
+                    bar.fillAmount = Mathf.Clamp01(1f - progress);
+                    InfoInProgress($"Timer progress: {progress:P0}");
+                }
+
             }
 
             MarkCompletedMapSegments();
@@ -187,7 +251,10 @@ namespace Game.Runtime
             {
                 if (i < _segmentsToLoad.Count)
                 {
-                    _segmentsToLoad[i].GetComponent<Image>().fillAmount = 1f;
+                    // _segmentsToLoad[i].GetComponent<Image>().fillAmount = 1f;
+                    
+                    _segmentVisuals[i].Image.fillAmount = 1f;
+                    
                     // var currentStation = _segments[_currentSegmentIndex];
                     // _currentStationLabel = $"{currentStation.LinePrefix}{currentStation.Id}"; 
                     // _trainStations.FirstOrDefault(x => x.name.Contains(_currentStationLabel))
@@ -198,91 +265,91 @@ namespace Game.Runtime
         
         
 
-        public void CreateProgressBarsForRoute(List<Station_Data> segments, StationNetwork_Data network,
-            float compressionFactor)
-        {
-            ClearProgressBars();
+        // public void CreateProgressBarsForRoute(List<Station_Data> segments, StationNetwork_Data network,
+        //     float compressionFactor)
+        // {
+        //     ClearProgressBars();
+        //
+        //     for (var i = 0; i < segments.Count - 1; i++)
+        //     {
+        //         var from = segments[i];
+        //         var to = segments[i + 1];
+        //
+        //         GameObject progressBarObj = Instantiate(_progressBarPrefab, _progressBarsParent);
+        //         Slider slider = progressBarObj.GetComponentInChildren<Slider>();
+        //         TextMeshProUGUI label = progressBarObj.GetComponentInChildren<TextMeshProUGUI>();
+        //
+        //         if (label != null)
+        //         {
+        //             label.text = $"Station {from.GetStationName()} -> Station {to.GetStationName()}";
+        //         }
+        //
+        //         if (slider != null)
+        //         {
+        //             slider.value = 0f;
+        //             var fillImage = slider.fillRect.GetComponent<Image>();
+        //             if (fillImage != null)
+        //             {
+        //                 // fillImage.color = GetSegmentColor(i);
+        //                 fillImage.color = Color.green;
+        //             }
+        //         }
+        //
+        //         progressBarObj.SetActive(true);
+        //         _progressBars.Add(progressBarObj);
+        //         _progressBarsSliders.Add(slider);
+        //         
+        //         Info($"Created progress bar for segment {segments[i].GetStationName()} -> {segments[i + 1].GetStationName()}");
+        //
+        //         //_trainTravelUI.SetActive(true);
+        //     }
+        // }
 
-            for (var i = 0; i < segments.Count - 1; i++)
-            {
-                var from = segments[i];
-                var to = segments[i + 1];
-
-                GameObject progressBarObj = Instantiate(_progressBarPrefab, _progressBarsParent);
-                Slider slider = progressBarObj.GetComponentInChildren<Slider>();
-                TextMeshProUGUI label = progressBarObj.GetComponentInChildren<TextMeshProUGUI>();
-
-                if (label != null)
-                {
-                    label.text = $"Station {from.GetStationName()} -> Station {to.GetStationName()}";
-                }
-
-                if (slider != null)
-                {
-                    slider.value = 0f;
-                    var fillImage = slider.fillRect.GetComponent<Image>();
-                    if (fillImage != null)
-                    {
-                        // fillImage.color = GetSegmentColor(i);
-                        fillImage.color = Color.green;
-                    }
-                }
-
-                progressBarObj.SetActive(true);
-                _progressBars.Add(progressBarObj);
-                _progressBarsSliders.Add(slider);
-                
-                Info($"Created progress bar for segment {segments[i].GetStationName()} -> {segments[i + 1].GetStationName()}");
-
-                //_trainTravelUI.SetActive(true);
-            }
-        }
-
-        public void StartSegmentProgress(int segmentIndex, CountdownTimer timer)
-        {
-            // Unsub from previous timer
-            if(_currentTimer != null) _currentTimer.OnTimerTick -= UpdateCurrentProgress;
-            
-            _currentSegmentIndex = segmentIndex;
-            _currentTimer = timer;
-            
-            if(_currentTimer != null) _currentTimer.OnTimerTick += UpdateCurrentProgress;
-                
-            Info($"Started progress tracking for segment {segmentIndex}");
-        }
-        
-        private void UpdateCurrentProgress(float progress)
-        {
-            // Update current segment progress (0 -> 1)
-            if (_currentSegmentIndex >= 0 && _currentSegmentIndex < _progressBarsSliders.Count)
-            {
-                _progressBarsSliders[_currentSegmentIndex].value = 1f - progress;
-                InfoInProgress($"Timer progress: {progress:P0}");
-            }
-
-            MarkCompletedSegments();
-        }
-        
-
-        private void MarkCompletedSegments()
-        {
-            for (int i = 0; i < _currentSegmentIndex; i++)
-            {
-                if (i < _progressBarsSliders.Count)
-                {
-                    _progressBarsSliders[i].value = 1f;
-                }
-            }
-        }
-
-        private Color GetSegmentColor(int segmentIndex)
-        {
-            Color[] colors = { 
-                Color.blue, Color.green, Color.yellow, 
-                Color.red, Color.magenta, Color.cyan 
-            };
-            return colors[segmentIndex % colors.Length];
-        }
+        // public void StartSegmentProgress(int segmentIndex, CountdownTimer timer)
+        // {
+        //     // Unsub from previous timer
+        //     if(_currentTimer != null) _currentTimer.OnTimerTick -= UpdateCurrentProgress;
+        //     
+        //     _currentSegmentIndex = segmentIndex;
+        //     _currentTimer = timer;
+        //     
+        //     if(_currentTimer != null) _currentTimer.OnTimerTick += UpdateCurrentProgress;
+        //         
+        //     Info($"Started progress tracking for segment {segmentIndex}");
+        // }
+        //
+        // private void UpdateCurrentProgress(float progress)
+        // {
+        //     // Update current segment progress (0 -> 1)
+        //     if (_currentSegmentIndex >= 0 && _currentSegmentIndex < _progressBarsSliders.Count)
+        //     {
+        //         _progressBarsSliders[_currentSegmentIndex].value = 1f - progress;
+        //         InfoInProgress($"Timer progress: {progress:P0}");
+        //     }
+        //
+        //     MarkCompletedSegments();
+        // }
+        //
+        //
+        // private void MarkCompletedSegments()
+        // {
+        //     for (int i = 0; i < _currentSegmentIndex; i++)
+        //     {
+        //         if (i < _progressBarsSliders.Count)
+        //         {
+        //             _progressBarsSliders[i].value = 1f;
+        //         }
+        //     }
+        // }
+        //
+        // private Color GetSegmentColor(int segmentIndex)
+        // {
+        //     Color[] colors = { 
+        //         Color.blue, Color.green, Color.yellow, 
+        //         Color.red, Color.magenta, Color.cyan 
+        //     };
+        //     return colors[segmentIndex % colors.Length];
+        // }
 
         public void ClearProgressBars()
         {
@@ -302,6 +369,7 @@ namespace Game.Runtime
             // }
             
             _currentTimer = null;
+            _segmentVisuals.Clear();
         }
 
         #endregion
@@ -421,6 +489,41 @@ namespace Game.Runtime
             _trainStations.FirstOrDefault(x => x.name.Contains(_currentStationLabel))
                 .gameObject.SetActive(true);
         }
+        
+        // Configure the Image to fill from the correct start depending on direction and shape.
+        private void ApplyDirectionToImage(SegmentPathVisual vis)
+        {
+            if (vis.Image == null) return;
+
+            switch (vis.Image.fillMethod)
+            {
+                case Image.FillMethod.Horizontal:
+                    // Start from Left when forward, Right when inverted
+                    vis.Image.fillOrigin = vis.Inverted
+                        ? (int)Image.OriginHorizontal.Right
+                        : (int)Image.OriginHorizontal.Left;
+                    vis.Image.fillClockwise = true;
+                    break;
+                case Image.FillMethod.Vertical:
+                    // Start from Bottom when forward, Top when inverted
+                    vis.Image.fillOrigin = vis.Inverted
+                        ? (int)Image.OriginVertical.Top
+                        : (int)Image.OriginVertical.Bottom;
+                    vis.Image.fillClockwise = true;
+                    break;
+                case Image.FillMethod.Radial90:
+                    // Keep the asset's corner origin; flip clockwise when inverted so it fills from the opposite end.
+                    vis.Image.fillOrigin = vis.OriginalFillOrigin;
+                    vis.Image.fillClockwise = vis.Inverted ? vis.OriginalFillClockwise : !vis.OriginalFillClockwise;
+                    break;
+                default:
+                    // Fallback: preserve origin, flip clockwise when inverted
+                    vis.Image.fillOrigin = vis.OriginalFillOrigin;
+                    vis.Image.fillClockwise = vis.Inverted ? vis.OriginalFillClockwise : !vis.OriginalFillClockwise;
+                    break;
+            }
+        }
+
         #endregion
     }
 }
