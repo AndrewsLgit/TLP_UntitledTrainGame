@@ -52,6 +52,7 @@ namespace Manager.Runtime
         public static RouteManager Instance { get; private set; }
         public event Action m_onPausedRouteRemoved;
         public event Action<Station_Data> OnTrainStationDiscovered;
+        public event Action OnDiscoveredTrainStationsUpdated;
         
         public string StationFacts => _stationFacts;
         
@@ -75,6 +76,8 @@ namespace Manager.Runtime
             // Assign instance as this current object
             Instance = this;
             DontDestroyOnLoad(gameObject);
+            
+            SaveAllVisibleStations();
         }
 
         // Start is called once before the first execution of Update after the MonoBehaviour is created
@@ -86,11 +89,11 @@ namespace Manager.Runtime
             
             Assert.IsNotNull(_controlPanel, "ControlPanel not found! Please add it to the GameManager object!");
             GDControlPanel.OnValuesUpdated += OnControlPanelUpdated;
-            if (!FactExists(_stationFacts, out _discoveredStations))
-            {
-                _discoveredStations = new HashSet<Station_Data>();
-                SetFact(_stationFacts, _discoveredStations, false);
-            }
+            // if (!FactExists(_stationFacts, out _discoveredStations))
+            // {
+            //     _discoveredStations = new HashSet<Station_Data>();
+            //     SetFact(_stationFacts, _discoveredStations, false);
+            // }
             
         }
 
@@ -432,6 +435,8 @@ namespace Manager.Runtime
                     station.To.IsDiscovered = false;
                 }
             }
+            
+            SaveAllVisibleStations();
         }
         
         [ContextMenu("Make every station visible")]
@@ -445,6 +450,34 @@ namespace Manager.Runtime
                     station.To.IsDiscovered = true;
                 }
             }
+            
+            SaveAllVisibleStations();
+        }
+
+        private void SaveAllVisibleStations()
+        {
+            if (!FactExists(_stationFacts, out _discoveredStations))
+            {
+                _discoveredStations = new HashSet<Station_Data>();
+                SetFact(_stationFacts, _discoveredStations, false);
+            }
+            foreach (var stationNetwork in _allStationNetworks)
+            {
+                foreach (var station in stationNetwork.Connections.Where(x => x.From.IsDiscovered || x.To.IsDiscovered))
+                {
+                    // if((station.From.LinePrefix == StationPrefix.A && station.From.Id == 3)
+                    //    || (station.To.LinePrefix == StationPrefix.A && station.To.Id == 3)) continue;
+                    // station.From.IsDiscovered = false;
+                    // station.To.IsDiscovered = false;
+                    //
+                    if(station.From.IsDiscovered)
+                        _discoveredStations.Add(station.From);
+                    if(station.To.IsDiscovered)
+                        _discoveredStations.Add(station.To);
+                }
+            }
+            
+            OnDiscoveredTrainStationsUpdated?.Invoke();
         }
         #endregion
     }
