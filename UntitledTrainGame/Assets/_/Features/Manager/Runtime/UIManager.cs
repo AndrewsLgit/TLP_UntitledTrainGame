@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 using Foundation.Runtime;
 using Manager.Runtime;
 using SharedData.Runtime;
@@ -152,25 +153,82 @@ namespace Game.Runtime
             var from = segments[0];
             var fromLabel = $"{from.LinePrefix}{from.Id}";
             
-            _currentStationInMap = _trainStations.FirstOrDefault(x =>
-                x.name.Contains(fromLabel) /*segments[0].StationScene.name.Contains(x.name)*/);
-            _currentStationInMap.gameObject.SetActive(true);
+            // _currentStationInMap = _trainStations.FirstOrDefault(x =>
+            //     x.name.Contains(fromLabel) /*segments[0].StationScene.name.Contains(x.name)*/);
+            // _currentStationInMap.gameObject.SetActive(true);
+            
             
             for (var i = 0; i < segments.Count - 1; i++)
             {
-                from = segments[i];
-                var to = segments[i + 1];
+                var segFrom = segments[i];
+                var segTo = segments[i + 1];
 
-                fromLabel = $"{from.LinePrefix}{from.Id}";
-                var toLabel = $"{to.LinePrefix}{to.Id}";
+                fromLabel = $"{segFrom.LinePrefix}{segFrom.Id}";
+                var toLabel = $"{segTo.LinePrefix}{segTo.Id}";
                 
                 // _isCurrentInverted = from.Id > to.Id;
-                var inverted = from.Id > to.Id;
-
+                // var inverted = segFrom.Id > segTo.Id;
+                
                 var lineTransform = _stationPathLines.FirstOrDefault(x =>
                     (x.name.Contains($"{fromLabel}") && x.name.Contains($"{toLabel}")));
                 
+                // Local helpers to parse labels like "A12" into (prefix="A", number=12)
+                (string prefix, int number) SplitLabel(string label)
+                {
+                    var m = Regex.Match(label, @"^([A-Za-z]+)(\d+)$");
+                    return m.Success ? (m.Groups[1].Value, int.Parse(m.Groups[2].Value)) : (string.Empty, 0);
+                }
+
+                bool ComputeInverted(string lfName, string fromLbl, string toLbl, int fallbackFromId, int fallbackToId)
+                {
+                    if (string.IsNullOrEmpty(lfName)) return fallbackFromId > fallbackToId;
+
+                    // Extract all labels embedded in the line transform name (e.g., "D2_A5_Path")
+                    var labelMatches = Regex.Matches(lfName, @"[A-Za-z]+\d+")
+                                            .Cast<Match>()
+                                            .Select(m => m.Value)
+                                            .Distinct()
+                                            .ToList();
+                    if (labelMatches.Count < 2)
+                        return fallbackFromId > fallbackToId;
+
+                    // If the line contains fromLabel, compare fromLabel with the other label that shares its prefix.
+                    if (labelMatches.Contains(fromLbl))
+                    {
+                        var (pFrom, nFrom) = SplitLabel(fromLbl);
+
+                        var other = labelMatches.FirstOrDefault(x => !string.Equals(x, fromLbl, StringComparison.Ordinal) && x.Contains(pFrom));
+                        var (pOther, nOther) = SplitLabel(other ?? string.Empty);
+                        if (!string.IsNullOrEmpty(pFrom) && pFrom == pOther)
+                        {
+                            // Example: if common prefix is 'D' and other is D5 => compare D2 > D5
+                            return nFrom > nOther;
+                        }
+                    }
+
+                    // If the line contains toLabel, compare the other label (with same prefix) against toLabel.
+                    if (labelMatches.Contains(toLbl))
+                    {
+                        var (pTo, nTo) = SplitLabel(toLbl);
+                        var other = labelMatches.FirstOrDefault(x => !string.Equals(x, toLbl, StringComparison.Ordinal) && x.Contains(pTo));
+                        
+                        var (pOther, nOther) = SplitLabel(other ?? string.Empty);
+                        if (!string.IsNullOrEmpty(pTo) && pTo == pOther)
+                        {
+                            // Example: if common prefix is 'A' and other is A5 => compare A5 > A2
+                            return nOther > nTo;
+                        }
+                    }
+
+                    // Fallback to numeric comparison on segment ids if no suitable common-prefix comparison was found
+                    return fallbackFromId > fallbackToId;
+                }
+
+                var inverted = ComputeInverted(lineTransform != null ? lineTransform.name : null, fromLabel, toLabel, segFrom.Id, segTo.Id);
+
+
                 _segmentsToLoad.Add(lineTransform);
+                
                 
                 var img = lineTransform != null ? lineTransform.GetComponent<Image>() : null;
                 if (img == null)
@@ -206,7 +264,7 @@ namespace Game.Runtime
             if(_currentTimer != null) _currentTimer.OnTimerTick -= UpdateCurrentMapProgress;
             
             
-            _currentStationInMap.gameObject.SetActive(true); 
+            //_currentStationInMap.gameObject.SetActive(true); 
             
             _currentSegmentIndex = segmentIndex;
             _currentTimer = timer;
@@ -271,94 +329,6 @@ namespace Game.Runtime
             }
         }
         
-        
-
-        // public void CreateProgressBarsForRoute(List<Station_Data> segments, StationNetwork_Data network,
-        //     float compressionFactor)
-        // {
-        //     ClearProgressBars();
-        //
-        //     for (var i = 0; i < segments.Count - 1; i++)
-        //     {
-        //         var from = segments[i];
-        //         var to = segments[i + 1];
-        //
-        //         GameObject progressBarObj = Instantiate(_progressBarPrefab, _progressBarsParent);
-        //         Slider slider = progressBarObj.GetComponentInChildren<Slider>();
-        //         TextMeshProUGUI label = progressBarObj.GetComponentInChildren<TextMeshProUGUI>();
-        //
-        //         if (label != null)
-        //         {
-        //             label.text = $"Station {from.GetStationName()} -> Station {to.GetStationName()}";
-        //         }
-        //
-        //         if (slider != null)
-        //         {
-        //             slider.value = 0f;
-        //             var fillImage = slider.fillRect.GetComponent<Image>();
-        //             if (fillImage != null)
-        //             {
-        //                 // fillImage.color = GetSegmentColor(i);
-        //                 fillImage.color = Color.green;
-        //             }
-        //         }
-        //
-        //         progressBarObj.SetActive(true);
-        //         _progressBars.Add(progressBarObj);
-        //         _progressBarsSliders.Add(slider);
-        //         
-        //         Info($"Created progress bar for segment {segments[i].GetStationName()} -> {segments[i + 1].GetStationName()}");
-        //
-        //         //_trainTravelUI.SetActive(true);
-        //     }
-        // }
-
-        // public void StartSegmentProgress(int segmentIndex, CountdownTimer timer)
-        // {
-        //     // Unsub from previous timer
-        //     if(_currentTimer != null) _currentTimer.OnTimerTick -= UpdateCurrentProgress;
-        //     
-        //     _currentSegmentIndex = segmentIndex;
-        //     _currentTimer = timer;
-        //     
-        //     if(_currentTimer != null) _currentTimer.OnTimerTick += UpdateCurrentProgress;
-        //         
-        //     Info($"Started progress tracking for segment {segmentIndex}");
-        // }
-        //
-        // private void UpdateCurrentProgress(float progress)
-        // {
-        //     // Update current segment progress (0 -> 1)
-        //     if (_currentSegmentIndex >= 0 && _currentSegmentIndex < _progressBarsSliders.Count)
-        //     {
-        //         _progressBarsSliders[_currentSegmentIndex].value = 1f - progress;
-        //         InfoInProgress($"Timer progress: {progress:P0}");
-        //     }
-        //
-        //     MarkCompletedSegments();
-        // }
-        //
-        //
-        // private void MarkCompletedSegments()
-        // {
-        //     for (int i = 0; i < _currentSegmentIndex; i++)
-        //     {
-        //         if (i < _progressBarsSliders.Count)
-        //         {
-        //             _progressBarsSliders[i].value = 1f;
-        //         }
-        //     }
-        // }
-        //
-        // private Color GetSegmentColor(int segmentIndex)
-        // {
-        //     Color[] colors = { 
-        //         Color.blue, Color.green, Color.yellow, 
-        //         Color.red, Color.magenta, Color.cyan 
-        //     };
-        //     return colors[segmentIndex % colors.Length];
-        // }
-
         public void ClearProgressBars()
         {
             // foreach (var bar in _progressBars)
@@ -503,7 +473,7 @@ namespace Game.Runtime
             var t = _trainStations.FirstOrDefault(x => x.name.Contains(_currentStationLabel));
             if(t != null) t.gameObject.SetActive(true);
             // _trainStations.FirstOrDefault(x => x.name.Contains(_currentStationLabel))
-                // .gameObject.SetActive(true);
+            // .gameObject.SetActive(true);
         }
         
         // Configure the Image to fill from the correct start depending on direction and shape.
@@ -583,7 +553,7 @@ namespace Game.Runtime
                 if (t != null) t.gameObject.SetActive(true);
             }
         }
-
+        
         #endregion
     }
 }
