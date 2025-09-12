@@ -43,6 +43,8 @@ namespace Manager.Runtime
 
         private readonly string _stationFacts = "DiscoveredStations";
 
+        private bool _reloaded = false;
+
         // Private Variables
         #endregion
         
@@ -89,17 +91,29 @@ namespace Manager.Runtime
             
             Assert.IsNotNull(_controlPanel, "ControlPanel not found! Please add it to the GameManager object!");
             GDControlPanel.OnValuesUpdated += OnControlPanelUpdated;
+            ClockManager.Instance.m_OnLoopEnd += () =>
+            {
+                _sceneToLoad = _sceneManager.StartScene;
+                _reloaded = true;
+                // EndJourneyNoLoad();
+            };
             // if (!FactExists(_stationFacts, out _discoveredStations))
             // {
             //     _discoveredStations = new HashSet<Station_Data>();
             //     SetFact(_stationFacts, _discoveredStations, false);
             // }
-            
+
         }
 
         private void OnDestroy()
         {
             GDControlPanel.OnValuesUpdated -= OnControlPanelUpdated;
+            ClockManager.Instance.m_OnLoopEnd -= () =>
+            {
+                _sceneToLoad = _sceneManager.StartScene;
+                _reloaded = true;
+                // EndJourneyNoLoad();
+            };
         }
 
         // Update is called once per frame
@@ -242,14 +256,19 @@ namespace Manager.Runtime
         private void EndSegment()
         {
             _currentStationIndex++;
-            ClockManager.Instance.AdvanceTime(_segmentTime);
-            if (!_isExpress && _stopEarly)
+            if(!_reloaded)
+                ClockManager.Instance.AdvanceTime(_segmentTime);
+            if (!_isExpress && _stopEarly && !_reloaded)
             {
                 ChangeDestination(_currentStationIndex);
                 _stopEarly = false;
                 return;
             }
-            StartSegment(_currentStationIndex);
+            if (!_reloaded)
+                StartSegment(_currentStationIndex);
+            
+            if(_reloaded)
+                EndJourney();
         }
 
         private void ChangeDestination(int index)
@@ -295,7 +314,8 @@ namespace Manager.Runtime
         private void EndJourney()
         {
             InfoDone($"Journey ended.");
-            _sceneManager.PreloadScene(_sceneToLoad);
+            if(!_reloaded)
+                _sceneManager.PreloadScene(_sceneToLoad);
             //todo: make the Station_Data.isDiscovered = true;
             // once we arrive at the destination
             _segments[_currentStationIndex].IsDiscovered = true;
@@ -319,8 +339,25 @@ namespace Manager.Runtime
             _currentSegmentTimer = null;
             _isExpress = false;
             //test
-            _sceneManager.ActivateScene();
+            if(!_reloaded)
+                _sceneManager.ActivateScene();
             
+            RemovePausedRoute();
+        }
+
+        private void EndJourneyNoLoad()
+        {
+            InfoDone($"Journey ended.");
+            if (FactExists(_stationFacts, out _discoveredStations) &&
+                _discoveredStations.Add(_segments[_currentStationIndex]))
+            {
+                SetFact(_stationFacts, _discoveredStations, false);
+            }
+            UIManager.Instance?.ResetInternalState();
+            UIManager.Instance?.HideMap();
+            CustomInputManager.Instance?.SwitchToPlayer();
+            _currentSegmentTimer = null;
+            _isExpress = false;
             RemovePausedRoute();
         }
 
@@ -387,6 +424,9 @@ namespace Manager.Runtime
             _trainRoute = null;
             _routePaused = false;
             _routePausedIndex = -1;
+            _reloaded = false;
+            
+            
 
             m_onPausedRouteRemoved?.Invoke();
         }
