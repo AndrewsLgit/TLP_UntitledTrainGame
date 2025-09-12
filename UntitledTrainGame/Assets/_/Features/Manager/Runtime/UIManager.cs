@@ -111,7 +111,7 @@ namespace Game.Runtime
             SetFact(_discoveredPathLinesFact, _discoveredPathLines, false);
             
             // Cache UI map children
-            _UIMapChildrenCache = _mainMapUIParent.GetComponentsInChildren<Transform>();
+            _UIMapChildrenCache = _mainMapUIParent.GetComponentsInChildren<Transform>().Where(x => x.parent == _mainMapUIParent).ToArray();
         }
 
         private void Start()
@@ -355,7 +355,7 @@ namespace Game.Runtime
             _trainStations = _mainMapUIParent.GetComponentsInChildren<Transform>()
                 .Where(c => c.parent.name == _trainStationLayerName)
                 .Select(c => c).ToHashSet();
-
+            
             // _trains = _trainStations.ToArray();
             
             _stationPathLines = _mainMapUIParent.GetComponentsInChildren<Transform>()
@@ -367,6 +367,7 @@ namespace Game.Runtime
             _travelTimes = _mainMapUIParent.GetComponentsInChildren<Transform>()
                 .Where(c => c.parent.name == _travelTimeLayerName)
                 .Select(c => c).ToHashSet();
+
             
             _trains = _trainStations.ToArray();
             _stationPathLinesList = _stationPathLines.ToArray();
