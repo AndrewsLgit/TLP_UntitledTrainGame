@@ -21,8 +21,8 @@ Material:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: MAT_PROPS_ForeGround
-  m_Shader: {fileID: -6465566751694194690, guid: dc4137e205611414da46ca163328b4aa, type: 3}
-  m_Parent: {fileID: 2100000, guid: 9b7cbd4ef0fa4f64eabef5397d0dc78a, type: 2}
+  m_Shader: {fileID: -6465566751694194690, guid: 4e7e25f4a6ec9884f949d4f1415619c8, type: 3}
+  m_Parent: {fileID: 2100000, guid: 2690da05b98a27e4d968152246f1ab78, type: 2}
   m_ModifiedSerializedProperties: 0
   m_ValidKeywords: []
   m_InvalidKeywords: []
