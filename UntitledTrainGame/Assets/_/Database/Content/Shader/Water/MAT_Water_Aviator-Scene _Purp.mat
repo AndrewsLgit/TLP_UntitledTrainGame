@@ -80,7 +80,7 @@ Material:
     - _depth: 26.77
     m_Colors:
     - _Dark_Depth_Color: {r: 0.453364, g: 0.7038484, b: 0.8490566, a: 1}
-    - _Dark_Foam_Color: {r: 0.9764706, g: 0.85882354, b: 0.99215686, a: 1}
+    - _Dark_Foam_Color: {r: 0.98279685, g: 0.8537736, b: 1, a: 1}
     - _Deep_Depth_Color: {r: 0.07058824, g: 0.24705884, b: 0.46274513, a: 1}
     - _Depth_Color: {r: 0.343147, g: 0.5292181, b: 0.5773585, a: 1}
     - _Ligth_Depth_Color: {r: 0.20281236, g: 0.39905015, b: 0.509434, a: 1}
