@@ -51,13 +51,12 @@ namespace Tools.Runtime
                 float previousProgress = Progress;
                 Time -= deltaTime;
                 
-                if(Math.Abs(Progress - previousProgress) > 0.001f) OnTimerTick.Invoke(Progress);
+                if(Math.Abs(Progress - previousProgress) > 0.0001f) OnTimerTick.Invoke(Progress);
             }
-            
-            if (IsRunning && Time <= 0) {
-                OnTimerTick.Invoke(Progress);
-                Stop();
-            }
+
+            if (!IsRunning || !(Time <= 0)) return;
+            OnTimerTick.Invoke(Progress);
+            Stop();
         }
         
         public bool IsFinished => Time <= 0;

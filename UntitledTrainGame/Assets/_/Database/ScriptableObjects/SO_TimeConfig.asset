@@ -12,3 +12,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a596ebd5cfc6b4b019bb0e251c25b0f5, type: 3}
   m_Name: SO_TimeConfig
   m_EditorClassIdentifier: 
+  m_LoopStart:
+    Hours: 10
+    Minutes: 0
+  m_LoopEnd:
+    Hours: 14
+    Minutes: 1

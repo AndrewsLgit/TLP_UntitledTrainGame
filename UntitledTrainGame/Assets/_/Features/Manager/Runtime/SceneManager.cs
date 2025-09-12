@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using Foundation.Runtime;
 using SharedData.Runtime;
+using UnityEditor;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnitySceneManager = UnityEngine.SceneManagement.SceneManager;
@@ -18,6 +19,7 @@ namespace Manager.Runtime
         
         // [SerializeField] private string _scenePath = $"_/Levels/";
         [SerializeField] private SceneReference _startScene;
+        [SerializeField] private SceneReference _emptyScene;
         
         private string _preloadedSceneName;
         private AsyncOperation _preloadOp;
@@ -38,6 +40,7 @@ namespace Manager.Runtime
         
         public static SceneManager Instance { get; private set; }
         public string CurrentActiveScene => _preloadedSceneName;
+        public SceneReference StartScene => _startScene;
         
         public event Action m_SceneActivated;
         
@@ -100,6 +103,11 @@ namespace Manager.Runtime
                 return;
             }
             
+            // if (_preloadedSceneName == sceneName)
+            // {
+            //     Info($"Scene {sceneName} already loaded. Ignoring preload request.");
+            //     return;
+            // }
             if (_preloadOp != null)
             {
                 if (_preloadedSceneName == sceneName)
@@ -179,6 +187,9 @@ namespace Manager.Runtime
                     Info("Start scene is already active. Unloading then reloading.");
                     UnitySceneManager.UnloadSceneAsync(_currentActiveScene);
                 }
+                
+                // PreloadScene(_emptyScene);
+                // ActivateScene();
                     
                 PreloadScene(_startScene);
                 ActivateScene();

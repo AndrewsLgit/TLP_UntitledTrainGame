@@ -40,16 +40,28 @@ namespace Interactable.Runtime
         public void Interact()
         {
             
-            if (_clockManager == null)
-                _clockManager = ClockManager.Instance;
-            Assert.IsNotNull(_clockManager, "ClockManager not found!");
+            GetClockManager();
+            
+            Wait();
+        }
+
+        public void Sleep()
+        {
+            GetClockManager();
+            Info($"Bench sleep selected");
+            // Add clock manager sleep event (reset loop)
+            _clockManager.FindNextEventWithTag("Sleep");
+        }
+
+        public void Wait()
+        {
+            GetClockManager();
+            Info($"Bench wait selected");
             
             TimeEvent foundEvent = null;
             Info("Interacting with Bench");
             
             foundEvent = _clockManager.FindNextEventWithTag("Train");
-            // else
-            // Error("ClockManager not found!");
 
             if (foundEvent != null)
             {
@@ -63,6 +75,17 @@ namespace Interactable.Runtime
             throw new System.NotImplementedException();
         }
 
+        #endregion
+        
+        #region Helpers/Utils
+
+        private void GetClockManager()
+        {
+            if (_clockManager == null)
+                _clockManager = ClockManager.Instance;
+            Assert.IsNotNull(_clockManager, "ClockManager not found!");
+        }
+        
         #endregion
     }
 }

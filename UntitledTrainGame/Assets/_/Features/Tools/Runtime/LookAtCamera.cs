@@ -25,7 +25,11 @@ namespace Tools.Runtime
         void Update()
         {
             _step = Time.deltaTime * _speed;
-        
+
+            if (_camera == null)
+            {
+                _camera = Camera.main;
+            }
             //LookAtTargetSmoothly(_camera.transform);
             LookAtTarget(_camera.transform);
             //var test = LookAtTarget(_player.transform);

@@ -1,13 +1,16 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Text.RegularExpressions;
 using Foundation.Runtime;
+using Manager.Runtime;
 using SharedData.Runtime;
 using TMPro;
 using Tools.Runtime;
 using UnityEngine;
-using UnityEngine.SceneManagement;
+using UnityEngine.Assertions;
 using UnityEngine.UI;
-using SceneManager = UnityEngine.SceneManagement.SceneManager;
+using UnitySceneManager = UnityEngine.SceneManagement.SceneManager;
 
 namespace Game.Runtime
 {
@@ -27,11 +30,55 @@ namespace Game.Runtime
         [Header("Progress Bar")] 
         [SerializeField] private Transform _progressBarsParent;
         [SerializeField] private GameObject _progressBarPrefab;
+
+        [Header("Main Map UI")]
+        [SerializeField] Transform _mainMapUIParent;
+        [Header("Layer Train Stations")]
+        [SerializeField] private string _trainStationLayerName = "Layer_Stations";
+        private HashSet<Transform> _trainStations;
+        [SerializeField] private Transform[] _trains;
+        [Header("Layer Station Lines")]
+        [SerializeField] private string _stationLineLayerName = "Layer_Network";
+        private HashSet<Transform> _stationPathLines;
+        [SerializeField] private Transform[] _stationPathLinesList;
+        [Header("Layer Travel Times")]
+        [SerializeField] private string _travelTimeLayerName = "Layer_TravelTime";
+        private HashSet<Transform> _travelTimes;
+        [SerializeField] private Transform[] _travelTimesList;
+
+        [Header("Map Clock")] 
+        [SerializeField] private TextMeshProUGUI _clockMinuteUnit;
+        [SerializeField] private TextMeshProUGUI _clockMinuteTens;
+        [SerializeField] private TextMeshProUGUI _clockHourUnit;
+        [SerializeField] private TextMeshProUGUI _clockHourTens;
         
-        private List<GameObject> _progressBars = new List<GameObject>();
-        private List<Slider> _progressBarsSliders = new List<Slider>();
         private CountdownTimer _currentTimer;
         private int _currentSegmentIndex = -1;
+        private List<Station_Data> _segments = new List<Station_Data>();
+        private List<Transform> _segmentsToLoad = new List<Transform>();
+        private Transform _currentStationInMap;
+        private string _currentStationLabel;
+        private bool _isCurrentInverted = false;
+        
+        // Per-segment visual info to handle direction/orientation
+        private struct SegmentPathVisual
+        {
+            public Transform Transform;
+            public Image Image;
+            public bool Inverted;
+            public int OriginalFillOrigin;
+            public bool OriginalFillClockwise;
+        }
+
+        private readonly List<SegmentPathVisual> _segmentVisuals = new List<SegmentPathVisual>();
+        
+        // Keep a local cache of discovered station labels so we re-apply visibility after bulk hides
+        private readonly HashSet<string> _discoveredStationLabels = new HashSet<string>(StringComparer.Ordinal);
+        // Keep a local cache of discovered path lines so we re-apply visibility after bulk hides
+        private HashSet<string> _discoveredPathLines = new HashSet<string>(StringComparer.Ordinal);
+        private readonly string _discoveredPathLinesFact = "DiscoveredPathLines";
+
+        private Transform[] _UIMapChildrenCache;
 
         // Private variables
         #endregion
@@ -59,6 +106,75 @@ namespace Game.Runtime
             //_isPaused = true;
             
             // some UI setup
+            if (FactExists(_discoveredPathLinesFact, out _discoveredPathLines)) return;
+            _discoveredPathLines = new HashSet<string>();
+            SetFact(_discoveredPathLinesFact, _discoveredPathLines, false);
+            
+            // Cache UI map children
+            _UIMapChildrenCache = _mainMapUIParent.GetComponentsInChildren<Transform>().Where(x => x.parent == _mainMapUIParent).ToArray();
+        }
+
+        private void Start()
+        {
+            SetupMapItems();
+            DisableAllMapItems(); 
+            
+            LoadDiscoveredStationsFromFacts();
+            LoadDiscoveredPathLinesFromFacts();
+            RefreshDiscoveredStationsVisibility();
+            RefreshDiscoveredPathLinesVisibility();
+            
+            HideMap();
+            Info($"UIManager started. Found {_trainStations.Count} stations and {_stationPathLines.Count} lines.");
+
+
+            RouteManager.Instance.OnTrainStationDiscovered += OnTrainStationDiscovered;
+            RouteManager.Instance.OnDiscoveredTrainStationsUpdated += () =>
+            {
+                DisableAllMapItems();
+                LoadDiscoveredStationsFromFacts();
+                RefreshDiscoveredStationsVisibility();
+                LoadDiscoveredPathLinesFromFacts();
+                RefreshDiscoveredPathLinesVisibility();
+            };
+            // RouteManager.Instance.OnSegmentEnd += (currentIndex) =>
+            // {
+            //     _currentSegmentIndex = currentIndex;
+            //     if(_currentSegmentIndex >= 0 && _currentSegmentIndex < _segmentsToLoad.Count)
+            //     {
+            //         var pathLine = _segmentsToLoad[_currentSegmentIndex].name;
+            //         SaveDiscoveredPathLinesToFacts(pathLine);
+            //         RefreshDiscoveredPathLinesVisibility();
+            //     }
+            // };
+            // Subscribe to clock event
+            ClockManager.Instance.m_OnTimeUpdated += UpdateClockTime;
+            UpdateClockTime(ClockManager.Instance.m_CurrentTime);
+        }
+
+        private void OnDestroy()
+        {
+            ClockManager.Instance.m_OnTimeUpdated -= UpdateClockTime;
+            RouteManager.Instance.OnTrainStationDiscovered -= OnTrainStationDiscovered;
+            
+            RouteManager.Instance.OnDiscoveredTrainStationsUpdated -= () =>
+            {
+                DisableAllMapItems();
+                LoadDiscoveredStationsFromFacts();
+                RefreshDiscoveredStationsVisibility();
+                LoadDiscoveredPathLinesFromFacts();
+                RefreshDiscoveredPathLinesVisibility();
+            };
+            // RouteManager.Instance.OnSegmentEnd -= (currentIndex) =>
+            // {
+            //     _currentSegmentIndex = currentIndex;
+            //     if(_currentSegmentIndex >= 0 && _currentSegmentIndex < _segmentsToLoad.Count)
+            //     {
+            //         var pathLine = _segmentsToLoad[_currentSegmentIndex].name;
+            //         SaveDiscoveredPathLinesToFacts(pathLine);
+            //         RefreshDiscoveredPathLinesVisibility();
+            //     }
+            // };
         }
 
         private void Update()
@@ -73,112 +189,121 @@ namespace Game.Runtime
 
         #region Train Travel UI
 
-        public void CreateProgressBarsForRoute(List<Station_Data> segments, StationNetwork_Data network,
-            float compressionFactor)
+        public void CreateProgressBarsForRoute(List<Station_Data> segments)
         {
-            ClearProgressBars();
+            if (!ValidateSegments(segments))
+                return;
+
+            InitializeForNewRoute(segments);
 
             for (var i = 0; i < segments.Count - 1; i++)
             {
-                var from = segments[i];
-                var to = segments[i + 1];
+                var segFrom = segments[i];
+                var segTo   = segments[i + 1];
 
-                GameObject progressBarObj = Instantiate(_progressBarPrefab, _progressBarsParent);
-                Slider slider = progressBarObj.GetComponentInChildren<Slider>();
-                TextMeshProUGUI label = progressBarObj.GetComponentInChildren<TextMeshProUGUI>();
+                var fromLabel = GetStationLabel(segFrom);
+                var toLabel   = GetStationLabel(segTo);
 
-                if (label != null)
-                {
-                    label.text = $"Station {from.GetStationName()} -> Station {to.GetStationName()}";
-                }
-
-                if (slider != null)
-                {
-                    slider.value = 0f;
-                    var fillImage = slider.fillRect.GetComponent<Image>();
-                    if (fillImage != null)
-                    {
-                        // fillImage.color = GetSegmentColor(i);
-                        fillImage.color = Color.green;
-                    }
-                }
-
-                progressBarObj.SetActive(true);
-                _progressBars.Add(progressBarObj);
-                _progressBarsSliders.Add(slider);
-                
-                Info($"Created progress bar for segment {segments[i].GetStationName()} -> {segments[i + 1].GetStationName()}");
-
-                //_trainTravelUI.SetActive(true);
+                PrepareAndRegisterSegmentVisual(i, segFrom, segTo, fromLabel, toLabel);
             }
+
+            // Postcondition: visuals and transforms should stay aligned 1:1 per segment
+            Assert.AreEqual(_segmentVisuals.Count, _segmentsToLoad.Count,
+                "Segment visuals and segments-to-load must have the same length.");
         }
 
-        public void StartSegmentProgress(int segmentIndex, CountdownTimer timer)
+        public void StartMapSegmentProgress(int segmentIndex, CountdownTimer timer)
+        {
+            // Unsub from previous timer
+            if(_currentTimer != null) _currentTimer.OnTimerTick -= UpdateCurrentMapProgress;
+            
+            
+            //_currentStationInMap.gameObject.SetActive(true); 
+            
+            _currentSegmentIndex = segmentIndex;
+            _currentTimer = timer;
+            
+            // Prepare visual for this segment with proper direction/origin
+            if (_currentSegmentIndex >= 0 && _currentSegmentIndex < _segmentVisuals.Count)
             {
-                // Unsub from previous timer
-                if(_currentTimer != null) _currentTimer.OnTimerTick -= UpdateCurrentProgress;
-            
-                _currentSegmentIndex = segmentIndex;
-                _currentTimer = timer;
-            
-                if(_currentTimer != null) _currentTimer.OnTimerTick += UpdateCurrentProgress;
-                
-                Info($"Started progress tracking for segment {segmentIndex}");
+                var pathLine = _segmentsToLoad[_currentSegmentIndex].name;
+                SaveDiscoveredPathLinesToFacts(pathLine);
+                var vis = _segmentVisuals[_currentSegmentIndex];
+                if (vis.Image != null)
+                {
+                    ApplyDirectionToImage(vis);
+                    vis.Image.fillAmount = 0f;
+                    vis.Transform.gameObject.SetActive(true);
+                }
             }
-        
-        private void UpdateCurrentProgress(float progress)
+            
+            if(_currentTimer != null) _currentTimer.OnTimerTick += UpdateCurrentMapProgress;
+                
+            Info($"Started progress tracking for segment {segmentIndex}");
+        }
+        private void UpdateCurrentMapProgress(float progress)
         {
             // Update current segment progress (0 -> 1)
-            if (_currentSegmentIndex >= 0 && _currentSegmentIndex < _progressBarsSliders.Count)
+            if (_currentSegmentIndex >= 0 && _currentSegmentIndex < _segmentsToLoad.Count)
             {
-                _progressBarsSliders[_currentSegmentIndex].value = 1f- progress;
+                
+                var vis = _segmentVisuals[_currentSegmentIndex];
+                var bar = vis.Image;
+                if (bar != null)
+                {
+                    // With origin/clockwise adjusted per direction, we can set fill directly
+                    bar.fillAmount = Mathf.Clamp01(1f - progress);
+                    // InfoInProgress($"Timer progress: {progress:P0}");
+                }
+
             }
 
-            MarkCompletedSegments();
+            MarkCompletedMapSegments();
         }
-
-        private void MarkCompletedSegments()
+        private void MarkCompletedMapSegments()
         {
             for (int i = 0; i < _currentSegmentIndex; i++)
             {
-                if (i < _progressBarsSliders.Count)
+                if (i < _segmentsToLoad.Count)
                 {
-                    _progressBarsSliders[i].value = 1f;
+                    // _segmentsToLoad[i].GetComponent<Image>().fillAmount = 1f;
+                    
+                    //SaveDiscoveredPathLinesToFacts(_segmentsToLoad[i].name);
+                    
+                    _segmentVisuals[i].Image.fillAmount = 1f;
+                    
+                    // var currentStation = _segments[_currentSegmentIndex];
+                    // _currentStationLabel = $"{currentStation.LinePrefix}{currentStation.Id}"; 
+                    // _trainStations.FirstOrDefault(x => x.name.Contains(_currentStationLabel))
+                    //     .gameObject.SetActive(true);
                 }
             }
         }
-
-        private Color GetSegmentColor(int segmentIndex)
+        
+        public void ResetInternalState()
         {
-            Color[] colors = { 
-                Color.blue, Color.green, Color.yellow, 
-                Color.red, Color.magenta, Color.cyan 
-            };
-            return colors[segmentIndex % colors.Length];
-        }
-
-        public void ClearProgressBars()
-        {
-            foreach (var bar in _progressBars)
-            {
-                if (bar != null) Destroy(bar);
-            }
-            _progressBars.Clear();
-            _progressBarsSliders.Clear();
             _currentSegmentIndex = -1;
             
-            // if (_currentTimer != null)
-            // {
-            //     _currentTimer.OnTimerTick -= UpdateCurrentProgress;
-            //     _currentTimer.Stop();
-            //     _currentTimer = null;
-            // }
+            if (_currentTimer != null)
+            {
+                _currentTimer.OnTimerTick -= UpdateCurrentMapProgress;
+                _currentTimer.Stop();
+                _currentTimer = null;
+            }
             
-            _currentTimer = null;
+            // _currentTimer = null;
+            _segmentVisuals.Clear();
+            _segmentsToLoad.Clear();
+            DisableAllMapItems();
+            LoadDiscoveredStationsFromFacts();
+            RefreshDiscoveredStationsVisibility();
+            LoadDiscoveredPathLinesFromFacts();
+            RefreshDiscoveredPathLinesVisibility();
         }
 
         #endregion
         
+        #region Game UI Menus
         // Set (invert) pause state
         public void PauseGame()
         {
@@ -209,7 +334,7 @@ namespace Game.Runtime
         {
             // load first scene in SceneManager
             // todo: declare scene inside Unity Build Settings
-            SceneManager.LoadSceneAsync(1);
+            UnitySceneManager.LoadSceneAsync(1);
         }
 
         public void GameOver()
@@ -219,6 +344,448 @@ namespace Game.Runtime
             _gameOverMenu.SetActive(true);
         }
         
+        #endregion
+        
         #endregion 
+        
+        #region Helper Methods
+
+        private void SetupMapItems()
+        {
+            _trainStations = _mainMapUIParent.GetComponentsInChildren<Transform>()
+                .Where(c => c.parent.name == _trainStationLayerName)
+                .Select(c => c).ToHashSet();
+            
+            // _trains = _trainStations.ToArray();
+            
+            _stationPathLines = _mainMapUIParent.GetComponentsInChildren<Transform>()
+                .Where(x => x.parent.name == _stationLineLayerName)
+                .Select(c => c).ToHashSet();
+            
+            // _stationPathLinesList = _stationPathLines.ToArray();
+            
+            _travelTimes = _mainMapUIParent.GetComponentsInChildren<Transform>()
+                .Where(c => c.parent.name == _travelTimeLayerName)
+                .Select(c => c).ToHashSet();
+
+            
+            _trains = _trainStations.ToArray();
+            _stationPathLinesList = _stationPathLines.ToArray();
+            _travelTimesList = _travelTimes.ToArray();
+        }
+
+        private void DisableAllMapItems()
+        {
+            _stationPathLines.Select(x => x.gameObject).ToList().ForEach(x => x.SetActive(false));
+            _travelTimes.Select(x => x.gameObject).ToList().ForEach(x => x.SetActive(false));
+            _trainStations.Select(x => x.gameObject).ToList().ForEach(x => x.SetActive(false));
+
+            // if(FactExists<HashSet<Station_Data>>(RouteManager.Instance.StationFacts, out var discovered))
+            // discovered = GetFact<HashSet<Station_Data>>(RouteManager.Instance.StationFacts);
+            //
+            // if (discovered == null) return;
+            // {
+            //     foreach (var label in discovered.Select(station => $"{station.LinePrefix}{station.Id}"))
+            //     {
+            //         _trainStations.FirstOrDefault(x => x.name.Contains(label))
+            //             .gameObject.SetActive(true);
+            //     }
+            // }
+            
+            // Re-enable any discovered stations
+            RefreshDiscoveredStationsVisibility();
+            RefreshDiscoveredPathLinesVisibility();
+        }
+
+        private void UpdateClockTime(GameTime time)
+        {
+            int[] numbers = time.Minutes.ToString()
+                .Select(c => int.Parse(c.ToString()))
+                .ToArray();
+            if (numbers.Length == 1)
+            {
+                numbers = new[] {0, numbers[0]};
+            }
+            
+            _clockMinuteUnit.text = numbers[1].ToString();
+            _clockMinuteTens.text = numbers[0].ToString();
+
+            numbers = time.Hours.ToString()
+                .Select(c => int.Parse(c.ToString()))
+                .ToArray();
+            if (numbers.Length == 1)
+                numbers = new[] {0, numbers[0]};
+            
+            _clockHourUnit.text = numbers[1].ToString();
+            _clockHourTens.text = numbers[0].ToString();
+        }
+
+        private void OnTrainStationDiscovered(Station_Data station)
+        {
+            _currentStationLabel = $"{station.LinePrefix}{station.Id}";
+            _discoveredStationLabels.Add(_currentStationLabel);
+            
+            var t = _trainStations.FirstOrDefault(x => x.name.Contains(_currentStationLabel));
+            if(t != null) t.gameObject.SetActive(true);
+        }
+        
+        // Configure the Image to fill from the correct start depending on direction and shape.
+        private void ApplyDirectionToImage(SegmentPathVisual vis)
+        {
+            if (vis.Image == null) return;
+
+            switch (vis.Image.fillMethod)
+            {
+                case Image.FillMethod.Horizontal:
+                    // Start from Left when forward, Right when inverted
+                    vis.Image.fillOrigin = vis.Inverted
+                        ? (int)Image.OriginHorizontal.Right
+                        : (int)Image.OriginHorizontal.Left;
+                    vis.Image.fillClockwise = true;
+                    break;
+                case Image.FillMethod.Vertical:
+                    // Start from Bottom when forward, Top when inverted
+                    if (vis.Inverted)
+                    {
+                        vis.Image.fillOrigin = vis.Image.fillOrigin == (int)Image.OriginVertical.Top 
+                            ? (int)Image.OriginVertical.Bottom : (int)Image.OriginVertical.Top;
+                    }
+                    // vis.Image.fillOrigin = vis.Inverted
+                    //     ? (int)Image.OriginVertical.Top
+                    //     : (int)Image.OriginVertical.Bottom;
+                    vis.Image.fillClockwise = true;
+                    break;
+                case Image.FillMethod.Radial90:
+                    // Keep the asset's corner origin; flip clockwise when inverted so it fills from the opposite end.
+                    vis.Image.fillOrigin = vis.OriginalFillOrigin;
+                    if(vis.Inverted)
+                        vis.Image.fillClockwise = vis.Image.fillClockwise ? !vis.OriginalFillClockwise : vis.OriginalFillClockwise;
+                    // vis.Image.fillClockwise = vis.Inverted ? !vis.OriginalFillClockwise : vis.OriginalFillClockwise;
+                    break;
+                default:
+                    // Fallback: preserve origin, flip clockwise when inverted
+                    // vis.Image.fillOrigin = vis.OriginalFillOrigin;
+                    if(vis.Inverted)
+                        vis.Image.fillClockwise = vis.Image.fillClockwise ? !vis.Image.fillClockwise : vis.Image.fillClockwise;;
+                    // vis.Image.fillClockwise = vis.Inverted ? vis.OriginalFillClockwise : !vis.OriginalFillClockwise;
+                    break;
+            }
+        }
+        
+        // Load discovered stations from FactSystem into local cache
+        private void LoadDiscoveredStationsFromFacts()
+        {
+            if(FactExists<HashSet<Station_Data>>(RouteManager.Instance.StationFacts, out var discovered))
+                discovered = GetFact<HashSet<Station_Data>>(RouteManager.Instance.StationFacts);
+            
+            _discoveredStationLabels.Clear();
+            if(discovered == null) return;
+
+            foreach (var label in discovered.Select(station => $"{station.LinePrefix}{station.Id}"))
+                _discoveredStationLabels.Add(label);
+        }
+        
+        // Save discovered path lines into FactSystem
+        private void SaveDiscoveredPathLinesToFacts(string newPathLineName)
+        {
+            if (FactExists(_discoveredPathLinesFact, out _discoveredPathLines))
+            {
+                _discoveredPathLines.Add(newPathLineName);
+                SetFact(_discoveredPathLinesFact, _discoveredPathLines, false);
+            }
+        }
+
+        private void LoadDiscoveredPathLinesFromFacts()
+        {
+            if (FactExists(_discoveredPathLinesFact, out _discoveredPathLines))
+            {
+                foreach (var line in _discoveredPathLines)
+                {
+                    var t = _stationPathLines.FirstOrDefault(x => x.name.Contains(line));
+                    if (t != null) t.gameObject.SetActive(true);
+                }
+            }
+        }
+
+        private void RefreshDiscoveredStationsVisibility()
+        {
+            if(_trainStations == null) return;
+            
+            string previousLabel = "";
+
+            foreach (var label in _discoveredStationLabels)
+            {
+                var t = _trainStations.FirstOrDefault(x => x.name.Contains(label));
+                if (t != null) t.gameObject.SetActive(true);
+
+                // if (previousLabel != "" && previousLabel != label)
+                // {
+                //     var trainLine = FindLineTransform(previousLabel, label);
+                //     if(trainLine != null)
+                //     {
+                //         trainLine.gameObject.SetActive(true);
+                //     } 
+                // }
+                //
+                // previousLabel = label;
+            }
+        }
+
+        private void RefreshDiscoveredPathLinesVisibility()
+        {
+            if(_stationPathLines == null) return;
+
+            foreach (var line in _discoveredPathLines)
+            {
+                var pathLine = _stationPathLines.FirstOrDefault(x => x.name.Contains(line));
+                
+                if (pathLine != null) pathLine.gameObject.SetActive(true);
+            }
+        }
+        
+        // Try to locate a line Transform whose name contains both labels (e.g., "A2" and "A5").
+        // If multiple are found, prefer the first but log a warning to aid debugging.
+        private Transform FindLineTransform(string fromLabel, string toLabel)
+        {
+            if (_stationPathLines == null || _stationPathLines.Count == 0) return null;
+
+            var matches = _stationPathLines
+                .Where(t =>
+                {
+                    var n = t.name;
+                    return n.IndexOf(fromLabel, StringComparison.Ordinal) >= 0 &&
+                           n.IndexOf(toLabel,   StringComparison.Ordinal) >= 0;
+                })
+                .ToList();
+
+            switch (matches.Count)
+            {
+                case 0:
+                    return null;
+                case > 1:
+                    Warning($"Multiple line transforms match {fromLabel}<->{toLabel}. Using '{matches[0].name}'. " +
+                            $"Candidates: {string.Join(", ", matches.Select(m => m.name))}");
+                    break;
+            }
+
+            return matches[0];
+        }
+        
+        // Decide orientation using common prefix + number rule from line name.
+        // Rules:
+        // - If line name contains fromLabel and another label sharing its prefix: compare from vs other => inverted = fromNum > otherNum
+        // - Else if line name contains toLabel and another label sharing its prefix: compare other vs to => inverted = otherNum > toNum
+        // - Else fallback to comparing Ids: inverted = fromId > toId
+        private bool ComputeInverted(string lineName, string fromLabel, string toLabel, int fromId, int toId)
+        {
+            if (string.IsNullOrEmpty(lineName))
+                return fromId > toId;
+
+            var labelsInName = ExtractLabels(lineName);
+            if (labelsInName.Count < 2)
+                return fromId > toId;
+
+            // Case 1: Use fromLabel as the anchor
+            if (labelsInName.Contains(fromLabel))
+            {
+                var (pFrom, nFrom) = SplitLabel(fromLabel);
+                if (!string.IsNullOrEmpty(pFrom))
+                {
+                    // Find another label sharing the same prefix
+                    var other = labelsInName.FirstOrDefault(x => !x.Equals(fromLabel, StringComparison.Ordinal) && x.StartsWith(pFrom, StringComparison.Ordinal));
+                    if (!string.IsNullOrEmpty(other))
+                    {
+                        var (pOther, nOther) = SplitLabel(other);
+                        if (pOther == pFrom)
+                        {
+                            // Example: from=D2, other=D5 => inverted if 2 > 5 (false)
+                            return nFrom > nOther;
+                        }
+                    }
+                }
+            }
+
+            // Case 2: Use toLabel as the anchor
+            if (labelsInName.Contains(toLabel))
+            {
+                var (pTo, nTo) = SplitLabel(toLabel);
+                if (!string.IsNullOrEmpty(pTo))
+                {
+                    // Find another label sharing the same prefix
+                    var other = labelsInName.FirstOrDefault(x => !x.Equals(toLabel, StringComparison.Ordinal) && x.StartsWith(pTo, StringComparison.Ordinal));
+                    if (!string.IsNullOrEmpty(other))
+                    {
+                        var (pOther, nOther) = SplitLabel(other);
+                        if (pOther == pTo)
+                        {
+                            // Example: to=A2, other=A5 => inverted if 5 > 2 (true)
+                            return nOther > nTo;
+                        }
+                    }
+                }
+            }
+
+            // Fallback: rely on numeric Id ordering
+            return fromId > toId;
+        }
+
+        // Extract labels like "A12", "D5" from an arbitrary string.
+        private static List<string> ExtractLabels(string source)
+        {
+            var list = new List<string>();
+            if (string.IsNullOrEmpty(source)) return list;
+
+            foreach (Match m in Regex.Matches(source, @"[A-Za-z]+\d+"))
+            {
+                var v = m.Value;
+                if (!list.Contains(v)) list.Add(v);
+            }
+
+            return list;
+        }
+
+        // Split "A12" => ("A", 12). Returns ("", 0) if format is not matched.
+        private static (string prefix, int number) SplitLabel(string label)
+        {
+            if (string.IsNullOrEmpty(label)) return (string.Empty, 0);
+
+            var m = Regex.Match(label, @"^([A-Za-z]+)(\d+)$");
+            if (!m.Success) return (string.Empty, 0);
+
+            var prefix = m.Groups[1].Value;
+            var number = int.Parse(m.Groups[2].Value);
+            return (prefix, number);
+        }
+
+        // ========== New private helpers for decoupling ==========
+
+        // 1) Input validation with assertions
+        private bool ValidateSegments(List<Station_Data> segments)
+        {
+            if (segments == null || segments.Count < 2)
+            {
+                Warning("CreateProgressBarsForRoute called with null or less than 2 segments.");
+                return false;
+            }
+
+            Assert.IsNotNull(_mainMapUIParent, "Main map UI parent must be assigned.");
+            Assert.IsNotNull(_stationPathLines, "Station path lines collection must be initialized via SetupMapItems.");
+            Assert.IsTrue(_stationPathLines.Count >= 0, "Station path lines collection should not be negative in size.");
+
+            return true;
+        }
+
+        // 2) Initialize state for a new route
+        private void InitializeForNewRoute(List<Station_Data> segments)
+        {
+            _segments = segments;
+            ResetInternalState();
+
+            // At this point, discovered stations should be visible again.
+            Assert.IsTrue(_segmentVisuals.Count == 0, "Segment visuals should be cleared during ResetInternalState.");
+            Assert.IsTrue(_segmentsToLoad.Count == 0, "SegmentsToLoad should be cleared during ResetInternalState.");
+        }
+
+        // 3) Prepare a segment (find transform, compute direction, set up image) and register it
+        private void PrepareAndRegisterSegmentVisual(
+            int index,
+            Station_Data segFrom,
+            Station_Data segTo,
+            string fromLabel,
+            string toLabel)
+        {
+            // Find the map transform for this route segment
+            var lineTransform = FindLineTransform(fromLabel, toLabel);
+
+            // Compute fill direction
+            var inverted = ComputeInverted(
+                lineTransform != null ? lineTransform.name : null,
+                fromLabel, toLabel, segFrom.Id, segTo.Id);
+
+            _segmentsToLoad.Add(lineTransform);
+
+            Image img = null;
+            if (lineTransform != null)
+            {
+                img = lineTransform.GetComponent<Image>();
+                if (img == null)
+                {
+                    Warning($"No Image component found for line '{lineTransform.name}' (segment {fromLabel}->{toLabel}).");
+                }
+                else
+                {
+                    img.fillAmount = 0f;
+                    lineTransform.gameObject.SetActive(false);
+                }
+            }
+            else
+            {
+                Warning($"No matching line transform found for segment {fromLabel}->{toLabel}. " +
+                        "Check naming or layer setup so that a transform contains both labels in its name.");
+            }
+
+            // Register per-segment visuals (keep index alignment with _segmentsToLoad)
+            if (lineTransform != null)
+            {
+                _segmentVisuals.Add(new SegmentPathVisual
+                {
+                    Transform = lineTransform,
+                    Image = img,
+                    Inverted = inverted,
+                    OriginalFillOrigin = img != null ? img.fillOrigin : 0,
+                    OriginalFillClockwise = img != null && img.fillClockwise
+                });
+            }
+            else
+            {
+                _segmentVisuals.Add(new SegmentPathVisual
+                {
+                    Transform = null,
+                    Image = null,
+                    Inverted = inverted,
+                    OriginalFillOrigin = 0,
+                    OriginalFillClockwise = false
+                });
+            }
+
+            // Ensure both lists remain aligned
+            Assert.IsTrue(_segmentVisuals.Count == _segmentsToLoad.Count,
+                "Segment visuals and segments-to-load must remain aligned.");
+
+            Info($"Prepared segment {index}: {fromLabel} -> {toLabel} | " +
+                 $"Line: {(lineTransform != null ? lineTransform.name : "NONE")} | Inverted: {inverted}");
+        }
+
+        // 4) Small utility to build station label consistently
+        private static string GetStationLabel(Station_Data s) => $"{s.LinePrefix}{s.Id}";
+
+        // =======================================================
+
+        public void ShowMap()
+        {
+            foreach (var transform in _UIMapChildrenCache)
+                transform.gameObject.SetActive(true);
+            
+            DisableAllMapItems();
+            LoadDiscoveredStationsFromFacts();
+            LoadDiscoveredPathLinesFromFacts();
+            RefreshDiscoveredStationsVisibility();
+            RefreshDiscoveredPathLinesVisibility();
+            
+            // foreach (var transform in _UIMapChildrenCache)
+            //     transform.gameObject.SetActive(true);
+        }
+        public void HideMap()
+        {
+            DisableAllMapItems();
+            LoadDiscoveredStationsFromFacts();
+            LoadDiscoveredPathLinesFromFacts();
+            RefreshDiscoveredStationsVisibility();
+            RefreshDiscoveredPathLinesVisibility();
+            
+            foreach (var transform in _UIMapChildrenCache)
+                transform.gameObject.SetActive(false);
+        }
+        #endregion
     }
 }

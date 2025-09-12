@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: SO_Station_Art_2
   m_EditorClassIdentifier: 
   LinePrefix: 0
-  Id: 1
+  Id: 2
   StationScene: {fileID: 11400000, guid: 57b630fadcbbc4178836212af0f38589, type: 2}
   DisplayName: Art Test 2
   IsDiscovered: 0

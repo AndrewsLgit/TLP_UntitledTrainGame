@@ -40,6 +40,8 @@ namespace SharedData.Runtime
         
         [Header("Time System")]
         [SerializeField, Range(0,1)] private float _compressionFactor = 0.5f;
+        [SerializeField, Tooltip("Minimal time taken for a train to go from one station to another (UI)")] 
+        private float _minTravelTime = 5f;
         
         // Private Variables
         #endregion
@@ -65,6 +67,7 @@ namespace SharedData.Runtime
         public AnimationCurve CameraReturnCurve => _cameraReturnCurve;
         
         public float CompressionFactor => _compressionFactor;
+        public float MinTravelTime => _minTravelTime;
         // Public Variables
         #endregion
         
@@ -122,6 +125,7 @@ namespace SharedData.Runtime
             _cameraRotationCurve = newControlPanel._cameraRotationCurve;
             _cameraReturnCurve = newControlPanel._cameraReturnCurve;
             _compressionFactor = newControlPanel._compressionFactor;
+            _minTravelTime = newControlPanel._minTravelTime;
 
             OnValuesUpdated?.Invoke(this);
         }
