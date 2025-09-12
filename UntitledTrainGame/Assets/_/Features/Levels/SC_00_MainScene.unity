@@ -271,6 +271,14 @@ PrefabInstance:
       propertyPath: m_FillAmount
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 8053136215402187809, guid: d8e9f92f8780447b28f7475513cdaa9d, type: 3}
+      propertyPath: _emptyScene
+      value: 
+      objectReference: {fileID: 11400000, guid: 968000e57cd434b9bad762795df353ce, type: 2}
+    - target: {fileID: 8053136215402187809, guid: d8e9f92f8780447b28f7475513cdaa9d, type: 3}
+      propertyPath: m_isVerbose
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 8343106658253979835, guid: d8e9f92f8780447b28f7475513cdaa9d, type: 3}
       propertyPath: _minTravelTime
       value: 1
