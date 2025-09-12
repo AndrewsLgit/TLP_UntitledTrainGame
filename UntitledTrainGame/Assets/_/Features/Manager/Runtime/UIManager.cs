@@ -78,6 +78,8 @@ namespace Game.Runtime
         private HashSet<string> _discoveredPathLines = new HashSet<string>(StringComparer.Ordinal);
         private readonly string _discoveredPathLinesFact = "DiscoveredPathLines";
 
+        private Transform[] _UIMapChildrenCache;
+
         // Private variables
         #endregion
         
@@ -107,6 +109,9 @@ namespace Game.Runtime
             if (FactExists(_discoveredPathLinesFact, out _discoveredPathLines)) return;
             _discoveredPathLines = new HashSet<string>();
             SetFact(_discoveredPathLinesFact, _discoveredPathLines, false);
+            
+            // Cache UI map children
+            _UIMapChildrenCache = _mainMapUIParent.GetComponentsInChildren<Transform>();
         }
 
         private void Start()
@@ -118,6 +123,8 @@ namespace Game.Runtime
             LoadDiscoveredPathLinesFromFacts();
             RefreshDiscoveredStationsVisibility();
             RefreshDiscoveredPathLinesVisibility();
+            
+            HideMap();
             Info($"UIManager started. Found {_trainStations.Count} stations and {_stationPathLines.Count} lines.");
 
 
@@ -753,6 +760,31 @@ namespace Game.Runtime
 
         // =======================================================
 
+        public void ShowMap()
+        {
+            foreach (var transform in _UIMapChildrenCache)
+                transform.gameObject.SetActive(true);
+            
+            DisableAllMapItems();
+            LoadDiscoveredStationsFromFacts();
+            LoadDiscoveredPathLinesFromFacts();
+            RefreshDiscoveredStationsVisibility();
+            RefreshDiscoveredPathLinesVisibility();
+            
+            // foreach (var transform in _UIMapChildrenCache)
+            //     transform.gameObject.SetActive(true);
+        }
+        public void HideMap()
+        {
+            DisableAllMapItems();
+            LoadDiscoveredStationsFromFacts();
+            LoadDiscoveredPathLinesFromFacts();
+            RefreshDiscoveredStationsVisibility();
+            RefreshDiscoveredPathLinesVisibility();
+            
+            foreach (var transform in _UIMapChildrenCache)
+                transform.gameObject.SetActive(false);
+        }
         #endregion
     }
 }

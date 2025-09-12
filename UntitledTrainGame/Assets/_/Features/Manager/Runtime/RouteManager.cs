@@ -160,6 +160,7 @@ namespace Manager.Runtime
             // test
             // UIManager.Instance?.CreateProgressBarsForRoute(_segments, _stationNetwork, _compressionFactor);
             UIManager.Instance?.CreateProgressBarsForRoute(_segments);
+            UIManager.Instance?.ShowMap();
             CustomInputManager.Instance.SwitchToUI();
             //test
             
@@ -193,6 +194,7 @@ namespace Manager.Runtime
             Info($"Starting journey from {_segments[0].GetStationName()} to {_segments[^1].GetStationName()}");
             // UIManager.Instance?.CreateProgressBarsForRoute(_segments, _stationNetwork, _compressionFactor);
             UIManager.Instance?.CreateProgressBarsForRoute(_segments);
+            UIManager.Instance?.ShowMap();
             CustomInputManager.Instance.SwitchToUI();
 
             _isExpress = false;
@@ -279,6 +281,7 @@ namespace Manager.Runtime
                 _currentSegmentTimer = null;
             }
             // UIManager.Instance?.ResetInternalState();
+            UIManager.Instance?.HideMap();
             CustomInputManager.Instance?.SwitchToPlayer();
             
             // Load and activate the scene
@@ -309,6 +312,7 @@ namespace Manager.Runtime
             OnTrainStationDiscovered?.Invoke(_segments[_currentStationIndex]);
             //test
             UIManager.Instance?.ResetInternalState();
+            UIManager.Instance?.HideMap();
             CustomInputManager.Instance?.SwitchToPlayer();
             // _currentSegmentTimer.Stop();
             // timer stop is done in the uiManager
