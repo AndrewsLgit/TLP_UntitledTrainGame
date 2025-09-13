@@ -186,6 +186,7 @@ namespace Interactable.Runtime
         private void HandleUISubmit()
         {
             if (!_selector.IsOpen) return;
+            // if (_selector.SelectedIndex < 0) return;
             
             // Notify PlayerInteraction of selection (Close() and switch action maps)
             _selector.Submit();
@@ -208,6 +209,8 @@ namespace Interactable.Runtime
         {
             
             int selectedIndex = _selector.SelectedIndex;
+            // if(selectedIndex < 0) return;
+            
             Info($"Selected index: {selectedIndex}");
             bool sleepSelected = selectedIndex == 0;
             bool waitSelected = selectedIndex == 1;
