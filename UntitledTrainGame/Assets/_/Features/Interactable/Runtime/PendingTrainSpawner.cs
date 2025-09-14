@@ -1,4 +1,5 @@
-using Manager.Runtime;
+using ServiceInterfaces.Runtime;
+using Services.Runtime;
 using UnityEngine;
 using UnityEngine.Assertions;
 
@@ -7,22 +8,22 @@ namespace Interactable.Runtime
     public class PendingTrainSpawner : MonoBehaviour
     {
         [SerializeField] private GameObject _pendingTrainPrefab;
-        private RouteManager _routeManager;
+        private IRouteService _routeManager;
         
         // Start is called once before the first execution of Update after the MonoBehaviour is created
         void Start()
         {
-            _routeManager = RouteManager.Instance;
+            _routeManager = ServiceRegistry.Resolve<IRouteService>();
             _pendingTrainPrefab.SetActive(false);
             Assert.IsNotNull(_routeManager);
             
             _pendingTrainPrefab.SetActive(_routeManager.HasPendingTrainAtActiveScene());
-            _routeManager.m_onPausedRouteRemoved += DisablePendingTrain;
+            _routeManager.OnPausedRouteRemoved += DisablePendingTrain;
         }
 
         private void OnDestroy()
         {
-            _routeManager.m_onPausedRouteRemoved -= DisablePendingTrain;
+            _routeManager.OnPausedRouteRemoved -= DisablePendingTrain;
         }
 
 
