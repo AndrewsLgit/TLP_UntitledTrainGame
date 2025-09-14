@@ -67,7 +67,7 @@ Material:
     - _Shadow_strength: 1
     - _Steps: 3
     m_Colors:
-    - _Color: {r: 0.4716981, g: 0.4716981, b: 0.4716981, a: 1}
+    - _Color: {r: 0.5849056, g: 0.5849056, b: 0.5849056, a: 1}
     - _MainColor: {r: 0, g: 0, b: 0, a: 0}
     - _OLD_MainColor: {r: 0, g: 0, b: 0, a: 1}
   m_BuildTextureStacks: []
