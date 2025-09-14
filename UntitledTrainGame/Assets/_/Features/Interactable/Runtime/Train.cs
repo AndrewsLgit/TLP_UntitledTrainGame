@@ -34,6 +34,7 @@ namespace Interactable.Runtime
         
         public GameTime TimeToInteract => _timeToInteract;
         public InteractionType InteractionType => InteractionType.Train;
+        public bool IsPendingTrain => _isPendingTrain;
         
         // Public Variables
         #endregion
@@ -54,7 +55,7 @@ namespace Interactable.Runtime
             // enable train model based on express train flag
             SetModel();
             
-            _routeManager.OnPausedRouteRemoved += DisableModel;
+            // _routeManager.OnPausedRouteRemoved += DisableModel;
             // _regularTrainModel.SetActive(!_isExpress || _isPendingTrain);
             // _expressTrainModel.SetActive(_isExpress && !_isPendingTrain);
             
@@ -81,16 +82,22 @@ namespace Interactable.Runtime
             Assert.IsNotNull(_routeManager);
             
             _isExpress = _trainRoute != null && _trainRoute.IsExpress;
+            _routeManager.OnPausedRouteRemoved += DisableModel;
+
             //_isPendingExists = _routeManager.HasPendingTrainAtActiveScene();
             // enable train model based on express train flag
             SetModel();
             // _regularTrainModel.SetActive(!_isExpress || _isPendingTrain);
             // _expressTrainModel.SetActive(_isExpress && !_isPendingTrain);
         }
+        private void OnDisable()
+        {
+            _routeManager.OnPausedRouteRemoved -= DisableModel;
+        }
 
         private void OnDestroy()
         {
-            _routeManager.OnPausedRouteRemoved -= DisableModel;
+            // _routeManager.OnPausedRouteRemoved -= DisableModel;
         }
 
         #endregion
