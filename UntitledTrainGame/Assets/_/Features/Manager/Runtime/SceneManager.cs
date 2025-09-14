@@ -1,8 +1,8 @@
 using System;
 using System.Collections;
 using Foundation.Runtime;
+using ServiceInterfaces.Runtime;
 using SharedData.Runtime;
-using UnityEditor;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnitySceneManager = UnityEngine.SceneManagement.SceneManager;
@@ -10,7 +10,7 @@ using UnitySceneManager = UnityEngine.SceneManagement.SceneManager;
 
 namespace Manager.Runtime
 {
-    public class SceneManager : FMono
+    public class SceneManager : FMono, ISceneService
     {
         #region Variables
         
@@ -42,7 +42,7 @@ namespace Manager.Runtime
         public string CurrentActiveScene => _preloadedSceneName;
         public SceneReference StartScene => _startScene;
         
-        public event Action m_SceneActivated;
+        public event Action OnSceneActivated;
         
         // Public Variables
         #endregion
@@ -77,12 +77,12 @@ namespace Manager.Runtime
                 ActivateScene();
             }
             
-            ClockManager.Instance.m_OnLoopEnd += ResetFromStartScene;
+            // ClockManager.Instance.OnLoopEnd += ResetFromStartScene;
         }
 
         private void OnDestroy()
         {
-            ClockManager.Instance.m_OnLoopEnd -= ResetFromStartScene;
+            // ClockManager.Instance.OnLoopEnd -= ResetFromStartScene;
         }
         
         #endregion
@@ -230,7 +230,7 @@ namespace Manager.Runtime
             _currentActiveScene = newScene;
             _isActivating = false;
 
-            // m_SceneActivated?.Invoke();
+            // OnSceneActivated?.Invoke();
         }
 
         private IEnumerator PreloadRoutine(string sceneName)

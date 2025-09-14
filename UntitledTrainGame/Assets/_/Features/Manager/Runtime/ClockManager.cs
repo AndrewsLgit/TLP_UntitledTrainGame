@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Foundation.Runtime;
+using ServiceInterfaces.Runtime;
 using SharedData.Runtime;
 using SharedData.Runtime.Events;
 using UnityEngine;
@@ -17,7 +18,7 @@ namespace Manager.Runtime
     /// - Finds TimeEventGroups in all loaded scenes
     /// - Updates their events when time changes
     /// </summary>
-    public class ClockManager : FMono
+    public class ClockManager : FMono, IClockService
     {
         #region Variables
         // Start of the Variables region
@@ -38,13 +39,13 @@ namespace Manager.Runtime
         public TimeConfig m_TimeConfig;
         
         [Header("Runtime State (Read Only)")]
-        public GameTime m_CurrentTime { get; private set; }
+        public GameTime CurrentTime { get; private set; }
 
         [Header("Current Events (Read Only)")] public List<TimeEventGroup> m_CurrentEvents => _timeEventGroups;
         
-        public event Action<GameTime> m_OnTimeUpdated;
-        public event Action m_OnLoopEnd;
-
+        public event Action<GameTime> OnTimeUpdated;
+        
+        public event Action OnLoopEnd;
         #endregion
         
         #endregion
@@ -63,7 +64,7 @@ namespace Manager.Runtime
             DontDestroyOnLoad(gameObject);
 
             // initialize time to loop start
-            m_CurrentTime = m_TimeConfig.m_LoopStart;
+            CurrentTime = m_TimeConfig.m_LoopStart;
 
         }
 
@@ -73,7 +74,7 @@ namespace Manager.Runtime
             UnitySceneManager.sceneLoaded += OnSceneLoaded;
             // UnitySceneManager.sceneUnloaded += OnSceneLoaded;
             // UnitySceneManager.activeSceneChanged += OnSceneLoaded;
-            // SceneManager.Instance.m_SceneActivated += OnSceneLoaded;
+            // SceneManager.Instance.OnSceneActivated += OnSceneLoaded;
         }
 
         private void OnDisable()
@@ -81,7 +82,7 @@ namespace Manager.Runtime
             UnitySceneManager.sceneLoaded -= OnSceneLoaded;
             // UnitySceneManager.sceneUnloaded -= OnSceneLoaded;
             // UnitySceneManager.activeSceneChanged -= OnSceneLoaded;
-            // SceneManager.Instance.m_SceneActivated -= OnSceneLoaded;
+            // SceneManager.Instance.OnSceneActivated -= OnSceneLoaded;
         }
 
         // Start is called once before the first execution of Update after the MonoBehaviour is created
@@ -100,10 +101,10 @@ namespace Manager.Runtime
         public void AdvanceTime(GameTime duration)
         {
             Info($"Advancing time by {duration}");
-            SetTime(m_CurrentTime.AddTime(duration));
-            m_OnTimeUpdated?.Invoke(m_CurrentTime);
-        } 
-        
+            SetTime(CurrentTime.AddTime(duration));
+            OnTimeUpdated?.Invoke(CurrentTime);
+        }
+
         /// <summary>
         /// Set the clock directly.
         /// If new newTime is outside the loop range → reset to loop start.
@@ -117,22 +118,22 @@ namespace Manager.Runtime
             if (newTimeToMinues < minTime || newTimeToMinues >= maxTime)
             {
                 if(newTimeToMinues >= maxTime)
-                    m_OnLoopEnd?.Invoke();
+                    OnLoopEnd?.Invoke();
                 
                 // If new time is outside of loop range, reset to loop start
                 Warning($"Time {newTime} is outside of or at loop range [{GameTime.FromTotalMinutes(minTime)} - {GameTime.FromTotalMinutes(maxTime)}]. Resetting to {m_TimeConfig.m_LoopStart}");
-                // m_CurrentTime = m_TimeConfig.m_LoopStart;
-                m_CurrentTime = newTime; // to trigger last event's onEnd callback
+                // CurrentTime = m_TimeConfig.m_LoopStart;
+                CurrentTime = newTime; // to trigger last event's onEnd callback
                 //todo: trigger last event's onEnd callback
                 // CheckAllEvents();
                 // ResetAllEvents();
-                // m_CurrentTime = m_TimeConfig.m_LoopStart;
+                // CurrentTime = m_TimeConfig.m_LoopStart;
                 ResetClock();
             }
-            else m_CurrentTime = newTime;
+            else CurrentTime = newTime;
 
             CheckAllEvents();
-            m_OnTimeUpdated?.Invoke(m_CurrentTime);
+            OnTimeUpdated?.Invoke(CurrentTime);
         }
         
         #endregion
@@ -189,7 +190,7 @@ namespace Manager.Runtime
             foreach (var group in _timeEventGroups)
                 group.ResetEvents();
             
-            m_OnLoopEnd?.Invoke();
+            OnLoopEnd?.Invoke();
         }
 
         /// <summary>
@@ -198,7 +199,7 @@ namespace Manager.Runtime
         private void CheckAllEvents()
         {
             foreach (var group in _timeEventGroups)
-                group.CheckEvents(m_CurrentTime);
+                group.CheckEvents(CurrentTime);
         }
 
         /// <summary>
@@ -209,13 +210,13 @@ namespace Manager.Runtime
         {
             var tagString = tag == String.Empty ? "no tag" : tag;
             InfoInProgress($"Finding next event with tag: {tagString}");
-            int now = m_CurrentTime.ToTotalMinutes();
+            int now = CurrentTime.ToTotalMinutes();
             int loopEnd = m_TimeConfig.m_LoopEnd.ToTotalMinutes();
             TimeEvent nextEvent = null;
 
             if (string.Equals(tag, "Sleep", StringComparison.OrdinalIgnoreCase))
             {
-                SetTime(m_TimeConfig.m_LoopEnd);
+                SleepToLoopEnd();
                 return null;
             }
 
@@ -247,7 +248,11 @@ namespace Manager.Runtime
             SetTime(nextEvent.m_Start);
             return nextEvent;
         }
-        
+
+        public void SleepToLoopEnd()
+        {
+            SetTime(m_TimeConfig.m_LoopEnd);
+        }
         //todo: get next train, with arrival time and destination station
         
         #endregion

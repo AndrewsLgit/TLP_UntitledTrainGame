@@ -1,4 +1,5 @@
 using Foundation.Runtime;
+using ServiceInterfaces.Runtime;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.SceneManagement;
@@ -6,7 +7,7 @@ using UnitySceneManager = UnityEngine.SceneManagement.SceneManager;
 
 namespace Manager.Runtime
 {
-    public class CustomInputManager : FMono
+    public class CustomInputManager : FMono, IInputService
     {
         [SerializeField] private PlayerInput _playerInput;
 
