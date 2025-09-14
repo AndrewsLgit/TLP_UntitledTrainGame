@@ -385,7 +385,8 @@ namespace Manager.Runtime
             var activeSceneName = UnitySceneManager.GetActiveScene().name;
             var pausedSceneName = _segments[_routePausedIndex].StationScene?.SceneName;
             Info($"pausedSceneName: {pausedSceneName}, activeSceneName: {activeSceneName}");
-            return !string.IsNullOrEmpty(pausedSceneName) && string.Equals(activeSceneName, pausedSceneName, StringComparison.Ordinal);
+            // return !string.IsNullOrEmpty(pausedSceneName) && string.Equals(activeSceneName, pausedSceneName, StringComparison.Ordinal);
+            return _routePaused;
         }
         // Resume the route from the paused station, continuing to the next station if available
         public void ResumeJourneyFromPausedStation()
