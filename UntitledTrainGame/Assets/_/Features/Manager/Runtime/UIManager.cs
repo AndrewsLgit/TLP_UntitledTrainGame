@@ -128,7 +128,6 @@ namespace Game.Runtime
             HideMap();
             Info($"UIManager started. Found {_trainStations.Count} stations and {_stationPathLines.Count} lines.");
 
-
             RouteManager.Instance.OnTrainStationDiscovered += OnTrainStationDiscovered;
             RouteManager.Instance.OnDiscoveredTrainStationsUpdated += () =>
             {
@@ -268,16 +267,8 @@ namespace Game.Runtime
             {
                 if (i < _segmentsToLoad.Count)
                 {
-                    // _segmentsToLoad[i].GetComponent<Image>().fillAmount = 1f;
-                    
-                    //SaveDiscoveredPathLinesToFacts(_segmentsToLoad[i].name);
-                    
                     _segmentVisuals[i].Image.fillAmount = 1f;
-                    
-                    // var currentStation = _segments[_currentSegmentIndex];
-                    // _currentStationLabel = $"{currentStation.LinePrefix}{currentStation.Id}"; 
-                    // _trainStations.FirstOrDefault(x => x.name.Contains(_currentStationLabel))
-                    //     .gameObject.SetActive(true);
+                    _segmentVisuals[i].Image.fillOrigin = _segmentVisuals[i].OriginalFillOrigin;
                 }
             }
         }
@@ -291,6 +282,12 @@ namespace Game.Runtime
                 _currentTimer.OnTimerTick -= UpdateCurrentMapProgress;
                 _currentTimer.Stop();
                 _currentTimer = null;
+            }
+
+            foreach (var segmentVisual in _segmentVisuals.Where(segmentVisual => segmentVisual.Image != null))
+            {
+                segmentVisual.Image.fillAmount = 1f;
+                segmentVisual.Image.fillOrigin = segmentVisual.OriginalFillOrigin;
             }
             
             // _currentTimer = null;
@@ -440,16 +437,19 @@ namespace Game.Runtime
             {
                 case Image.FillMethod.Horizontal:
                     // Start from Left when forward, Right when inverted
-                    vis.Image.fillOrigin = vis.Inverted
-                        ? (int)Image.OriginHorizontal.Right
-                        : (int)Image.OriginHorizontal.Left;
+                    // vis.Image.fillOrigin = vis.Inverted
+                    //     ? (int)Image.OriginHorizontal.Right
+                    //     : (int)Image.OriginHorizontal.Left;
+                    if (vis.Inverted)
+                        vis.Image.fillOrigin = vis.OriginalFillOrigin == (int)Image.OriginHorizontal.Left ? 
+                            (int)Image.OriginHorizontal.Right : (int)Image.OriginHorizontal.Left;
                     vis.Image.fillClockwise = true;
                     break;
                 case Image.FillMethod.Vertical:
                     // Start from Bottom when forward, Top when inverted
                     if (vis.Inverted)
                     {
-                        vis.Image.fillOrigin = vis.Image.fillOrigin == (int)Image.OriginVertical.Top 
+                        vis.Image.fillOrigin = vis.OriginalFillOrigin == (int)Image.OriginVertical.Top 
                             ? (int)Image.OriginVertical.Bottom : (int)Image.OriginVertical.Top;
                     }
                     // vis.Image.fillOrigin = vis.Inverted
@@ -467,8 +467,10 @@ namespace Game.Runtime
                 default:
                     // Fallback: preserve origin, flip clockwise when inverted
                     // vis.Image.fillOrigin = vis.OriginalFillOrigin;
+                    // if(vis.Inverted)
+                    //     vis.Image.fillClockwise = vis.Image.fillClockwise ? !vis.Image.fillClockwise : vis.Image.fillClockwise;
                     if(vis.Inverted)
-                        vis.Image.fillClockwise = vis.Image.fillClockwise ? !vis.Image.fillClockwise : vis.Image.fillClockwise;;
+                        vis.Image.fillClockwise = vis.OriginalFillClockwise ? !vis.OriginalFillClockwise : vis.OriginalFillClockwise; 
                     // vis.Image.fillClockwise = vis.Inverted ? vis.OriginalFillClockwise : !vis.OriginalFillClockwise;
                     break;
             }
