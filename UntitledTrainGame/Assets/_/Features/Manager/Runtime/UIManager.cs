@@ -7,6 +7,7 @@ using Manager.Runtime;
 using SharedData.Runtime;
 using TMPro;
 using Tools.Runtime;
+using ToServiceInterfacesols.Runtime;
 using UnityEngine;
 using UnityEngine.Assertions;
 using UnityEngine.UI;
@@ -14,7 +15,7 @@ using UnitySceneManager = UnityEngine.SceneManagement.SceneManager;
 
 namespace Game.Runtime
 {
-    public class UIManager : FMono
+    public class UIManager : FMono, IUiService
     {
         #region Variables
 
@@ -148,13 +149,13 @@ namespace Game.Runtime
             //     }
             // };
             // Subscribe to clock event
-            ClockManager.Instance.m_OnTimeUpdated += UpdateClockTime;
-            UpdateClockTime(ClockManager.Instance.m_CurrentTime);
+            ClockManager.Instance.OnTimeUpdated += UpdateClockTime;
+            UpdateClockTime(ClockManager.Instance.CurrentTime);
         }
 
         private void OnDestroy()
         {
-            ClockManager.Instance.m_OnTimeUpdated -= UpdateClockTime;
+            ClockManager.Instance.OnTimeUpdated -= UpdateClockTime;
             RouteManager.Instance.OnTrainStationDiscovered -= OnTrainStationDiscovered;
             
             RouteManager.Instance.OnDiscoveredTrainStationsUpdated -= () =>
@@ -241,6 +242,7 @@ namespace Game.Runtime
                 
             Info($"Started progress tracking for segment {segmentIndex}");
         }
+
         private void UpdateCurrentMapProgress(float progress)
         {
             // Update current segment progress (0 -> 1)
@@ -280,7 +282,7 @@ namespace Game.Runtime
             }
         }
         
-        public void ResetInternalState()
+        public void ResetTravelUiState()
         {
             _currentSegmentIndex = -1;
             
@@ -679,11 +681,11 @@ namespace Game.Runtime
         private void InitializeForNewRoute(List<Station_Data> segments)
         {
             _segments = segments;
-            ResetInternalState();
+            ResetTravelUiState();
 
             // At this point, discovered stations should be visible again.
-            Assert.IsTrue(_segmentVisuals.Count == 0, "Segment visuals should be cleared during ResetInternalState.");
-            Assert.IsTrue(_segmentsToLoad.Count == 0, "SegmentsToLoad should be cleared during ResetInternalState.");
+            Assert.IsTrue(_segmentVisuals.Count == 0, "Segment visuals should be cleared during ResetTravelUiState.");
+            Assert.IsTrue(_segmentsToLoad.Count == 0, "SegmentsToLoad should be cleared during ResetTravelUiState.");
         }
 
         // 3) Prepare a segment (find transform, compute direction, set up image) and register it

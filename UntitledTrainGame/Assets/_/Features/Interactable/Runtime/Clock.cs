@@ -1,5 +1,5 @@
-using System;
-using Manager.Runtime;
+using ServiceInterfaces.Runtime;
+using Services.Runtime;
 using SharedData.Runtime;
 using TMPro;
 using UnityEngine;
@@ -9,26 +9,26 @@ namespace Interactable.Runtime
     public class Clock : MonoBehaviour
     {
         [SerializeField] private TMP_Text[] _clockText;
-        private ClockManager _clockManager;
+        private IClockService _clockManager;
         
         #region Unity API
         // Start is called once before the first execution of Update after the MonoBehaviour is created
         void Start()
         {
             _clockText = GetComponentsInChildren<TMP_Text>();
-            _clockManager = ClockManager.Instance;
-            _clockManager.m_OnTimeUpdated += UpdateTime;
+            _clockManager = ServiceRegistry.Resolve<IClockService>();
+            _clockManager.OnTimeUpdated += UpdateTime;
             
-            UpdateTime(_clockManager.m_CurrentTime);
+            UpdateTime(_clockManager.CurrentTime);
         }
 
         // private void OnEnable()
         // {
-        //     _clockManager.m_OnTimeUpdated += UpdateTime;
+        //     _clockManager.OnTimeUpdated += UpdateTime;
         // }
         private void OnDestroy()
         {
-            _clockManager.m_OnTimeUpdated -= UpdateTime;
+            _clockManager.OnTimeUpdated -= UpdateTime;
         }
         
         #endregion

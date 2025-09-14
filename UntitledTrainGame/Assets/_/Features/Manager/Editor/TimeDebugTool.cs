@@ -35,7 +35,7 @@ namespace Manager.Editor
             // GUILayout.Label("Time Debug Tool");
             GUILayout.Label("Manual Time Control", EditorStyles.boldLabel);
             
-            GUILayout.Label($"Current Time: {_clockManager.m_CurrentTime.ToString()}");
+            GUILayout.Label($"Current Time: {_clockManager.CurrentTime.ToString()}");
             GUILayout.Space(10);
             
             // GUILayout.Label($"Target Time: {m_Hours:D2}:{m_Minutes:D2}");
