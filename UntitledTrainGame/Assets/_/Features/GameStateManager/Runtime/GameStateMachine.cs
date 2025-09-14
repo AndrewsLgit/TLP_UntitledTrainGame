@@ -223,7 +223,7 @@ namespace GameStateManager.Runtime
             _inputService.SwitchToUI();
             _routeService.StartJourney(route, network);
             
-            _sceneToLoad = route.EndStation.StationScene.SceneName;
+            // _sceneToLoad = route.EndStation.StationScene.SceneName;
         }
 
         public void RequestStartJourney(Station_Data start, Station_Data end, StationNetwork_Data network)
@@ -245,7 +245,7 @@ namespace GameStateManager.Runtime
             _inputService.SwitchToUI();
             _routeService.StartJourney(start, end, network);
             
-            _sceneToLoad = end.StationScene.SceneName;
+            // _sceneToLoad = end.StationScene.SceneName;
         }
 
         public void RequestResumeJourney()
@@ -387,6 +387,8 @@ namespace GameStateManager.Runtime
             _uiService.CreateProgressBarsForRoute(stationSegments);
             _inputService.SwitchToUI();
             
+            // load last station scene on notification
+            _sceneToLoad = stationSegments[^1].StationScene.SceneName;
         }
 
         public void NotifyJourneyEnded()
