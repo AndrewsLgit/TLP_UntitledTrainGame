@@ -1399,6 +1399,10 @@ PrefabInstance:
       propertyPath: m_Layer
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 1966136187532938399, guid: e17302e8239d14d8facdb270cb35d404, type: 3}
+      propertyPath: m_Layer
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 2639774479634111692, guid: e17302e8239d14d8facdb270cb35d404, type: 3}
       propertyPath: m_Layer
       value: 0
@@ -8006,6 +8010,10 @@ PrefabInstance:
     - target: {fileID: 4884986099846934561, guid: 6a264a2de286dae429f13ecfabfdcbe7, type: 3}
       propertyPath: m_Name
       value: p_WaterFall (1)
+      objectReference: {fileID: 0}
+    - target: {fileID: 4884986099846934561, guid: 6a264a2de286dae429f13ecfabfdcbe7, type: 3}
+      propertyPath: m_Layer
+      value: 9
       objectReference: {fileID: 0}
     - target: {fileID: 6740689038926287528, guid: 6a264a2de286dae429f13ecfabfdcbe7, type: 3}
       propertyPath: m_LocalScale.x
