@@ -165,46 +165,26 @@ namespace DialogSystem.Runtime
 
         private void HandleFlags(DialogNode node)
         {
-            if (node.FlagsToSet != null)
+            if (node.FlagsToChange != null)
             {
-                foreach (var f in node.FlagsToSet)
+                foreach (var f in node.FlagsToChange)
                 {
                     if (_flagProvider != null)
-                        _flagProvider.SetFlag(f, true);
-                    else Warning($"FlagProvider is null! Not setting flag: {f}");
-                }
-            }
-
-            if (node.FlagsToClear != null)
-            {
-                foreach (var f in node.FlagsToClear)
-                {
-                    if (_flagProvider != null)
-                        _flagProvider.SetFlag(f, false);
-                    else Warning($"FlagProvider is null! Not clearing flag: {f}");
+                        _flagProvider.SetFlag(f.flagKey, f.value);
+                    else Warning($"FlagProvider is null! Not setting flag: {f.flagKey}");
                 }
             }
         }
 
         private void HandleFlags(Response response)
         {
-            if (response.FlagsToSet != null)
+            if (response.FlagsToChange != null)
             {
-                foreach (var f in response.FlagsToSet)
+                foreach (var f in response.FlagsToChange)
                 {
                     if (_flagProvider != null)
-                        _flagProvider.SetFlag(f, true);
-                    else Warning($"FlagProvider is null! Not setting flag: {f}");
-                }
-            }
-
-            if (response.FlagsToClear != null)
-            {
-                foreach (var f in response.FlagsToClear)
-                {
-                    if (_flagProvider != null)
-                        _flagProvider.SetFlag(f, false);
-                    else Warning($"FlagProvider is null! Not clearing flag: {f}");
+                        _flagProvider.SetFlag(f.flagKey, f.value);
+                    else Warning($"FlagProvider is null! Not setting flag: {f.flagKey}");
                 }
             }
         }
@@ -234,9 +214,7 @@ namespace DialogSystem.Runtime
             string key = SceneManager.GetActiveScene().name;
             if (_firstTalkSet.Contains(key)) return;
 
-            bool consumeTime = node.Responses != null && node.Responses.Any(r => r.ConsumeTime);
 
-            if (!consumeTime) return;
             _firstTalkSet.Add(key);
             OnFirstTimeTalk?.Invoke(key); // todo: subscribe ClockManager to this event in order to advance time
         }
