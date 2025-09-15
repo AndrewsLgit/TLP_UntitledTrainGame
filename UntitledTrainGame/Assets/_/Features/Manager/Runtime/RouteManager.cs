@@ -388,6 +388,7 @@ namespace Manager.Runtime
             // return !string.IsNullOrEmpty(pausedSceneName) && string.Equals(activeSceneName, pausedSceneName, StringComparison.Ordinal);
             return _routePaused;
         }
+        
         // Resume the route from the paused station, continuing to the next station if available
         public void ResumeJourneyFromPausedStation()
         {

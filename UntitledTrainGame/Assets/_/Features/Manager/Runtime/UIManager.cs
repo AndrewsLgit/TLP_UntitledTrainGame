@@ -639,7 +639,11 @@ namespace Game.Runtime
             }
 
             // Fallback: rely on numeric Id ordering
-            return fromId > toId;
+            var fromStation = _trainStations.FirstOrDefault(x => x.name.Contains(fromLabel));
+            var toStation = _trainStations.FirstOrDefault(x => x.name.Contains(toLabel));
+            
+            return fromStation.transform.position.x > toStation.transform.position.x;
+            // return fromId > toId;
         }
 
         // Extract labels like "A12", "D5" from an arbitrary string.
