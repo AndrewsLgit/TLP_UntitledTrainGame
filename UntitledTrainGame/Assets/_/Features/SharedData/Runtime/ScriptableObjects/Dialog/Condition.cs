@@ -14,10 +14,10 @@ namespace SharedData.Runtime
         public ConditionScope scope;
     }
 
-    public enum ConditionScope
-    {
-        Global,
-        SingleNPC,
-        Scene
-    }
+    // public enum ConditionScope
+    // {
+    //     Global,
+    //     SingleNPC,
+    //     Scene
+    // }
 }
