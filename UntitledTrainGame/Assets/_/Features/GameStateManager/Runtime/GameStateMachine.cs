@@ -310,6 +310,7 @@ namespace GameStateManager.Runtime
             
             _uiService.ResetTravelUiState();
             _uiService.ShowMap();
+            _inputService.SwitchToUI();
             Info("Map requested.");
         }
 
@@ -320,6 +321,7 @@ namespace GameStateManager.Runtime
             
             _uiService.ResetTravelUiState();
             _uiService.HideMap();
+            _inputService.SwitchToPlayer();
             Info("Map hide requested.");
         }
 
