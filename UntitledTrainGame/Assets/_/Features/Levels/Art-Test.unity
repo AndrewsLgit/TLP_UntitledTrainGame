@@ -1547,7 +1547,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &655389153
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2662,6 +2662,18 @@ PrefabInstance:
       propertyPath: m_LocalPosition.z
       value: -7.45
       objectReference: {fileID: 0}
+    - target: {fileID: 5984732179767798748, guid: a5ac3f1732bbb4f6bbe48536dc0b60e2, type: 3}
+      propertyPath: m_Materials.Array.size
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5984732179767798748, guid: a5ac3f1732bbb4f6bbe48536dc0b60e2, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 7297e9858e7108e4c864133ee7ffdd43, type: 2}
+    - target: {fileID: 5984732179767798748, guid: a5ac3f1732bbb4f6bbe48536dc0b60e2, type: 3}
+      propertyPath: 'm_Materials.Array.data[1]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 59441e4a35e28574f8235f41f79961cf, type: 2}
     - target: {fileID: 6329061466236294378, guid: a5ac3f1732bbb4f6bbe48536dc0b60e2, type: 3}
       propertyPath: m_Name
       value: p_TrainGroupSchedule_A
@@ -2670,6 +2682,10 @@ PrefabInstance:
       propertyPath: _trainRoute
       value: 
       objectReference: {fileID: 11400000, guid: 702dcd86f71b74265b7f30a37d585a1f, type: 2}
+    - target: {fileID: 8180228993889338767, guid: a5ac3f1732bbb4f6bbe48536dc0b60e2, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 8363469493765800719, guid: a5ac3f1732bbb4f6bbe48536dc0b60e2, type: 3}
       propertyPath: _trainRoute
       value: 
