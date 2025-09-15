@@ -537,13 +537,22 @@ namespace Game.Runtime
 
         private void RefreshDiscoveredPathLinesVisibility()
         {
-            if(_stationPathLines == null) return;
+            if (_stationPathLines == null)
+            {
+                Warning("No path lines found. Skipping.");
+                return;
+            }
 
             foreach (var line in _discoveredPathLines)
             {
                 var pathLine = _stationPathLines.FirstOrDefault(x => x.name.Contains(line));
-                
-                if (pathLine != null) pathLine.gameObject.SetActive(true);
+                Info($"Found path line: {pathLine} in discovered path lines.");
+
+                if (pathLine != null)
+                {
+                    pathLine.gameObject.SetActive(true);
+                    pathLine.GetComponent<Image>().fillAmount = 1f;
+                }
             }
         }
         

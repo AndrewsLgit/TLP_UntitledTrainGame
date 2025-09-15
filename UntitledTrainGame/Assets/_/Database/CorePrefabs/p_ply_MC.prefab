@@ -229,31 +229,31 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 8cd174534d9f8164ab1c0a6e66d1e1e8, type: 3}
       propertyPath: m_LocalPosition.x
-      value: -5.635276
+      value: -5.2639456
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 8cd174534d9f8164ab1c0a6e66d1e1e8, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 0.56999993
+      value: 1.265
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 8cd174534d9f8164ab1c0a6e66d1e1e8, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 5.5624986
+      value: 2.951136
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 8cd174534d9f8164ab1c0a6e66d1e1e8, type: 3}
       propertyPath: m_LocalRotation.w
-      value: 0.9006622
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 8cd174534d9f8164ab1c0a6e66d1e1e8, type: 3}
       propertyPath: m_LocalRotation.x
-      value: -0
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 8cd174534d9f8164ab1c0a6e66d1e1e8, type: 3}
       propertyPath: m_LocalRotation.y
-      value: 0.43451992
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 8cd174534d9f8164ab1c0a6e66d1e1e8, type: 3}
       propertyPath: m_LocalRotation.z
-      value: -0
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 8cd174534d9f8164ab1c0a6e66d1e1e8, type: 3}
       propertyPath: m_LocalEulerAnglesHint.x
@@ -261,7 +261,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 8cd174534d9f8164ab1c0a6e66d1e1e8, type: 3}
       propertyPath: m_LocalEulerAnglesHint.y
-      value: 771.51
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 8cd174534d9f8164ab1c0a6e66d1e1e8, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
@@ -710,6 +710,38 @@ MonoBehaviour:
         m_CallState: 2
     m_ActionId: a30102dd-d208-4da9-98af-670282f961f9
     m_ActionName: 'UI/StopTrain[/Keyboard/ctrl,/Keyboard/a]'
+  - m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 300937130390162711}
+        m_TargetAssemblyTypeName: Player.Runtime.PlayerInputRouter, Player.Runtime
+        m_MethodName: ShowMap
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+    m_ActionId: c4add2ec-76eb-4d1e-8ee3-9a4fcd65e615
+    m_ActionName: 'Player/Map[/Keyboard/m]'
+  - m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 300937130390162711}
+        m_TargetAssemblyTypeName: Player.Runtime.PlayerInputRouter, Player.Runtime
+        m_MethodName: UIHideMap
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+    m_ActionId: a772d290-656e-47e3-988d-ce997f78c00a
+    m_ActionName: 'UI/Map[/Keyboard/m]'
   m_NeverAutoSwitchControlSchemes: 0
   m_DefaultControlScheme: 
   m_DefaultActionMap: Player

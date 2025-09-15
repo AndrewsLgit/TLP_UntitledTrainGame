@@ -1,5 +1,6 @@
 using System;
 using Foundation.Runtime;
+using GameStateManager.Runtime;
 using Manager.Runtime;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -26,6 +27,8 @@ namespace Player.Runtime
         public event Action OnInteract;
         // Stop train button pressed
         public event Action OnStopTrain; 
+        // Show map button pressed
+        public event Action OnShowMap;
         
         // --- UI Action Map events ---
         // Fired with UI/Navigate (e.g., WASD/arrow keys or dpad/left stick when on UI map)
@@ -78,6 +81,26 @@ namespace Player.Runtime
             OnStopTrain?.Invoke();
             _onPlayerJourneyEnd?.Invoke();
         }
+
+        [ContextMenu("Show Map")]
+        public void ShowMap(InputAction.CallbackContext context)
+        {
+            if (context is { performed: false, canceled: false }) return;
+            
+            var gameManager = GameStateMachine.Instance;
+            if (gameManager == null)
+            {
+                Warning($"Game manger not found! Retrying.");
+                gameManager = GameStateMachine.Instance;
+                if (gameManager == null)
+                {
+                    Error($"Game manger still not found! Aborting.");
+                    return;
+                }
+            }
+            
+            gameManager.RequestShowMap();
+        }
         
         // --- UI Action Map handlers (bind these in the PlayerInput component to the "UI" action map) ---
 
@@ -107,6 +130,24 @@ namespace Player.Runtime
             OnUICancel?.Invoke();
         }
 
- 
+        [ContextMenu("Hide Map")]
+        public void UIHideMap(InputAction.CallbackContext context)
+        {
+            if (context is { performed: false, canceled: false }) return;
+            
+            var gameManager = GameStateMachine.Instance;
+            if (gameManager == null)
+            {
+                Warning($"Game manger not found! Retrying.");
+                gameManager = GameStateMachine.Instance;
+                if (gameManager == null)
+                {
+                    Error($"Game manger still not found! Aborting.");
+                    return;
+                }
+            }
+            
+            gameManager.RequestHideMap();
+        }
     }
 }
