@@ -182,8 +182,7 @@ public class DialogController_PlaymodeSelfTest : FMono
         node.NextNode = next;
         node.Responses = responses ?? new List<Response>();
         node.Conditions = new List<Condition>();
-        node.FlagsToSet = new List<string>();
-        node.FlagsToClear = new List<string>();
+        node.FlagsToChange = new List<FlagChange>();
 
         var character = ScriptableObject.CreateInstance<CharacterData>();
         character.Id = "npc_" + id;
@@ -200,9 +199,7 @@ public class DialogController_PlaymodeSelfTest : FMono
             Text = text,
             NextNode = next,
             Conditions = new List<Condition>(),
-            FlagsToSet = new List<string>(),
-            FlagsToClear = new List<string>(),
-            ConsumeTime = false
+            FlagsToChange = new List<FlagChange>(),
         };
     }
 

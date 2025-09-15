@@ -470,7 +470,7 @@ namespace Manager.Runtime
         #region Debug
 
         [ContextMenu("Remove all visibility (except for A3)")]
-        private void RemoveAllVisibility()
+        public void RemoveAllVisibility()
         {
             foreach (var stationNetwork in _allStationNetworks)
             {
