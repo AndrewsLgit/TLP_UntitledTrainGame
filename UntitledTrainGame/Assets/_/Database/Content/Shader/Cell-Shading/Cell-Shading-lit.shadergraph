@@ -3966,7 +3966,7 @@
     "m_ZTestMode": 4,
     "m_ZWriteControl": 0,
     "m_AlphaMode": 0,
-    "m_RenderFace": 2,
+    "m_RenderFace": 0,
     "m_AlphaClip": true,
     "m_CastShadows": true,
     "m_ReceiveShadows": true,
@@ -4183,8 +4183,8 @@
     "m_ObjectId": "d18bd7999bb64f0782a352e8fe63b51d",
     "m_Title": "obsolete",
     "m_Position": {
-        "x": -2038.999755859375,
-        "y": -906.0
+        "x": -2039.199951171875,
+        "y": -907.2000122070313
     }
 }
 
