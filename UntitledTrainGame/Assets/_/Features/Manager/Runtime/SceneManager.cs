@@ -116,22 +116,20 @@ namespace Manager.Runtime
                     return;
                 }
                 StartCoroutine(ReplacePreload(sceneName));
-                // Scene previousLoadedScene = SceneManager.GetSceneByName($"{SceneName}");
-                // if (previousLoadedScene.IsValid() && previousLoadedScene.isLoaded)
-                // {
-                //     SceneManager.UnloadSceneAsync(previousLoadedScene);
-                //     Info($"Previous scene unloaded: {previousLoadedScene.name}");
-                // }
-                // _preloadOp = null;
+                return;
+            }
+            
+            // Guard: if target is already the currently active non-persistent scene, skip preload
+            _currentActiveScene = GetCurrentLevelScene();
+            if (IsSameAsCurrent(sceneName))
+            {
+                Warning($"Requested scene {sceneName} is already active. Skipping preload.");
+                _preloadedSceneName = sceneName;
+                _preloadOp = null;
                 return;
             }
             
             _preloadedSceneName = sceneName;
-            // _currentActiveScene = SceneManager.GetActiveScene();
-            //_currentActiveScene = GetCurrentLevelScene();
-            // _preloadOp = SceneManager.LoadSceneAsync($"{_scenePath}{SceneName}", LoadSceneMode.Additive);
-            // _preloadOp.allowSceneActivation = false;
-            // Info($"Starting to preload scene: {SceneName}");
             
             StartCoroutine(PreloadRoutine(sceneName));
         }
@@ -148,8 +146,14 @@ namespace Manager.Runtime
 
         public void ActivateScene()
         {
+            // if nothing is preloaded but target equals current active scene, treat as no-op
             if (_preloadOp == null)
             {
+                if (!string.IsNullOrEmpty(_preloadedSceneName) && IsSameAsCurrent(_preloadedSceneName))
+                {
+                    Warning($"ActivateScene skipped: '{_preloadedSceneName} already active.");
+                    return;
+                }
                 Error($"No scene preloaded!");
                 return;
             }
@@ -215,8 +219,13 @@ namespace Manager.Runtime
                 Info($"Set active scene to: {newScene.name}");
             }
             
+            // If it's actually the same scene (already loaded), don't unload
+            if (_currentActiveScene.IsValid() && _currentActiveScene == newScene)
+            {
+                Warning($"Target scene '{newScene.name}' is already active. Skipping unload.'");
+            }
             // Unload old scene if existent and different
-            if (_currentActiveScene.IsValid() && _currentActiveScene != newScene && !IsPersistentScene(_currentActiveScene))
+            else if (_currentActiveScene.IsValid() && _currentActiveScene != newScene && !IsPersistentScene(_currentActiveScene))
             {
                 Info($"Unloading previous scene: {_currentActiveScene.name}");
                 AsyncOperation unloadOperation = UnityEngine.SceneManagement.SceneManager.UnloadSceneAsync(_currentActiveScene);
@@ -236,6 +245,17 @@ namespace Manager.Runtime
         private IEnumerator PreloadRoutine(string sceneName)
         {
             Info($"Starting to preload scene: {sceneName}");
+            // If the scene is already loaded, don't load again
+            var already = UnitySceneManager.GetSceneByName(sceneName);
+            if (already.IsValid() && already.isLoaded && !IsPersistentScene(already))
+            {
+                Warning($"Scene '{sceneName}' already loaded. Skipping async load.");
+                _preloadOp = null;
+                _currentActiveScene = GetCurrentLevelScene();
+                yield break;
+            }
+            
+            
             _preloadOp = UnityEngine.SceneManagement.SceneManager.LoadSceneAsync($"{sceneName}", LoadSceneMode.Additive);
             if (_preloadOp == null)
             {
@@ -261,6 +281,13 @@ namespace Manager.Runtime
             _preloadedSceneName = nextSceneName;
 
             _currentActiveScene = GetCurrentLevelScene();
+            
+            // If next = current, don't preload
+            if (IsSameAsCurrent(nextSceneName))
+            {
+                Warning($"Next scene '{nextSceneName}' is already active. Skipping preload.");
+                yield break;
+            }
             yield return PreloadRoutine(nextSceneName);
         }
         
@@ -298,6 +325,13 @@ namespace Manager.Runtime
         private bool IsPersistentScene(Scene scene)
         {
             return scene.IsValid() && scene == _persistentScene;
+        }
+
+        private bool IsSameAsCurrent(string sceneName)
+        {
+            if(string.IsNullOrEmpty(sceneName)) return false;
+            var currentScene = GetCurrentLevelScene();
+            return currentScene.IsValid() && currentScene.isLoaded && !IsPersistentScene(currentScene) && currentScene.name == sceneName;
         }
         
         #endregion
