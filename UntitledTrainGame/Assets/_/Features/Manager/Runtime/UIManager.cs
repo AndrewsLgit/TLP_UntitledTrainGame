@@ -288,6 +288,7 @@ namespace Game.Runtime
             {
                 segmentVisual.Image.fillAmount = 1f;
                 segmentVisual.Image.fillOrigin = segmentVisual.OriginalFillOrigin;
+                segmentVisual.Image.fillClockwise = segmentVisual.OriginalFillClockwise;
             }
             
             // _currentTimer = null;
@@ -461,7 +462,7 @@ namespace Game.Runtime
                     // Keep the asset's corner origin; flip clockwise when inverted so it fills from the opposite end.
                     vis.Image.fillOrigin = vis.OriginalFillOrigin;
                     if(vis.Inverted)
-                        vis.Image.fillClockwise = vis.Image.fillClockwise ? !vis.OriginalFillClockwise : vis.OriginalFillClockwise;
+                        vis.Image.fillClockwise = vis.OriginalFillClockwise ? !vis.OriginalFillClockwise : vis.OriginalFillClockwise;
                     // vis.Image.fillClockwise = vis.Inverted ? !vis.OriginalFillClockwise : vis.OriginalFillClockwise;
                     break;
                 default:
@@ -470,7 +471,8 @@ namespace Game.Runtime
                     // if(vis.Inverted)
                     //     vis.Image.fillClockwise = vis.Image.fillClockwise ? !vis.Image.fillClockwise : vis.Image.fillClockwise;
                     if(vis.Inverted)
-                        vis.Image.fillClockwise = vis.OriginalFillClockwise ? !vis.OriginalFillClockwise : vis.OriginalFillClockwise; 
+                        vis.Image.fillClockwise = !vis.OriginalFillClockwise;
+                        // vis.Image.fillClockwise = vis.OriginalFillClockwise ? !vis.OriginalFillClockwise : vis.OriginalFillClockwise; 
                     // vis.Image.fillClockwise = vis.Inverted ? vis.OriginalFillClockwise : !vis.OriginalFillClockwise;
                     break;
             }
