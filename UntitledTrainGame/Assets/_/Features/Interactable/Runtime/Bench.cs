@@ -51,7 +51,7 @@ namespace Interactable.Runtime
             GetClockManager();
             Info($"Bench sleep selected");
             // Add clock manager sleep event (reset loop)
-            // _clockManager.FindNextEventWithTag("Sleep");
+            // _clockManager.JumpToNextEventWithTag("Sleep");
             _clockManager.SleepToLoopEnd();
         }
 
@@ -63,7 +63,7 @@ namespace Interactable.Runtime
             TimeEvent foundEvent = null;
             Info("Interacting with Bench");
             
-            foundEvent = _clockManager.FindNextEventWithTag("Train");
+            foundEvent = _clockManager.JumpToNextEventWithTag("Train");
 
             if (foundEvent != null)
             {

@@ -336,7 +336,7 @@ namespace GameStateManager.Runtime
         {
             Assert.IsNotNull(_clockService, "Clock service not found!");
             
-            _clockService.FindNextEventWithTag(tag ?? string.Empty);
+            _clockService.JumpToNextEventWithTag(tag ?? string.Empty);
             _routeService.RemovePausedRoute();
         }
 

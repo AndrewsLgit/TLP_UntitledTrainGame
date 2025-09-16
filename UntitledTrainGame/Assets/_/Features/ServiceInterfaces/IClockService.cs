@@ -16,7 +16,8 @@ namespace ServiceInterfaces.Runtime
         void AdvanceTime(GameTime duration);
 
         // Query or jump helper; you can later split into QueryNextEvent/AdvanceToNextEvent if you want pure queries
-        TimeEvent FindNextEventWithTag(string tag);
+        TimeEvent JumpToNextEventWithTag(string tag);
+        TimeEvent GetNextEvent();
         void SleepToLoopEnd();
     }
 

@@ -171,7 +171,7 @@ namespace Manager.Runtime
             _timeEventGroups.Clear(); ;
             _timeEventGroups = FindObjectsByType<TimeEventGroup>(FindObjectsSortMode.None).Where(eg => eg.gameObject.scene.name == SceneManager.Instance.CurrentActiveScene).ToList();
             // ResetAllEvents();
-            Info($"Found {_timeEventGroups.Count} TimeEventGroups with {_timeEventGroups.ToArray().Length}");
+            Info($"Found {_timeEventGroups.Count} TimeEventGroups with {_timeEventGroups.ToArray().Length} event groups and {_timeEventGroups.SelectMany(g => g.m_Events).Count()} events in scene {SceneManager.Instance.CurrentActiveScene}.");
         }
 
         private void ResetClock()
@@ -206,12 +206,15 @@ namespace Manager.Runtime
         /// Find the next event with a given tag across all groups.
         /// Used by DebugTool (e.g., jump to next train).
         /// </summary>
-        public TimeEvent FindNextEventWithTag(string tag)
+        public TimeEvent JumpToNextEventWithTag(string tag)
         {
+            
             var tagString = tag == String.Empty ? "no tag" : tag;
             InfoInProgress($"Finding next event with tag: {tagString}");
             int now = CurrentTime.ToTotalMinutes();
             int loopEnd = m_TimeConfig.m_LoopEnd.ToTotalMinutes();
+            
+            // RefreshEventGroups();
             TimeEvent nextEvent = null;
 
             if (string.Equals(tag, "Sleep", StringComparison.OrdinalIgnoreCase))
@@ -220,7 +223,20 @@ namespace Manager.Runtime
                 return null;
             }
 
-            if (string.IsNullOrEmpty(tag))
+            // if (string.IsNullOrEmpty(tag))
+            // {
+            //     var groupsEvents = _timeEventGroups.SelectMany(g => g.m_Events);
+            //     var availableEvents = groupsEvents.Where(e => e.m_Start.ToTotalMinutes() > now && e.m_Start.ToTotalMinutes() < loopEnd);
+            //     var orderedEvents = availableEvents.OrderBy(e => e.m_Start.ToTotalMinutes()); 
+            //     nextEvent = orderedEvents.FirstOrDefault();
+            //     
+            //     var nextGroupEvent = _timeEventGroups.SelectMany(g => g.m_Events)
+            //         .Where(e => e.m_Start.ToTotalMinutes() > now && e.m_Start.ToTotalMinutes() < loopEnd)
+            //         .OrderBy(e => e.m_Start.ToTotalMinutes())
+            //         .FirstOrDefault();
+            //     
+            // }
+            if(string.IsNullOrEmpty(tag))
                 nextEvent = _timeEventGroups.SelectMany(g => g.m_Events)
                     .Where(e => e.m_Start.ToTotalMinutes() > now && e.m_Start.ToTotalMinutes() < loopEnd)
                     .OrderBy(e => e.m_Start.ToTotalMinutes())
@@ -245,8 +261,36 @@ namespace Manager.Runtime
                 return null;
             }
             RouteManager.Instance.RemovePausedRoute();
+            GetNextEvent();
             SetTime(nextEvent.m_Start);
             return nextEvent;
+        }
+
+        public TimeEvent GetNextEvent()
+        {
+            int now = CurrentTime.ToTotalMinutes();
+            int loopEnd = m_TimeConfig.m_LoopEnd.ToTotalMinutes();
+            
+            // RefreshEventGroups();
+            
+            TimeEvent nextEvent = null;
+
+            nextEvent = _timeEventGroups
+                .SelectMany(g => g.m_Events)
+                .Where(e => (e.m_Start.ToTotalMinutes() > now) &&
+                            (e.m_Start.ToTotalMinutes() < loopEnd))
+                .OrderBy(e => e.m_Start.ToTotalMinutes())
+                .FirstOrDefault();
+
+            if (nextEvent != null)
+            {
+                Info($"Found next event: {nextEvent.m_EventName} at {nextEvent.m_Start}.");
+                return nextEvent;
+            }
+            
+            Warning($"No event found.");
+            return null;
+
         }
 
         public void SleepToLoopEnd()

@@ -54,7 +54,7 @@ namespace Manager.Editor
             if (GUILayout.Button("Jump to Next Event"))
             {
                 Debug.Log($"Using tag: {_tag}");
-                var timeEvent = _clockManager.FindNextEventWithTag(_tag);
+                var timeEvent = _clockManager.JumpToNextEventWithTag(_tag);
 
                 if (timeEvent != null)
                 {
