@@ -12,8 +12,8 @@ namespace SharedData.Runtime
         [Tooltip("The value to assign to the flag (true/false).")]
         public bool value;
 
-        [Tooltip("Determines the scope: global, local to NPC, or scene-specific.")]
-        public ConditionScope scope;
+    //     [Tooltip("Determines the scope: global, local to NPC, or scene-specific.")]
+    //     public ConditionScope scope;
     }
 }
 

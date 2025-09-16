@@ -8,6 +8,7 @@ namespace SharedData.Runtime
     [Serializable]
     public struct Response
     {
+        public string Id;
         public string Text;
         [Tooltip("Next node to go to after choosing this response. Leave empty if this is the end of the dialog")] 
         [CanBeNull] public DialogNode NextNode;

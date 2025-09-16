@@ -36,29 +36,4 @@ namespace SharedData.Runtime
         [Tooltip("Determines if this is an end node. DO NOT TOUCH! This is handled automatically.")]
         public bool IsEndNode => (Responses == null || Responses.Count == 0) && (NextNode == null); 
     }
-    // [Serializable]
-    // public struct Response
-    // {
-    //     private string Id;
-    //     public string Text;
-    //     [Tooltip("Next node to go to after choosing this response. Leave empty if this is the end of the dialog")] 
-    //     [CanBeNull] public DialogNode NextNode;
-    //     [Tooltip("Conditions needed for this response to be available. Leave empty if this response is always available.")]
-    //     [CanBeNull] public List<Condition> Conditions;
-    //     [Tooltip("Flags that will be set when choosing this response.")]
-    //     public List<string> FlagsToSet;
-    //     [Tooltip("Flags that will be cleared when choosing this response.")]
-    //     public List<string> FlagsToClear;
-    // }
-    //
-    // [Serializable]
-    // public struct Condition 
-    // {
-    //     [Tooltip("Key used to check the flag system.")]
-    //     public string flagKey;
-    //     [Tooltip("The expected state of the flag (true/false).")]
-    //     public bool requiredValue;
-    //     [Tooltip("Determines the scope: global, local to NPC, or scene-specific.")]
-    //     public conditionscope scope;
-    // }
 }
