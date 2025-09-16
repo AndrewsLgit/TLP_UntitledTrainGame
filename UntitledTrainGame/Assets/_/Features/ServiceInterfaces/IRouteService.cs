@@ -25,6 +25,7 @@ namespace ServiceInterfaces.Runtime
         void ResumeJourneyFromPausedStation();
         void StopJourneyEarly();
         void RemovePausedRoute();
+        void RemoveAllVisibility();
 
         // Queries
         bool HasPendingTrainAtActiveScene();

@@ -137,6 +137,11 @@ namespace GameStateManager.Runtime
                   "Ensure ServicesBootstrapper registers services in the first scene.");
         }
 
+        private void OnApplicationQuit()
+        {
+            _routeService.RemoveAllVisibility();
+        }
+
 
         private void Update() { }
 
@@ -300,6 +305,7 @@ namespace GameStateManager.Runtime
 
         public void RequestGameExit()
         {
+            _routeService.RemoveAllVisibility();
             Application.Quit();
         }
 
