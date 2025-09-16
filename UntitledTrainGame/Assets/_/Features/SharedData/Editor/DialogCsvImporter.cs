@@ -22,9 +22,9 @@ namespace SharedData.Editor
         private string _characterDataFolder;
         private bool _overwriteExisting = true;
         
-        private const string _dialogsCsvFileName = "Dialogs.csv";
-        private const string _responsesCsvFileName = "Responses.csv";
-        private const string _conditionsCsvFileName = "Conditions.csv";
+        private const string _dialogsCsvFileName = "UTG - Dialogues.csv";
+        private const string _responsesCsvFileName = "UTG - Responses.csv";
+        private const string _conditionsCsvFileName = "UTG - Conditions.csv";
         // --- End of Private Variables --- 
 
         #endregion
@@ -473,12 +473,12 @@ namespace SharedData.Editor
             public static bool TryParse(Dictionary<string, string> row, out DialogRow dr)
             {
                 dr = default;
-                if (!row.TryGetValue("Id", out var id)) return false;
+                if (!row.TryGetValue("Dialogue ID", out var id)) return false;
 
-                row.TryGetValue("CharacterId", out var characterId);
-                row.TryGetValue("DialogText", out var dialogText);
-                row.TryGetValue("NextDialogId", out var nextId);
-                row.TryGetValue("flagKey", out var flagSpec);
+                row.TryGetValue("Character ID", out var characterId);
+                row.TryGetValue("Text", out var dialogText);
+                row.TryGetValue("Next Dialogue ID", out var nextId);
+                row.TryGetValue("Flag", out var flagSpec);
 
                 dr = new DialogRow
                 {
@@ -503,12 +503,12 @@ namespace SharedData.Editor
             public static bool TryParse(Dictionary<string, string> row, out ResponseRow rr)
             {
                 rr = default;
-                if (!row.TryGetValue("Id", out var id)) return false;
+                if (!row.TryGetValue("Response ID", out var id)) return false;
 
-                row.TryGetValue("DialogId", out var dialogId);
-                row.TryGetValue("text", out var text);
-                row.TryGetValue("NextDialogId", out var nextId);
-                row.TryGetValue("flagKey", out var flagSpec);
+                row.TryGetValue("Previous Dialogue ID", out var dialogId);
+                row.TryGetValue("Text", out var text);
+                row.TryGetValue("Next Dialogue ID", out var nextId);
+                row.TryGetValue("Flag", out var flagSpec);
 
                 rr = new ResponseRow
                 {
@@ -543,12 +543,12 @@ namespace SharedData.Editor
             {
                 cr = default;
 
-                if (!row.TryGetValue("TargetType", out var ttRaw)) return false;
-                row.TryGetValue("TargetId", out var targetId);
-                row.TryGetValue("flagKey", out var flagKey);
-                row.TryGetValue("Needed value", out var neededValRaw);
-                row.TryGetValue("default value", out var defaultValRaw);
-                row.TryGetValue("scope", out var scopeRaw);
+                if (!row.TryGetValue("Type", out var ttRaw)) return false;
+                row.TryGetValue("ID", out var targetId);
+                row.TryGetValue("Key", out var flagKey);
+                row.TryGetValue("Condition", out var neededValRaw);
+                row.TryGetValue("Default Value", out var defaultValRaw);
+                row.TryGetValue("Scope", out var scopeRaw);
 
                 var targetType = ParseTargetType(ttRaw);
                 var neededVal = ParseBool(neededValRaw, false);
