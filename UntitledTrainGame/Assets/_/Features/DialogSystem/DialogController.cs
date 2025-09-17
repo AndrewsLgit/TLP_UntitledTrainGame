@@ -71,17 +71,16 @@ namespace DialogSystem.Runtime
             
             
             // Choice navigation controller
-            _choiceController = new ChoiceSelectionController(_navRepeatCooldown);
-            _choiceController.OnSubmit += HandleChoiceSubmit;
-            _choiceController.OnCancel += HandleChoiceCancel;
+            
             // SelectionChanged can be used to update highlight if/when UI supports it
             // _choiceController.OnSelectionChanged += HandleChoiceSelectionChanged;
 
-            EnsureEventSubscriptions();
+            //EnsureEventSubscriptions();
         }
 
         private void Start()
         {
+            _choiceController = new ChoiceSelectionController(_navRepeatCooldown);
         }
 
         private void Update()
@@ -95,7 +94,9 @@ namespace DialogSystem.Runtime
         }
 
         private void OnEnable()
-        {
+        
+        { 
+
             if (_inputRouter != null)
             {
                 _inputRouter.OnUINavigate += OnUINavigate;
@@ -114,30 +115,34 @@ namespace DialogSystem.Runtime
                 _inputRouter.OnUISubmit -= OnUISubmit;
                 _inputRouter.OnUICancel -= OnUICancel;
             }
+
+            EnsureEventUnsub();
         }
+
+        
 
         private void OnDestroy()
         {
-            if (NodeManager != null && _subscribedToNodeManager)
-            {
-                NodeManager.OnNodeEntered -= HandleNodeEntered;
-                NodeManager.OnNodeExited -= HandleNodeExited;
-                NodeManager.OnConversationEnded -= HandleConversationEnd;
-            }
-
-            if (UiManager != null && _subscribedToUiManager)
-            {
-                UiManager.OnResponseChosen -= HandleResponseChosen;
-                UiManager.OnTextComplete -= HandleTextComplete;
-                UiManager.OnAdvanceRequested -= HandleAdvanceRequested;
-            }
-
-            if (_choiceController != null)
-            {
-                _choiceController.OnSubmit -= HandleChoiceSubmit;
-                _choiceController.OnCancel -= HandleChoiceCancel;
-                // _choiceController.OnSelectionChanged -= HandleChoiceSelectionChanged;
-            }
+            // if (NodeManager != null && _subscribedToNodeManager)
+            // {
+            //     NodeManager.OnNodeEntered -= HandleNodeEntered;
+            //     NodeManager.OnNodeExited -= HandleNodeExited;
+            //     NodeManager.OnConversationEnded -= HandleConversationEnd;
+            // }
+            //
+            // if (UiManager != null && _subscribedToUiManager)
+            // {
+            //     UiManager.OnResponseChosen -= HandleResponseChosen;
+            //     UiManager.OnTextComplete -= HandleTextComplete;
+            //     UiManager.OnAdvanceRequested -= HandleAdvanceRequested;
+            // }
+            //
+            // if (_choiceController != null)
+            // {
+            //     _choiceController.OnSubmit -= HandleChoiceSubmit;
+            //     _choiceController.OnCancel -= HandleChoiceCancel;
+            //     // _choiceController.OnSelectionChanged -= HandleChoiceSelectionChanged;
+            // }
 
         }
 
@@ -242,8 +247,14 @@ namespace DialogSystem.Runtime
 
         private void EnsureEventSubscriptions()
         {
+            if (_choiceController is not null)
+            {
+                _choiceController.OnSubmit += HandleChoiceSubmit;
+                _choiceController.OnCancel += HandleChoiceCancel;
+            }
+
             // Subscribe to NodeManager events
-            if (NodeManager != null && !_subscribedToNodeManager)
+            if (NodeManager is not null && !_subscribedToNodeManager)
             {
                 NodeManager.OnNodeEntered += HandleNodeEntered;
                 NodeManager.OnNodeExited += HandleNodeExited;
@@ -252,12 +263,37 @@ namespace DialogSystem.Runtime
             }
 
             // Subscribe to UIManager events
-            if (UiManager != null && !_subscribedToUiManager)
+            if (UiManager is not null && !_subscribedToUiManager)
             {
                 UiManager.OnResponseChosen += HandleResponseChosen;
                 UiManager.OnTextComplete += HandleTextComplete;
                 UiManager.OnAdvanceRequested += HandleAdvanceRequested;
                 _subscribedToUiManager = true;
+            }
+        }
+        private void EnsureEventUnsub()
+        {
+            if (NodeManager != null && _subscribedToNodeManager)
+            {
+                NodeManager.OnNodeEntered -= HandleNodeEntered;
+                NodeManager.OnNodeExited -= HandleNodeExited;
+                NodeManager.OnConversationEnded -= HandleConversationEnd;
+                _subscribedToNodeManager = false;
+            }
+
+            if (UiManager != null && _subscribedToUiManager)
+            {
+                UiManager.OnResponseChosen -= HandleResponseChosen;
+                UiManager.OnTextComplete -= HandleTextComplete;
+                UiManager.OnAdvanceRequested -= HandleAdvanceRequested;
+                _subscribedToUiManager = false;
+            }
+
+            if (_choiceController != null)
+            {
+                _choiceController.OnSubmit -= HandleChoiceSubmit;
+                _choiceController.OnCancel -= HandleChoiceCancel;
+                // _choiceController.OnSelectionChanged -= HandleChoiceSelectionChanged;
             }
         }
 
