@@ -20,7 +20,7 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: MAT_Fol_1_D
+  m_Name: MAT_Fol_2_L 6
   m_Shader: {fileID: -6465566751694194690, guid: 5eed73ae923656846814b9f95e1b70cb, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
@@ -29,7 +29,7 @@ Material:
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
   m_DoubleSidedGI: 0
-  m_CustomRenderQueue: -1
+  m_CustomRenderQueue: 5000
   stringTagMap: {}
   disabledShaderPasses:
   - MOTIONVECTORS
@@ -38,7 +38,7 @@ Material:
     serializedVersion: 3
     m_TexEnvs:
     - _MainTex:
-        m_Texture: {fileID: 2800000, guid: 2a7e9af50f7a8e640ba3ee8751a5c1ba, type: 3}
+        m_Texture: {fileID: 2800000, guid: 118cbea0dfcaa804b9cb7ef08e817783, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - unity_Lightmaps:
@@ -55,11 +55,11 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
-    - _QueueControl: 0
+    - _QueueControl: 1
     - _QueueOffset: 0
     - _WindIntensity: 0.05
     - _WindSpeed: 0.5
     m_Colors:
-    - _Color: {r: 0.2209163, g: 0.2830189, b: 0.08677466, a: 0}
+    - _Color: {r: 0.4156863, g: 0.5568628, b: 0.25490198, a: 0}
   m_BuildTextureStacks: []
   m_AllowLocking: 1
