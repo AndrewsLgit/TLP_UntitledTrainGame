@@ -179,7 +179,7 @@ public class DialogController_PlaymodeSelfTest : FMono
         var node = ScriptableObject.CreateInstance<DialogNode>();
         node.Id = id;
         node.DialogText = text;
-        node.NextNode = next;
+        node.NextNodes[0] = next;
         node.Responses = responses ?? new List<Response>();
         node.Conditions = new List<Condition>();
         node.FlagsToChange = new List<FlagChange>();
