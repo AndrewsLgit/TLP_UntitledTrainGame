@@ -160,9 +160,9 @@ public class DialogController_PlaymodeSelfTest : FMono
 
     private void BuildGraph_ABC()
     {
-        _nodeC = MakeNode("C", "Goodbye", null, new List<Response>());
+        _nodeC = MakeNode("C", "Goodbye", new List<DialogNode>(), new List<Response>());
 
-        _nodeB = MakeNode("B", "No choices here, continue...", _nodeC, new List<Response>());
+        _nodeB = MakeNode("B", "No choices here, continue...", new List<DialogNode>(){_nodeC}, new List<Response>());
 
         var toB = MakeResponse("Go to B", _nodeB);
         _nodeA = MakeNode("A", "Hello!", null, new List<Response> { toB });
@@ -171,15 +171,15 @@ public class DialogController_PlaymodeSelfTest : FMono
     private void BuildGraph_OnlyAWithChoice()
     {
         var toEnd = MakeResponse("Finish", null);
-        _nodeA = MakeNode("A", "Choose to end or cancel", null, new List<Response> { toEnd });
+        _nodeA = MakeNode("A", "Choose to end or cancel", new List<DialogNode>(), new List<Response> { toEnd });
     }
 
-    private static DialogNode MakeNode(string id, string text, DialogNode next, List<Response> responses)
+    private static DialogNode MakeNode(string id, string text, List<DialogNode> nextNodes, List<Response> responses)
     {
         var node = ScriptableObject.CreateInstance<DialogNode>();
         node.Id = id;
         node.DialogText = text;
-        node.NextNodes[0] = next;
+        node.NextNodes = nextNodes ?? new List<DialogNode>();
         node.Responses = responses ?? new List<Response>();
         node.Conditions = new List<Condition>();
         node.FlagsToChange = new List<FlagChange>();

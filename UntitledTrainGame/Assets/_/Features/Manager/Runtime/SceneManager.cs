@@ -20,6 +20,7 @@ namespace Manager.Runtime
         // [SerializeField] private string _scenePath = $"_/Levels/";
         [SerializeField] private SceneReference _startScene;
         [SerializeField] private SceneReference _emptyScene;
+        [SerializeField] private SceneReference _persistentSceneRef;
         
         private string _preloadedSceneName;
         private AsyncOperation _preloadOp;
@@ -66,7 +67,13 @@ namespace Manager.Runtime
             DontDestroyOnLoad(gameObject);
             
             // Store persistent scene reference
-            _persistentScene = gameObject.scene;
+            _persistentScene = UnitySceneManager.GetSceneByName($"{_persistentSceneRef.SceneName}");
+            if (!_persistentScene.IsValid()) Error($"Persistent scene '{_persistentSceneRef.SceneName}' not found!");
+            else Info($"Persistent scene '{_persistentSceneRef.SceneName}' found!");
+            
+            // _preloadCoroutine = StartCoroutine(PreloadRoutine(_startScene.SceneName));
+            // _replaceCoroutine = StartCoroutine(ReplaceRoutine(_startScene.SceneName)); 
+            
         }
 
         private void Start()

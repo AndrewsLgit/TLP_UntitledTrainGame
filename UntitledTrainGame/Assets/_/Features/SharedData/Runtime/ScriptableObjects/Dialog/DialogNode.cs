@@ -6,6 +6,7 @@ using UnityEngine;
 namespace SharedData.Runtime
 {
     [CreateAssetMenu(fileName = "SO_DialogNodeData", menuName = "Dialog/DialogNodeData", order = 0)]
+    [Serializable]
     public class DialogNode : ScriptableObject
     {
         public string Id;
@@ -34,6 +35,6 @@ namespace SharedData.Runtime
         public string Notes;
 
         [Tooltip("Determines if this is an end node. DO NOT TOUCH! This is handled automatically.")]
-        public bool IsEndNode => (Responses == null || Responses.Count == 0) && (NextNodes == null || NextNodes.Count == 0); 
+        public bool IsEndNode => (Responses is {Count: <= 0} or null) && (NextNodes is {Count: <= 0} or null); 
     }
 }
