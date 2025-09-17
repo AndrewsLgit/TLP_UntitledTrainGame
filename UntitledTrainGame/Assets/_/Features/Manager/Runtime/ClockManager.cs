@@ -251,14 +251,14 @@ namespace Manager.Runtime
                     .OrderBy(e => e.m_Start.ToTotalMinutes())
                     .FirstOrDefault();
 
-            if (nextEvent == null)
+            if (nextEvent is null)
             {
                 Warning($"No event found with tag {tag}.");
                 // m_OnLoopEnd?.Invoke();
                 // if(now >= loopEnd)
                 //     m_OnLoopEnd?.Invoke();
                 // SetTime(m_TimeConfig.m_LoopEnd);
-                return null;
+                return nextEvent;
             }
             RouteManager.Instance.RemovePausedRoute();
             GetNextEvent();
