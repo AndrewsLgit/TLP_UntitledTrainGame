@@ -85,7 +85,7 @@ namespace DialogSystem.Runtime
                 for(int i = 0; i < node.Responses.Count; i++)
                     Info($"Response {i}: {node.Responses[i].Text}");
             }
-            else if (node.NextNode != null)
+            else if (node.NextNodes is {Count: > 0})
             {
                 Info($"Node has continuation. Call AdvanceToNextNode() to continue.");
             }

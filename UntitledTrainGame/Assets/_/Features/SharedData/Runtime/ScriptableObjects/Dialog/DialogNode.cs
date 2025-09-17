@@ -22,7 +22,7 @@ namespace SharedData.Runtime
         [CanBeNull] public List<Response> Responses = new List<Response>();
         
         [Tooltip("(Optional) Next node to go to after this dialog is over. Leave empty if this is the end of the dialog or if the player needs to choose a response.")] 
-        [CanBeNull] public DialogNode NextNode;
+        [CanBeNull] public List<DialogNode> NextNodes;
 
         [Tooltip("Flags whose value will be set when choosing this response.")] 
         [CanBeNull] public List<FlagChange> FlagsToChange;
@@ -34,6 +34,6 @@ namespace SharedData.Runtime
         public string Notes;
 
         [Tooltip("Determines if this is an end node. DO NOT TOUCH! This is handled automatically.")]
-        public bool IsEndNode => (Responses == null || Responses.Count == 0) && (NextNode == null); 
+        public bool IsEndNode => (Responses == null || Responses.Count == 0) && (NextNodes == null || NextNodes.Count == 0); 
     }
 }

@@ -95,7 +95,7 @@ namespace DialogSystem.Runtime
             _responses.Clear();
             _responses = BuildResponses(CurrentNode);
 
-            if (_responses.Count == 0 && CurrentNode.NextNode != null)
+            if (_responses.Count == 0 && CurrentNode.NextNodes is {Count: > 0})
             {
                 // todo: wait for player input with UI Map
                 OnNodeExited?.Invoke(CurrentNode);
@@ -115,9 +115,9 @@ namespace DialogSystem.Runtime
             {
                 EnterNode(response.NextNode);
             }
-            else if (CurrentNode.NextNode != null)
+            else if (CurrentNode.NextNodes is {Count: > 0})
             {
-                EnterNode(CurrentNode.NextNode);
+                EnterNode(CurrentNode.NextNodes[0]);
             }
             else EndConversation();
         }
@@ -134,9 +134,9 @@ namespace DialogSystem.Runtime
 
         private void ResolveFallback(DialogNode node)
         {
-            if (node != null && node.NextNode != null)
+            if (node != null && node.NextNodes is {Count: > 0})
             {
-                EnterNode(node.NextNode);
+                EnterNode(node.NextNodes[0]);
                 return;
             }
             EndConversation();
@@ -155,8 +155,8 @@ namespace DialogSystem.Runtime
 
         public void AdvanceToNextNode()
         {
-            if (CurrentNode != null && _responses.Count == 0 && CurrentNode.NextNode != null)
-                EnterNode(CurrentNode.NextNode);
+            if (CurrentNode != null && _responses.Count == 0 && CurrentNode.NextNodes is {Count: > 0})
+                EnterNode(CurrentNode.NextNodes[0]);
         }
 
         #endregion

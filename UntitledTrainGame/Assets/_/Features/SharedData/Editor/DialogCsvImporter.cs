@@ -248,8 +248,8 @@ namespace SharedData.Editor
                 node.Conditions = node.Conditions ?? new List<Condition>();
                 node.Conditions.Clear();
 
-                // NextNode will be resolved in the second pass
-                node.NextNode = null;
+                // NextNodes will be resolved in the second pass
+                node.NextNodes = new List<DialogNode>();
 
                 EditorUtility.SetDirty(node);
                 nodeById[dr.Id] = node;
@@ -257,30 +257,43 @@ namespace SharedData.Editor
 
             AssetDatabase.SaveAssets();
 
-            // Second pass: link NextNode for dialogs and build Responses
+            // Second pass: link NextNodes for dialogs and build Responses
             var responseIndexById = new Dictionary<string, (DialogNode parent, int index)>(StringComparer.OrdinalIgnoreCase);
 
             foreach (var dr in dialogRows)
             {
                 if (!nodeById.TryGetValue(dr.Id, out var node)) continue;
 
-                // Link dialog.NextNode if present
-                if (!string.IsNullOrEmpty(dr.NextDialogId))
+                // Link dialog.NextNodes (can be [A][B]... or single A)
+                node.NextNodes = new List<DialogNode>();
+                var nextIds = ParseNextNodeIds(dr.NextDialogId);
+                foreach (var nextId in nextIds)
                 {
-                    if (nodeById.TryGetValue(dr.NextDialogId, out var nextNode))
+                    if (nodeById.TryGetValue(nextId, out var nextNode))
                     {
-                        node.NextNode = nextNode;
+                        node.NextNodes.Add(nextNode);
                     }
                     else
                     {
-                        Debug.LogWarning($"NextDialogId '{dr.NextDialogId}' not found for Dialog '{dr.Id}'.");
-                        node.NextNode = null;
+                        Debug.LogWarning($"NextDialogId '{nextId}' not found for Dialog '{dr.Id}'.");
                     }
                 }
-                else
-                {
-                    node.NextNode = null;
-                }
+                // if (!string.IsNullOrEmpty(dr.NextDialogId))
+                // {
+                //     if (nodeById.TryGetValue(dr.NextDialogId, out var nextNode))
+                //     {
+                //         node.NextNodes.Add(nextNode);
+                //     }
+                //     else
+                //     {
+                //         Debug.LogWarning($"NextDialogId '{dr.NextDialogId}' not found for Dialog '{dr.Id}'.");
+                //         node.NextNodes = null;
+                //     }
+                // }
+                // else
+                // {
+                //     node.NextNodes = null;
+                // }
 
                 // Build responses for this dialog
                 node.Responses = new List<Response>();
@@ -438,27 +451,60 @@ namespace SharedData.Editor
             // Pattern to match [key:value]
             // key may contain letters, digits, underscores, dashes
             // value: true/false
-            var rx = new Regex(@"\[([^\[\]:]+)\s*:\s*(true|false)\]", RegexOptions.IgnoreCase);
-            var matches = rx.Matches(spec);
-            foreach (Match m in matches)
+            if (spec.Contains("["))
             {
-                var key = m.Groups[1].Value.Trim();
-                var valStr = m.Groups[2].Value.Trim();
-                if (bool.TryParse(valStr, out var val))
+                var rx = new Regex(@"\[([^\[\]:]+)\s*:\s*(true|false)\]", RegexOptions.IgnoreCase);
+                var matches = rx.Matches(spec);
+                foreach (Match m in matches)
                 {
-                    list.Add(new FlagChange
+                    var key = m.Groups[1].Value.Trim();
+                    var valStr = m.Groups[2].Value.Trim();
+                    if (bool.TryParse(valStr, out var val))
                     {
-                        flagKey = key,
-                        value = val
-                    });
+                        list.Add(new FlagChange
+                        {
+                            flagKey = key,
+                            value = val
+                        });
+                    }
+                    else
+                    {
+                        Debug.LogWarning($"Invalid flag value '{valStr}' for key '{key}' in '{spec}'. Skipping.");
+                    }
                 }
-                else
-                {
-                    Debug.LogWarning($"Invalid flag value '{valStr}' for key '{key}' in '{spec}'. Skipping.");
-                }
+                return list;
             }
+            // No brackets -> expect a single token "key:value"
+            if (TryParseSingleFlagToken(spec, out var single))
+            {
+                list.Add(single);
+                return list;
+            }
+
+            Debug.LogWarning($"Flag spec '{spec}' could not be parsed. Expected either [key:true][key2:false] or key:true");
             return list;
+
         }
+        // Parses a single flag token of form "key:value" (case-insensitive for value)
+        private static bool TryParseSingleFlagToken(string token, out FlagChange result)
+        {
+            result = default;
+            if (string.IsNullOrWhiteSpace(token)) return false;
+
+            // Split by the first ':' only
+            var idx = token.IndexOf(':');
+            if (idx <= 0 || idx >= token.Length - 1) return false;
+
+            var key = token.Substring(0, idx).Trim();
+            var valStr = token.Substring(idx + 1).Trim();
+
+            if (string.IsNullOrEmpty(key)) return false;
+            if (!bool.TryParse(valStr, out var val)) return false;
+
+            result = new FlagChange { flagKey = key, value = val };
+            return true;
+        }
+
 
         // CSV row models and parsing
 
@@ -490,6 +536,36 @@ namespace SharedData.Editor
                 };
                 return true;
             }
+        }
+        // Accepts:
+        // - "[A][B][C]"  -> {A,B,C}
+        // - "A"          -> {A}
+        // - "[A]"        -> {A}
+        private static List<string> ParseNextNodeIds(string nextDialogId)
+        {
+            var ids = new List<string>();
+            if (string.IsNullOrWhiteSpace(nextDialogId)) return ids;
+            
+            nextDialogId = nextDialogId.Trim();
+
+            if (nextDialogId.Contains("["))
+            {
+                var rx = new Regex(@"\[([^\[\]]+)\]");
+                var matches = rx.Matches(nextDialogId);
+                foreach (Match m in matches)
+                {
+                    var id = m.Groups[1].Value.Trim();
+                    if (!string.IsNullOrEmpty(id))
+                        ids.Add(id);
+                }
+                return ids;
+            }
+            
+            // Single id without brackets
+            if (!string.IsNullOrEmpty(nextDialogId))
+                ids.Add(nextDialogId);
+            
+            return ids;
         }
 
         private struct ResponseRow
@@ -572,7 +648,7 @@ namespace SharedData.Editor
             {
                 if (string.IsNullOrEmpty(s)) return ConditionTargetType.Unknown;
                 s = s.Trim();
-                if (s.Equals("Dialog", StringComparison.OrdinalIgnoreCase)) return ConditionTargetType.Dialog;
+                if (s.Equals("Dialogue", StringComparison.OrdinalIgnoreCase)) return ConditionTargetType.Dialog;
                 if (s.Equals("Response", StringComparison.OrdinalIgnoreCase)) return ConditionTargetType.Response;
                 return ConditionTargetType.Unknown;
             }
@@ -727,5 +803,5 @@ namespace SharedData.Editor
 
 
         #endregion
-        }
     }
+}
