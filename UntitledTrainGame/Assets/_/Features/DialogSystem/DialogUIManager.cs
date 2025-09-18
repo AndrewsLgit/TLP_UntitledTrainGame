@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using Foundation.Runtime;
 using JetBrains.Annotations;
 using SharedData.Runtime;
@@ -36,6 +37,10 @@ namespace DialogSystem.Runtime
         private float _cps = 30f;
         private Coroutine _typewriterCoroutine;
         
+        // Local state bound to current node so UI is display-only but can emit correct selection events
+        private DialogNode _currentNode;
+        private readonly List<GameObject> _spawnedResponses = new List<GameObject>();
+        
         // Protected raisers so derived classes (like tests) can trigger events
         protected void RaiseTextComplete() => OnTextComplete?.Invoke();
         protected void RaiseResponseChosen(int index, Response response) => OnResponseChosen?.Invoke(index, response);
@@ -52,7 +57,7 @@ namespace DialogSystem.Runtime
         [Header("UI References")] [CanBeNull]
         public GameObject DialogUI;
         public Sprite CharacterPortrait;
-        public Text CharacterName;
+        public TextMeshProUGUI CharacterName;
         [CanBeNull] public GameObject CharacterNameContainer;
         
         public event Action OnTextComplete;               // Triggered when typewriter finishes.
@@ -79,16 +84,6 @@ namespace DialogSystem.Runtime
             }
         }
 
-        private void Update() { }
-
-        private void FixedUpdate() { }
-
-        private void OnEnable() { }
-
-        private void OnDisable() { }
-
-        private void OnDestroy() { }
-
         #endregion
 
         #region Main Methods
@@ -102,47 +97,160 @@ namespace DialogSystem.Runtime
         public virtual void Close()
         {
             gameObject.SetActive(false);
-            if(_dialogTextContainer != null) _dialogTextContainer.GetComponent<TextMeshProUGUI>().text = "";
-            
-            if(_dialogResponsesContainer != null)
-                foreach (Transform child in _dialogResponsesContainer.transform)
-                    Destroy(child.gameObject);
+            _currentNode = null;
+            ClearTypeWriterText();
+            ClearResponses();
+            // if(_dialogTextContainer != null) _dialogTextContainer.GetComponent<TextMeshProUGUI>().text = "";
+            //
+            // if(_dialogResponsesContainer != null)
+            //     foreach (Transform child in _dialogResponsesContainer.transform)
+            //         Destroy(child.gameObject);
             
             // OnConversationEnd?.Invoke();
             RaiseClosed();
             RaiseConversationEnd();
         }
 
+        // Render a full dialog node: portrait, name/nameplate, textbook bg, text (typewriter)
         public virtual void RenderNode(DialogNode node)
         {
-            CharacterPortrait = node.Character.PortraitSprite;
-            // CharacterName.text = node.Character.Name;
-            _characterPortraitContainer.GetComponentInChildren<Image>().sprite = CharacterPortrait;
-            _dialogTextContainer.GetComponentInChildren<Image>().sprite = node.Character.DefaultTextBoxSprite;
-            _dialogTextContainer.GetComponentInChildren<TextMeshProUGUI>().text = "";
-            // _dialogTextContainer.GetComponentInChildren<TextMeshProUGUI>().text = node.DialogText;
-            Instantiate(node.Character.NamePlatePrefab, _characterNameContainer.transform);
+            if (node is null) return;
+            _currentNode = node;
+ 
+            // Portrait (supports override)
+            Sprite portrait = node.PortraitSpriteOverride != null ? node.PortraitSpriteOverride : node.Character?.PortraitSprite;
+            var portraitImg = _characterPortraitContainer?.GetComponentInChildren<Image>();
+            if (portraitImg is not null) portraitImg.sprite = portrait;
+            
+            // Dialog textbox background (from character data)
+            var textboxBg = _dialogTextContainer?.GetComponentInChildren<Image>();
+            if (textboxBg != null && node.Character is not null && node.Character.DefaultTextBoxSprite is not null)
+                textboxBg.sprite = node.Character.DefaultTextBoxSprite;
 
-            if (_typewriterCoroutine != null)
+            // Character name + optional nameplate sprite override
+            if (CharacterNameContainer is null && _characterNameContainer is not null)
+                CharacterNameContainer = _characterNameContainer;
+            
+            if (CharacterName is null && _characterNameContainer is not null)
+                CharacterName = _characterNameContainer.GetComponent<TextMeshProUGUI>();
+            
+            if (CharacterName is not null && node.Character is not null)
+                CharacterName.text = node.Character.Name;
+            
+            // If name container has an Image, support NamePlateSpriteOverride
+            var nameplateImage = CharacterNameContainer?.GetComponentInChildren<Image>();
+            if (nameplateImage is not null)
+                nameplateImage.sprite = node.NamePlateSpriteOverride ?? nameplateImage.sprite;
+            
+            // Clear text and (re)start typewriter
+            ClearTypeWriterText();
+            if (_typewriterCoroutine is not null)
                 StopCoroutine(_typewriterCoroutine);
             _typewriterCoroutine = StartCoroutine(TypeWriter(node.DialogText));
+            
+            // Clear any stale responses; they'll be rendered on TextComplete if present
+            ClearResponses();
+            // DEPRECATED
+//             CharacterPortrait = node.Character.PortraitSprite;
+//             // CharacterName.text = node.Character.Name;
+//             _characterPortraitContainer.GetComponentInChildren<Image>().sprite = CharacterPortrait;
+//             _dialogTextContainer.GetComponentInChildren<Image>().sprite = node.Character.DefaultTextBoxSprite;
+//             _dialogTextContainer.GetComponentInChildren<TextMeshProUGUI>().text = "";
+//             // _dialogTextContainer.GetComponentInChildren<TextMeshProUGUI>().text = node.DialogText;
+// //            Instantiate(node.Character.NamePlatePrefab, _characterNameContainer.transform);
+//
+//             if (_typewriterCoroutine != null)
+//                 StopCoroutine(_typewriterCoroutine);
+//             _typewriterCoroutine = StartCoroutine(TypeWriter(node.DialogText));
         }
 
         public virtual void RenderResponses(DialogNode node)
         {
-            for (int i = 0; i < _dialogResponsesContainer.transform.childCount; i++)
+            // === DEPRECATED ===
+            // for (int i = 0; i < _dialogResponsesContainer.transform.childCount; i++)
+            // {
+            //     var go = Instantiate(_classicResponsePrefab, _dialogResponsesContainer.transform.GetChild(i));
+            //     go.GetComponentInChildren<TextMeshProUGUI>().text = node.Responses[i].Text;
+            //     go.transform.GetChild(0).gameObject.SetActive(true);
+            //     go.transform.GetChild(1).gameObject.SetActive(false);
+            // }
+            // === END DEPRECATED ===
+            
+            if (node is null) return;
+            ClearResponses();
+            
+            if (_dialogResponsesContainer is null) return;
+            if (node.Responses is not { Count: > 0 }) return;
+            
+            // Instantiate a row per response under the responses container (one layout child or direct? -> direct under container)
+            // Expect prefab to have:
+            // - TextMeshProUGUI for the label
+            // - Two children (index 0 = unselected visuals, index 1 = selected visuals) as per current setup
+            for (int i = 0; i < node.Responses.Count; i++)
             {
-                var go = Instantiate(_classicResponsePrefab, _dialogResponsesContainer.transform.GetChild(i));
-                go.GetComponentInChildren<TextMeshProUGUI>().text = node.Responses[i].Text;
-                go.transform.GetChild(0).gameObject.SetActive(true);
-                go.transform.GetChild(1).gameObject.SetActive(false);
+                var prefab = _classicResponsePrefab ?? _actionResponsePrefab;
+                if (prefab is null)
+                {
+                    Warning($"No response prefab set on DialogUIManager.");
+                    break;
+                }
+                
+                var go = Instantiate(prefab, _dialogResponsesContainer.transform);
+                _spawnedResponses.Add(go);
+                
+                var label = go.GetComponentInChildren<TextMeshProUGUI>();
+                if (label is not null) label.text = node.Responses[i].Text;
+                
+                // Default to unselected visuals on render
+                if (go.transform.childCount >= 2)
+                {
+                    go.transform.GetChild(0).gameObject.SetActive(true);
+                    go.transform.GetChild(1).gameObject.SetActive(false);
+                }
+                
+                // Optional: allow clicking a response to select (controller remains source of truth)
+                int idx = i;
+                var btn = go.GetComponentInChildren<Button>();
+                if (btn is not null)
+                {
+                    btn.onClick.RemoveAllListeners();
+                    btn.onClick.AddListener(() => SelectResponse(idx));
+                }
+            }
+        }
+        
+        // Controller calls this to update highlight state as the player navigates responses
+        public virtual void HighlightResponse(int index)
+        {
+            if (_spawnedResponses.Count <= 0) return;
+
+            for (int i = 0; i < _spawnedResponses.Count; i++)
+            {
+                var go = _spawnedResponses[i];
+                if (go is null) continue;
+                
+                bool isSelected = (i == index);
+                if (go.transform.childCount >= 2)
+                {
+                    // child(0) -> unselected, child(1) -> selected
+                    go.transform.GetChild(0).gameObject.SetActive(!isSelected);
+                    go.transform.GetChild(1).gameObject.SetActive(isSelected);
+                }
             }
         }
 
         public virtual void SelectResponse(int index)
         {
-            RaiseResponseChosen(index, _dialogResponsesContainer.transform.GetChild(index).GetComponent<Response>());
+            // === DEPRECATED ===
+            // RaiseResponseChosen(index, _dialogResponsesContainer.transform.GetChild(index));
             // OnResponseChosen?.Invoke(index, _dialogResponsesContainer.transform.GetChild(index).GetComponent<Response>());
+            // === END DEPRECATED ===
+            
+            if (_currentNode is null) return;
+            if (_currentNode.Responses is not {Count: > 0}) return;
+            if (index < 0 || index >= _currentNode.Responses.Count) return;
+            
+            RaiseResponseChosen(index, _currentNode.Responses[index]);;
         }
         #endregion
 
@@ -177,19 +285,64 @@ namespace DialogSystem.Runtime
                         break;
                 }
             }
-            CharacterName = _characterNameContainer.GetComponent<Text>();
-            ;
+            CharacterName = _characterNameContainer.GetComponent<TextMeshProUGUI>();
         }
 
         private IEnumerator TypeWriter(string text)
         {
-            _dialogTextContainer.GetComponentInChildren<TextMeshProUGUI>().text = "";
+            // === DEPRECATED ===
+            // _dialogTextContainer.GetComponentInChildren<TextMeshProUGUI>().text = "";
+            // foreach (char letter in text)
+            // {
+            //     _dialogTextContainer.GetComponentInChildren<TextMeshProUGUI>().text += letter;
+            //     yield return new WaitForSeconds(1f / _cps);
+            // }
+            // RaiseTextComplete();
+            // === END DEPRECATED ===
+
+            if (_dialogTextContainer is null)
+            {
+                RaiseTextComplete();
+                yield break;
+            }
+            
+            var tmp = _dialogTextContainer.GetComponentInChildren<TextMeshProUGUI>();
+            if (tmp is null)
+            {
+                RaiseTextComplete();
+                yield break;
+            }
+            
+            tmp.text = "";
+            if (string.IsNullOrEmpty(text))
+            {
+                RaiseTextComplete();
+                yield break;
+            }
+
             foreach (char letter in text)
             {
-                _dialogTextContainer.GetComponentInChildren<TextMeshProUGUI>().text += letter;
+                tmp.text += letter;
                 yield return new WaitForSeconds(1f / _cps);
             }
             RaiseTextComplete();
+        }
+
+        private void ClearTypeWriterText()
+        {
+            if (_dialogTextContainer is not null)
+            {
+                var tmp = _dialogTextContainer.GetComponentInChildren<TextMeshProUGUI>();
+                if (tmp is not null) tmp.text = "";
+            }
+        }
+
+        private void ClearResponses()
+        {
+            _spawnedResponses.Clear();
+            if(_dialogResponsesContainer is not null)
+                foreach (Transform child in _dialogResponsesContainer.transform)
+                    Destroy(child.gameObject);
         }
         #endregion
     }

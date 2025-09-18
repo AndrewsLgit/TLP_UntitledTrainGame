@@ -1,5 +1,6 @@
 using Foundation.Runtime;
 using Player.Runtime;
+using Services.Runtime;
 using SharedData.Runtime;
 using Tools.Runtime;
 using UnityEngine;
@@ -25,6 +26,9 @@ namespace DialogSystem.Runtime
         [SerializeField] private PlayerInputRouter _inputRouter;
         [SerializeField, Tooltip("Cooldown between repeated nav steps when holding string/keys")]
         private float _navRepeatCooldown = 0.2f;
+        
+        [Header("Test")]
+        [SerializeField] private DialogNode _testRootNode;
         
         private ChoiceSelectionController _choiceController;
         private bool _uiOpen;
@@ -71,7 +75,8 @@ namespace DialogSystem.Runtime
             
             
             // Choice navigation controller
-            
+            // Selection highlight is handled via UiManager.HighlightResponse(index)
+
             // SelectionChanged can be used to update highlight if/when UI supports it
             // _choiceController.OnSelectionChanged += HandleChoiceSelectionChanged;
 
@@ -80,7 +85,9 @@ namespace DialogSystem.Runtime
 
         private void Start()
         {
+            NodeManager = NodeManager.Instance;
             _choiceController = new ChoiceSelectionController(_navRepeatCooldown);
+            _inputRouter = FindFirstObjectByType<PlayerInputRouter>();
         }
 
         private void Update()
@@ -123,27 +130,6 @@ namespace DialogSystem.Runtime
 
         private void OnDestroy()
         {
-            // if (NodeManager != null && _subscribedToNodeManager)
-            // {
-            //     NodeManager.OnNodeEntered -= HandleNodeEntered;
-            //     NodeManager.OnNodeExited -= HandleNodeExited;
-            //     NodeManager.OnConversationEnded -= HandleConversationEnd;
-            // }
-            //
-            // if (UiManager != null && _subscribedToUiManager)
-            // {
-            //     UiManager.OnResponseChosen -= HandleResponseChosen;
-            //     UiManager.OnTextComplete -= HandleTextComplete;
-            //     UiManager.OnAdvanceRequested -= HandleAdvanceRequested;
-            // }
-            //
-            // if (_choiceController != null)
-            // {
-            //     _choiceController.OnSubmit -= HandleChoiceSubmit;
-            //     _choiceController.OnCancel -= HandleChoiceCancel;
-            //     // _choiceController.OnSelectionChanged -= HandleChoiceSelectionChanged;
-            // }
-
         }
 
         #endregion
@@ -155,7 +141,7 @@ namespace DialogSystem.Runtime
         /// </summary>
         public void StartConversation(DialogNode root, string npcId)
         {
-            if(NodeManager is null) NodeManager = NodeManager.Instance;
+            NodeManager ??= NodeManager.Instance;
             Assert.IsNotNull(UiManager);
             Assert.IsNotNull(NodeManager);
             
@@ -165,6 +151,12 @@ namespace DialogSystem.Runtime
             UiManager.Open();
             _uiOpen = true;
             NodeManager.StartConversation(root, npcId);
+        }
+
+        [ContextMenu("Test Conversation")]
+        public void TestConversation()
+        {
+            StartConversation(_testRootNode, _testRootNode.Character.Id);
         }
         
         #region NodeManager Event Handlers
@@ -190,6 +182,7 @@ namespace DialogSystem.Runtime
             _choiceController?.Close();
             _uiOpen = false;
             UiManager?.Close();
+            EnsureEventUnsub();
         }
 
         #endregion
@@ -198,11 +191,19 @@ namespace DialogSystem.Runtime
 
         private void HandleTextComplete()
         {
-            Assert.IsNotNull(UiManager);
-            Assert.IsNotNull(NodeManager);
+            // Assert.IsNotNull(UiManager);
+            // Assert.IsNotNull(NodeManager);
+            
+            // Only act if a conversation is active and NodeManager is ready
+            if (!_uiOpen || NodeManager == null)
+            {
+                // Ignore spurious UI events that can occur before/after conversations
+                return;
+            }
+
 
             var node = NodeManager.CurrentNode;
-            if (node == null)
+            if (node is null)
             {
                 Warning($"Node is null!");
                 return;
@@ -215,6 +216,7 @@ namespace DialogSystem.Runtime
                 UiManager.RenderResponses(node);
                 // Open choice navigation over responses; default to first
                 _choiceController?.Open(responses.Count, 0);
+                UiManager.HighlightResponse(0);
             }
             else
             {
@@ -354,10 +356,10 @@ namespace DialogSystem.Runtime
         }
         
         // If you later add visual highlighting support in DialogUIManager, hook it here.
-        // private void HandleChoiceSelectionChanged(int index)
-        // {
-        //     UiManager?.HighlightResponse(index);
-        // }
+        private void HandleChoiceSelectionChanged(int index)
+        {
+            UiManager?.HighlightResponse(index);
+        }
 
         #endregion
         
