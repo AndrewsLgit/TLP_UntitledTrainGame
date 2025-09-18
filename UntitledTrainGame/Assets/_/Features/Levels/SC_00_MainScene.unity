@@ -285,6 +285,10 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 5196345142183699903, guid: d8e9f92f8780447b28f7475513cdaa9d, type: 3}
+      propertyPath: m_Enabled
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5196345142183699903, guid: d8e9f92f8780447b28f7475513cdaa9d, type: 3}
       propertyPath: m_isVerbose
       value: 0
       objectReference: {fileID: 0}

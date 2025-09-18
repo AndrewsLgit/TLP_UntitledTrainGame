@@ -4872,6 +4872,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 6292247664205399515, guid: 91c6a20ac94855f4ca8e603df792e494, type: 3}
+      propertyPath: _dialogStart
+      value: 
+      objectReference: {fileID: 11400000, guid: a5c271ce5ec7f4ffbabc6050df09df14, type: 2}
     - target: {fileID: 7611459302081208271, guid: 91c6a20ac94855f4ca8e603df792e494, type: 3}
       propertyPath: m_Name
       value: p_interior_station_building

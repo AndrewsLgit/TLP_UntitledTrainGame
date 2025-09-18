@@ -1,5 +1,7 @@
 using Foundation.Runtime;
 using Player.Runtime;
+using ServiceInterfaces.Runtime;
+using Services.Runtime;
 using SharedData.Runtime;
 using Tools.Runtime;
 using UnityEngine;
@@ -25,6 +27,7 @@ namespace DialogSystem.Runtime
         [SerializeField] private PlayerInputRouter _inputRouter;
         [SerializeField, Tooltip("Cooldown between repeated nav steps when holding string/keys")]
         private float _navRepeatCooldown = 0.2f;
+        private IInputService _customInputService;
         
         [Header("Test")]
         [SerializeField] private DialogNode _testRootNode;
@@ -99,6 +102,7 @@ namespace DialogSystem.Runtime
             NodeManager = NodeManager.Instance;
             _choiceController = new ChoiceSelectionController(_navRepeatCooldown);
             _inputRouter = FindFirstObjectByType<PlayerInputRouter>();
+            _customInputService = ServiceRegistry.Resolve<IInputService>();
         }
 
         private void Update()
@@ -115,24 +119,14 @@ namespace DialogSystem.Runtime
         
         { 
 
-            if (_inputRouter != null)
-            {
-                _inputRouter.OnUINavigate += OnUINavigate;
-                _inputRouter.OnUISubmit += OnUISubmit;
-                _inputRouter.OnUICancel += OnUICancel;
-            }
+            
             
             EnsureEventSubscriptions();
         }
 
         private void OnDisable()
         {
-            if (_inputRouter != null)
-            {
-                _inputRouter.OnUINavigate -= OnUINavigate;
-                _inputRouter.OnUISubmit -= OnUISubmit;
-                _inputRouter.OnUICancel -= OnUICancel;
-            }
+            
 
             EnsureEventUnsub();
         }
@@ -153,6 +147,8 @@ namespace DialogSystem.Runtime
         public void StartConversation(DialogNode root, string npcId)
         {
             NodeManager ??= NodeManager.Instance;
+            _customInputService.SwitchToUI();
+            
             Assert.IsNotNull(UiManager);
             Assert.IsNotNull(NodeManager);
             
@@ -195,6 +191,7 @@ namespace DialogSystem.Runtime
             _choiceController?.Close();
             _uiOpen = false;
             UiManager?.Close();
+            _customInputService.SwitchToPlayer();
             EnsureEventUnsub();
         }
 
@@ -204,7 +201,7 @@ namespace DialogSystem.Runtime
 
         private void HandleTextComplete()
         {
-            _inputRouter = FindFirstObjectByType<PlayerInputRouter>();
+            EnsureEventSubscriptions();
             Assert.IsNotNull(_inputRouter);
             // Assert.IsNotNull(UiManager);
             // Assert.IsNotNull(NodeManager);
@@ -230,8 +227,8 @@ namespace DialogSystem.Runtime
             {
                 UiManager.RenderResponses(node);
                 // Open choice navigation over responses; default to first
-                _choiceController?.Open(responses.Count, 0);
-                UiManager.HighlightResponse(0);
+                _choiceController?.Open(responses.Count, -1);
+                // UiManager.HighlightResponse(0);
             }
             else
             {
@@ -263,57 +260,7 @@ namespace DialogSystem.Runtime
 
         #region Helpers/Utils
 
-        private void EnsureEventSubscriptions()
-        {
-            if (_choiceController is not null)
-            {
-                _choiceController.OnSubmit += HandleChoiceSubmit;
-                _choiceController.OnCancel += HandleChoiceCancel;
-            }
-
-            // Subscribe to NodeManager events
-            if (NodeManager is not null && !_subscribedToNodeManager)
-            {
-                NodeManager.OnNodeEntered += HandleNodeEntered;
-                NodeManager.OnNodeExited += HandleNodeExited;
-                NodeManager.OnConversationEnded += HandleConversationEnd;
-                _subscribedToNodeManager = true;
-            }
-
-            // Subscribe to UIManager events
-            if (UiManager is not null && !_subscribedToUiManager)
-            {
-                UiManager.OnResponseChosen += HandleResponseChosen;
-                UiManager.OnTextComplete += HandleTextComplete;
-                UiManager.OnAdvanceRequested += HandleAdvanceRequested;
-                _subscribedToUiManager = true;
-            }
-        }
-        private void EnsureEventUnsub()
-        {
-            if (NodeManager != null && _subscribedToNodeManager)
-            {
-                NodeManager.OnNodeEntered -= HandleNodeEntered;
-                NodeManager.OnNodeExited -= HandleNodeExited;
-                NodeManager.OnConversationEnded -= HandleConversationEnd;
-                _subscribedToNodeManager = false;
-            }
-
-            if (UiManager != null && _subscribedToUiManager)
-            {
-                UiManager.OnResponseChosen -= HandleResponseChosen;
-                UiManager.OnTextComplete -= HandleTextComplete;
-                UiManager.OnAdvanceRequested -= HandleAdvanceRequested;
-                _subscribedToUiManager = false;
-            }
-
-            if (_choiceController != null)
-            {
-                _choiceController.OnSubmit -= HandleChoiceSubmit;
-                _choiceController.OnCancel -= HandleChoiceCancel;
-                // _choiceController.OnSelectionChanged -= HandleChoiceSelectionChanged;
-            }
-        }
+        
 
         // Input routing to ChoiceSelectionController
         private void OnUINavigate(Vector2 dir)
@@ -378,6 +325,73 @@ namespace DialogSystem.Runtime
             UiManager?.HighlightResponse(index);
         }
 
+        private void EnsureEventSubscriptions()
+        {
+            if (_choiceController is not null)
+            {
+                _choiceController.OnSubmit += HandleChoiceSubmit;
+                _choiceController.OnCancel += HandleChoiceCancel;
+            }
+
+            // Subscribe to NodeManager events
+            if (NodeManager is not null && !_subscribedToNodeManager)
+            {
+                NodeManager.OnNodeEntered += HandleNodeEntered;
+                NodeManager.OnNodeExited += HandleNodeExited;
+                NodeManager.OnConversationEnded += HandleConversationEnd;
+                _subscribedToNodeManager = true;
+            }
+
+            // Subscribe to UIManager events
+            if (UiManager is not null && !_subscribedToUiManager)
+            {
+                UiManager.OnResponseChosen += HandleResponseChosen;
+                UiManager.OnTextComplete += HandleTextComplete;
+                UiManager.OnAdvanceRequested += HandleAdvanceRequested;
+                _subscribedToUiManager = true;
+            }
+            if (_inputRouter == null)
+                _inputRouter = FindAnyObjectByType<PlayerInputRouter>();
+            if (_inputRouter != null)
+            {
+                _inputRouter.OnUINavigate += OnUINavigate;
+                _inputRouter.OnUISubmit += OnUISubmit;
+                _inputRouter.OnUICancel += OnUICancel;
+            }
+        }
+        private void EnsureEventUnsub()
+        {
+            if (NodeManager != null && _subscribedToNodeManager)
+            {
+                NodeManager.OnNodeEntered -= HandleNodeEntered;
+                NodeManager.OnNodeExited -= HandleNodeExited;
+                NodeManager.OnConversationEnded -= HandleConversationEnd;
+                _subscribedToNodeManager = false;
+            }
+
+            if (UiManager != null && _subscribedToUiManager)
+            {
+                UiManager.OnResponseChosen -= HandleResponseChosen;
+                UiManager.OnTextComplete -= HandleTextComplete;
+                UiManager.OnAdvanceRequested -= HandleAdvanceRequested;
+                _subscribedToUiManager = false;
+            }
+
+            if (_choiceController != null)
+            {
+                _choiceController.OnSubmit -= HandleChoiceSubmit;
+                _choiceController.OnCancel -= HandleChoiceCancel;
+                // _choiceController.OnSelectionChanged -= HandleChoiceSelectionChanged;
+            }
+            if (_inputRouter == null)
+                _inputRouter = FindAnyObjectByType<PlayerInputRouter>();
+            if (_inputRouter != null)
+            {
+                _inputRouter.OnUINavigate -= OnUINavigate;
+                _inputRouter.OnUISubmit -= OnUISubmit;
+                _inputRouter.OnUICancel -= OnUICancel;
+            }
+        }
         #endregion
         
         
