@@ -119,11 +119,6 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
---- !u!1 &249228607 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 1630245388483901805, guid: f0026918090a34c48b7fa17e1d917716, type: 3}
-  m_PrefabInstance: {fileID: 1063944375}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &322071686
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -199,7 +194,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6308052346477413940, guid: f0026918090a34c48b7fa17e1d917716, type: 3}
       propertyPath: m_MatchWidthOrHeight
-      value: 0.468
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 6308052346477413940, guid: f0026918090a34c48b7fa17e1d917716, type: 3}
       propertyPath: m_ReferenceResolution.x
@@ -296,45 +291,24 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents:
-    - targetCorrespondingSourceObject: {fileID: 7226601545430313960, guid: f0026918090a34c48b7fa17e1d917716, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 1063944382}
+    m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: f0026918090a34c48b7fa17e1d917716, type: 3}
 --- !u!224 &1063944376 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 6684911509907713731, guid: f0026918090a34c48b7fa17e1d917716, type: 3}
   m_PrefabInstance: {fileID: 1063944375}
   m_PrefabAsset: {fileID: 0}
---- !u!1 &1063944377 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 7226601545430313960, guid: f0026918090a34c48b7fa17e1d917716, type: 3}
+--- !u!114 &1063944382 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 1429293520277390255, guid: f0026918090a34c48b7fa17e1d917716, type: 3}
   m_PrefabInstance: {fileID: 1063944375}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &1063944382
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1063944377}
+  m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 32a314f247d3412ba642a40a9b566729, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_isVerbose: 1
-  _dialogUI: {fileID: 7226601545430313960, guid: f0026918090a34c48b7fa17e1d917716, type: 3}
-  _characterPortraitContainer: {fileID: 2082344079}
-  _dialogTextContainer: {fileID: 1854549323}
-  _characterNameContainer: {fileID: 1452656558}
-  _dialogResponsesContainer: {fileID: 1803074909}
-  _classicResponsePrefab: {fileID: 1040307145779719538, guid: 3812dbf21edaf674c9d84f0f1ee9cbf4, type: 3}
-  _actionResponsePrefab: {fileID: 1422456246218653480, guid: 7a4abeba9aa89984dacc4b01a39f6319, type: 3}
-  DialogUI: {fileID: 1063944377}
-  CharacterPortrait: {fileID: 0}
-  CharacterName: {fileID: 0}
-  CharacterNameContainer: {fileID: 249228607}
 --- !u!1 &1099702889
 GameObject:
   m_ObjectHideFlags: 0
@@ -422,11 +396,6 @@ MonoBehaviour:
   ResponsesParent: {fileID: 0}
   ResponseButtonPrefab: {fileID: 0}
   CharactersPerSecond: 30
---- !u!1 &1452656558 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 1006850121949402204, guid: f0026918090a34c48b7fa17e1d917716, type: 3}
-  m_PrefabInstance: {fileID: 1063944375}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1467957086
 GameObject:
   m_ObjectHideFlags: 0
@@ -640,21 +609,6 @@ MonoBehaviour:
   m_LightCookieSize: {x: 1, y: 1}
   m_LightCookieOffset: {x: 0, y: 0}
   m_SoftShadowQuality: 0
---- !u!1 &1803074909 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 1135244924458230713, guid: f0026918090a34c48b7fa17e1d917716, type: 3}
-  m_PrefabInstance: {fileID: 1063944375}
-  m_PrefabAsset: {fileID: 0}
---- !u!1 &1854549323 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 836356754917245589, guid: f0026918090a34c48b7fa17e1d917716, type: 3}
-  m_PrefabInstance: {fileID: 1063944375}
-  m_PrefabAsset: {fileID: 0}
---- !u!1 &2082344079 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 5875302128119711986, guid: f0026918090a34c48b7fa17e1d917716, type: 3}
-  m_PrefabInstance: {fileID: 1063944375}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
