@@ -606,6 +606,7 @@ GameObject:
   - component: {fileID: 6308052346477413940}
   - component: {fileID: 7475649564640770776}
   - component: {fileID: 6890083473909131531}
+  - component: {fileID: 1429293520277390255}
   m_Layer: 5
   m_Name: UI_Dialogue
   m_TagString: Untagged
@@ -721,6 +722,30 @@ MonoBehaviour:
   fontStyle: 0
   alignment: 0
   textDropShadow: 0
+--- !u!114 &1429293520277390255
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7226601545430313960}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 32a314f247d3412ba642a40a9b566729, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_isVerbose: 1
+  _dialogUI: {fileID: 7226601545430313960}
+  _characterPortraitContainer: {fileID: 5875302128119711986}
+  _dialogTextContainer: {fileID: 836356754917245589}
+  _characterNameContainer: {fileID: 1006850121949402204}
+  _dialogResponsesContainer: {fileID: 1135244924458230713}
+  _classicResponsePrefab: {fileID: 1040307145779719538, guid: 3812dbf21edaf674c9d84f0f1ee9cbf4, type: 3}
+  _actionResponsePrefab: {fileID: 1422456246218653480, guid: 7a4abeba9aa89984dacc4b01a39f6319, type: 3}
+  DialogUI: {fileID: 7226601545430313960}
+  CharacterPortrait: {fileID: 0}
+  CharacterName: {fileID: 0}
+  CharacterNameContainer: {fileID: 1630245388483901805}
 --- !u!1 &7727588944001988791
 GameObject:
   m_ObjectHideFlags: 0
@@ -956,6 +981,11 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: c8e6a5245a2d951458c66c5abcf335de, type: 3}
+--- !u!1 &1006850121949402204 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 2701847749386460628, guid: c8e6a5245a2d951458c66c5abcf335de, type: 3}
+  m_PrefabInstance: {fileID: 2920558998707243400}
+  m_PrefabAsset: {fileID: 0}
 --- !u!224 &8227698467020699217 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 6532823956348436441, guid: c8e6a5245a2d951458c66c5abcf335de, type: 3}

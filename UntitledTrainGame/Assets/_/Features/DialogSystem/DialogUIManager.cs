@@ -194,19 +194,33 @@ namespace DialogSystem.Runtime
                     Warning($"No response prefab set on DialogUIManager.");
                     break;
                 }
-                
-                var go = Instantiate(prefab, _dialogResponsesContainer.transform);
+
+                GameObject go = null;
+                if (i < _dialogResponsesContainer.transform.childCount)
+                {
+                    go = Instantiate(prefab, _dialogResponsesContainer.transform.GetChild(i));
+                }
                 _spawnedResponses.Add(go);
                 
-                var label = go.GetComponentInChildren<TextMeshProUGUI>();
-                if (label is not null) label.text = node.Responses[i].Text;
-                
+                TextMeshProUGUI label = null;
                 // Default to unselected visuals on render
                 if (go.transform.childCount >= 2)
                 {
                     go.transform.GetChild(0).gameObject.SetActive(true);
                     go.transform.GetChild(1).gameObject.SetActive(false);
+
+                    if (go.transform.GetChild(2).GetComponent<TextMeshProUGUI>() is not null)
+                    {
+                        label = go.transform.GetChild(2).GetComponent<TextMeshProUGUI>();
+                        label.text = node.Responses[i].Text;
+                        label.transform.gameObject.SetActive(true);
+                    }
                 }
+                
+                //var label = go.GetComponentInChildren<TextMeshProUGUI>();
+                if (label is not null) label.text = node.Responses[i].Text;
+                
+                
                 
                 // Optional: allow clicking a response to select (controller remains source of truth)
                 int idx = i;
@@ -340,9 +354,10 @@ namespace DialogSystem.Runtime
         private void ClearResponses()
         {
             _spawnedResponses.Clear();
-            if(_dialogResponsesContainer is not null)
-                foreach (Transform child in _dialogResponsesContainer.transform)
-                    Destroy(child.gameObject);
+            if (_dialogResponsesContainer is null) return;
+            foreach (Transform responseContainer in _dialogResponsesContainer.transform)
+            foreach (Transform child in responseContainer)
+                Destroy(child.gameObject);
         }
         #endregion
     }
