@@ -1,6 +1,5 @@
 using Foundation.Runtime;
 using Player.Runtime;
-using Services.Runtime;
 using SharedData.Runtime;
 using Tools.Runtime;
 using UnityEngine;
@@ -59,6 +58,8 @@ namespace DialogSystem.Runtime
         [Header("Typewriter Settings")]
         public float CharactersPerSecond = 30f;
         
+        public static DialogController Instance { get; private set; }
+        
         // --- End of Public Variables --- 
 
         #endregion
@@ -72,7 +73,17 @@ namespace DialogSystem.Runtime
             if(NodeManager == null)
                 NodeManager = NodeManager.Instance;
             
-            
+            // Find instance of this class, if existent -> destroy that instance
+            if (Instance is not null && Instance != this)
+            {
+                Destroy(gameObject);
+                Error("There is already an instance of this class! Destroying this one!");
+                return;
+            }
+
+            // Assign instance as this current object
+            Instance = this;
+            DontDestroyOnLoad(gameObject);
             
             // Choice navigation controller
             // Selection highlight is handled via UiManager.HighlightResponse(index)
@@ -163,7 +174,9 @@ namespace DialogSystem.Runtime
 
         private void HandleNodeEntered(DialogNode node)
         {
+            _inputRouter = FindFirstObjectByType<PlayerInputRouter>();
             Assert.IsNotNull(UiManager);
+            Assert.IsNotNull(_inputRouter);
             // Render node text with typewriter effect
             UiManager.SetTypewriterSpeed(CharactersPerSecond);
             UiManager.RenderNode(node);
@@ -191,11 +204,13 @@ namespace DialogSystem.Runtime
 
         private void HandleTextComplete()
         {
+            _inputRouter = FindFirstObjectByType<PlayerInputRouter>();
+            Assert.IsNotNull(_inputRouter);
             // Assert.IsNotNull(UiManager);
             // Assert.IsNotNull(NodeManager);
             
             // Only act if a conversation is active and NodeManager is ready
-            if (!_uiOpen || NodeManager == null)
+            if (!_uiOpen || NodeManager is null)
             {
                 // Ignore spurious UI events that can occur before/after conversations
                 return;
@@ -308,6 +323,8 @@ namespace DialogSystem.Runtime
             
             if(_choiceController.IsOpen)
                 _choiceController.HandleNavigate(dir);
+            
+            UiManager.HighlightResponse(_choiceController.SelectedIndex);
         }
         
         private void OnUISubmit()

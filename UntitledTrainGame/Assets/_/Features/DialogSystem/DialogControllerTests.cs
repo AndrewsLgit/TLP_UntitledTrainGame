@@ -207,6 +207,8 @@ public class DialogController_PlaymodeSelfTest : FMono
         
         // Ensure controller and node manager are in sync with node A
         Assert.AreEqual(_nodeA, _nodeManager.CurrentNode, "(Scenario 3) Should be at node A initially.)");
+        realUI.HighlightResponse(0);
+        yield return WaitForOrTimeout(() => chosenIndex == 0, 4f);
         
         // Choose response 0 to go A -> B on the real UI
         realUI.SelectResponse(0);

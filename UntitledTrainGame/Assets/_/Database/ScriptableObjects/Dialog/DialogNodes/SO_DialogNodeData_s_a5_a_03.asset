@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5d05a618d5014d18910107c82c60746c, type: 3}
+  m_Name: SO_DialogNodeData_s_a5_a_03
+  m_EditorClassIdentifier: 
+  Id: s_a5_a_03
+  Character: {fileID: 0}
+  DialogText: You can't remember what you lost? Everyone who ends up here has lost
+    something, something precious.
+  PortraitSpriteOverride: {fileID: 0}
+  NamePlateSpriteOverride: {fileID: 0}
+  Responses: []
+  NextNodes: []
+  FlagsToChange: []
+  Conditions: []
+  Notes: 

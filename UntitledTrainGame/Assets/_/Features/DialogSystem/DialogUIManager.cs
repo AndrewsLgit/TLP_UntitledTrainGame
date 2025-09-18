@@ -80,6 +80,7 @@ namespace DialogSystem.Runtime
         {
             if (_dialogUI != null)
             {
+                _dialogUI.SetActive(false);
                 AssignUIReferences();
             }
         }
@@ -132,7 +133,7 @@ namespace DialogSystem.Runtime
                 CharacterNameContainer = _characterNameContainer;
             
             if (CharacterName is null && _characterNameContainer is not null)
-                CharacterName = _characterNameContainer.GetComponent<TextMeshProUGUI>();
+                CharacterName = _characterNameContainer.GetComponentInChildren<TextMeshProUGUI>();
             
             if (CharacterName is not null && node.Character is not null)
                 CharacterName.text = node.Character.Name;
@@ -140,7 +141,8 @@ namespace DialogSystem.Runtime
             // If name container has an Image, support NamePlateSpriteOverride
             var nameplateImage = CharacterNameContainer?.GetComponentInChildren<Image>();
             if (nameplateImage is not null)
-                nameplateImage.sprite = node.NamePlateSpriteOverride ?? nameplateImage.sprite;
+                nameplateImage.sprite = node.Character.NamePlatePrefab.transform.GetChild(0).GetComponent<Image>().sprite;
+                //nameplateImage.sprite = node.NamePlateSpriteOverride ?? nameplateImage.sprite;
             
             // Clear text and (re)start typewriter
             ClearTypeWriterText();
@@ -299,7 +301,7 @@ namespace DialogSystem.Runtime
                         break;
                 }
             }
-            CharacterName = _characterNameContainer.GetComponent<TextMeshProUGUI>();
+            //CharacterName = _characterNameContainer.GetComponent<TextMeshProUGUI>();
         }
 
         private IEnumerator TypeWriter(string text)
