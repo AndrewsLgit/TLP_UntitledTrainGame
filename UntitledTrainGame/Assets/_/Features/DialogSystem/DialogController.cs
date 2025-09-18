@@ -155,6 +155,7 @@ namespace DialogSystem.Runtime
         /// </summary>
         public void StartConversation(DialogNode root, string npcId)
         {
+            if(NodeManager is null) NodeManager = NodeManager.Instance;
             Assert.IsNotNull(UiManager);
             Assert.IsNotNull(NodeManager);
             

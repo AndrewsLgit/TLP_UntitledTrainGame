@@ -41,6 +41,8 @@ namespace DialogSystem.Runtime
         protected void RaiseResponseChosen(int index, Response response) => OnResponseChosen?.Invoke(index, response);
         protected void RaiseAdvanceRequested() => OnAdvanceRequested?.Invoke();
         protected void RaiseConversationEnd() => OnConversationEnd?.Invoke();
+        protected void RaiseOpened() => OnOpened?.Invoke();
+        protected void RaiseClosed() => OnClosed?.Invoke();
 
         // --- End of Private Variables --- 
         #endregion
@@ -57,6 +59,8 @@ namespace DialogSystem.Runtime
         public event Action<int, Response> OnResponseChosen; // Triggered when player selects a response.
         public event Action OnConversationEnd;            // Triggered when UI closes.
         public event Action OnAdvanceRequested;           // Triggered when player wants to advance to next node.
+        public event Action OnOpened;                     // Triggered when UI opens.
+        public event Action OnClosed;
         
         // --- End of Public Variables --- 
         #endregion
@@ -92,6 +96,8 @@ namespace DialogSystem.Runtime
         public virtual void Open()
         {
             gameObject.SetActive(true);
+            // OnOpened?.Invoke();
+            RaiseOpened();
         }
         public virtual void Close()
         {
@@ -103,13 +109,14 @@ namespace DialogSystem.Runtime
                     Destroy(child.gameObject);
             
             // OnConversationEnd?.Invoke();
+            RaiseClosed();
             RaiseConversationEnd();
         }
 
         public virtual void RenderNode(DialogNode node)
         {
             CharacterPortrait = node.Character.PortraitSprite;
-            CharacterName.text = node.Character.Name;
+            // CharacterName.text = node.Character.Name;
             _characterPortraitContainer.GetComponentInChildren<Image>().sprite = CharacterPortrait;
             _dialogTextContainer.GetComponentInChildren<Image>().sprite = node.Character.DefaultTextBoxSprite;
             _dialogTextContainer.GetComponentInChildren<TextMeshProUGUI>().text = "";
@@ -170,6 +177,8 @@ namespace DialogSystem.Runtime
                         break;
                 }
             }
+            CharacterName = _characterNameContainer.GetComponent<Text>();
+            ;
         }
 
         private IEnumerator TypeWriter(string text)

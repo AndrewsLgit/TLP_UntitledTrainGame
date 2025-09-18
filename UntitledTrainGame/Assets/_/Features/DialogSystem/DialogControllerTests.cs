@@ -10,6 +10,10 @@ using UnityEngine.Assertions;
 // Or call "Run DialogController Self Test" from the component's context menu.
 public class DialogController_PlaymodeSelfTest : FMono
 {
+    // Allow assigning a specific UI instance/prefab from the Inspector to avoid discovery issues
+    [Header("Optional: Real Dialog UI Override for Scenario 3")]
+    [SerializeField] private DialogUIManager _realUiOverride;
+
     private class TestDialogUIManager : DialogUIManager
     {
         public bool OpenCalled { get; private set; }
@@ -139,7 +143,114 @@ public class DialogController_PlaymodeSelfTest : FMono
         Warning($"Scenario 2: {_ui.CloseCalled}");
         Assert.IsTrue(_ui.CloseCalled, "(Scenario 2) UI should close after cancel/end.");
         Debug.Log("DialogController_PlaymodeSelfTest: PASSED (all scenarios)");
+        
+        // ========== Scenario 3: Use the real DialogUIManager and test UI rendering, choice selection, and UI closing ==========
+        yield return Scenario3_WithRealDialogUI();
     }
+
+    private IEnumerator Scenario3_WithRealDialogUI()
+    {
+        // Find DialogUIManager in scene
+        var realUI = _realUiOverride;
+        Assert.IsNotNull(realUI, "Scenario 3 skipped: No real DialogUIManager found in the scene. " +
+                                 "Add your actual dialog UI prefab/instance to the scene to run this test.");
+        
+        Cleanup();
+        // Build new system but re-use the real UI
+        var rootGo = new GameObject("DialogSystem_TestRoot_S3");
+        rootGo.SetActive(false);
+        
+        _nodeManager = rootGo.AddComponent<NodeManager>();
+        _controller = rootGo.AddComponent<DialogController>();
+        
+        _controller.NodeManager = _nodeManager;
+        _controller.UiManager = realUI;
+        
+        // Track UI events (exposed by real DialogUIManager
+        bool uiOpened = false;
+        bool uiClosed = false;
+        int textCompletedCount = 0;
+        int chosenIndex = -1;
+        
+        // In many implementations, Open/Close toggle GameObject active state; we can infer open via activeSelf changes.
+        // But we'll rely on dialog UI events/signals when possible.
+        // If your real DialogUIManager exposes events as suggested below, we subscribe to them.
+        // Signatures assumed based on Raise* calls used by the test stub.
+        realUI.OnTextComplete += OnTextCompleteHandler;
+        realUI.OnConversationEnd += OnConversationEndHandler;
+        realUI.OnOpened += OnOpenedHandler;
+        realUI.OnClosed += OnClosedHandler;
+        realUI.OnResponseChosen += OnResponseChosenHandler;
+
+        void OnTextCompleteHandler() => textCompletedCount++;
+        void OnConversationEndHandler() => uiClosed = true;
+        void OnOpenedHandler() => uiOpened = true;
+        void OnClosedHandler() => uiClosed = true;
+        void OnResponseChosenHandler(int index, Response response) => chosenIndex = index;
+        
+        BuildGraph_ABC();
+        
+        rootGo.SetActive(true);
+        
+        _controller.StartConversation(_nodeA, "npc_A");
+        
+        // Wait a few frames for UI to open and first line to render (and complete typewriter)
+        yield return WaitForOrTimeout(() => uiOpened || realUI.gameObject.activeSelf, 2f);
+        Assert.IsTrue(uiOpened || realUI.gameObject.activeSelf, "(Scenario 3) UI should open the dialog.");
+        
+        // Wait for text complete at least once (node A text completed)
+        yield return WaitForOrTimeout(() => textCompletedCount >= 1, 2f);
+        Assert.IsTrue(textCompletedCount >= 1, "(Scenario 3) UI should complete rendering of the first node's text.");
+        
+        // Ensure controller and node manager are in sync with node A
+        Assert.AreEqual(_nodeA, _nodeManager.CurrentNode, "(Scenario 3) Should be at node A initially.)");
+        
+        // Choose response 0 to go A -> B on the real UI
+        realUI.SelectResponse(0);
+        yield return null;
+        
+        // Optional: verify the UI surfaced the choice selection event
+        Assert.AreEqual(0, chosenIndex, "(Scenario 3) UI should raise response chosen event with index 0.");
+        
+        // After selection, the controller should move to B
+        yield return WaitForOrTimeout(() => _nodeManager.CurrentNode == _nodeB, 1f);
+        Assert.AreEqual(_nodeB, _nodeManager.CurrentNode, "(Scenario 3) Selecting choice 0 at A should go to B.");
+        
+        // Advance from B to C. Many real UIs expose a 'continue' button handler.
+        // If your UI exposes a method to request advance, invoke it here (e.g., realUi.RequestAdvance()).
+        // If not, advance via the NodeManager (same logical effect) to focus on UI close behavior.
+        _nodeManager.AdvanceToNextNode();
+        yield return WaitForOrTimeout(() => _nodeManager.CurrentNode == _nodeC, 1f);
+        Assert.AreEqual(_nodeC, _nodeManager.CurrentNode, "(Scenario 3) Advance from B should enter C.");
+        
+        // End conversation and ensure UI closes
+        _controller.NodeManager.EndConversation();
+        yield return WaitForOrTimeout(() => uiClosed || !realUI.gameObject.activeInHierarchy, 2f);;
+        Assert.IsTrue(uiClosed || !realUI.gameObject.activeInHierarchy, "(Scenario 3) UI should close after conversation ends.");
+        
+        // Unsubscribe and cleanup
+        realUI.OnTextComplete -= OnTextCompleteHandler;
+        realUI.OnConversationEnd -= OnConversationEndHandler;
+        realUI.OnOpened -= OnOpenedHandler;
+        realUI.OnClosed -= OnClosedHandler;
+        realUI.OnResponseChosen -= OnResponseChosenHandler;
+
+        if (_controller != null) DestroyImmediate(_controller.gameObject);
+        // Note: Do NOT destroy the real UI; it belongs to the scene/prefab under test.
+
+    }
+    private IEnumerator WaitForOrTimeout(System.Func<bool> condition, float timeoutSeconds)
+    {
+        var start = Time.realtimeSinceStartup;
+        while (Time.realtimeSinceStartup - start < timeoutSeconds)
+        {
+            if (condition()) yield break;
+            yield return null;
+        }
+        // Let assertions following this call fail with explicit messages
+    }
+    // ======== End Scenario 3 helpers ========
+
 
     private void BuildSystem()
     {
