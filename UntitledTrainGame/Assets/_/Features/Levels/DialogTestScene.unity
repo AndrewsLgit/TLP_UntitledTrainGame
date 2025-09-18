@@ -185,16 +185,12 @@ PrefabInstance:
     m_TransformParent: {fileID: 1099702891}
     m_Modifications:
     - target: {fileID: 6308052346477413940, guid: f0026918090a34c48b7fa17e1d917716, type: 3}
-      propertyPath: m_UiScaleMode
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 6308052346477413940, guid: f0026918090a34c48b7fa17e1d917716, type: 3}
       propertyPath: m_ScreenMatchMode
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 6308052346477413940, guid: f0026918090a34c48b7fa17e1d917716, type: 3}
       propertyPath: m_MatchWidthOrHeight
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 6308052346477413940, guid: f0026918090a34c48b7fa17e1d917716, type: 3}
       propertyPath: m_ReferenceResolution.x

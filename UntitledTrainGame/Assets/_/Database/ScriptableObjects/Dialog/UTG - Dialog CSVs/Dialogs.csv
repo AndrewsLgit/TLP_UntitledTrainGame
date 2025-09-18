@@ -1,0 +1,6 @@
+Id,CharacterId,DialogText,NextDialogId,flagKey,
+s_a3_ta_intro,char_ta,"Hey you there! You better stop wasting time, the next train is about to arrive. You wouldn't want to miss it would you?",,if_start_game:false
+s_a3_ta_01,char_ta,"You better stop wasting time, the next train is about to arrive. You wouldn't want to miss it would you?",,is_first_loop:false
+s_a3_ta_02,char_ta,"You better stop wasting time, the next train is about to arrive. You wouldn't want to miss it would you?",,
+s_a3_ta_03,char_ta,…,s_a3_ta_04,
+s_a3_ta_04,char_ta,"Go bother someone else. There's an old man who keeps talking nonsense. Take the train coming up, he's usually at Station A5.",,
