@@ -7,6 +7,7 @@ using Manager.Runtime;
 using SharedData.Runtime;
 using TMPro;
 using Tools.Runtime;
+using ToServiceInterfacesols.Runtime;
 using UnityEngine;
 using UnityEngine.Assertions;
 using UnityEngine.UI;
@@ -14,7 +15,7 @@ using UnitySceneManager = UnityEngine.SceneManagement.SceneManager;
 
 namespace Game.Runtime
 {
-    public class UIManager : FMono
+    public class UIManager : FMono, IUiService
     {
         #region Variables
 
@@ -127,7 +128,6 @@ namespace Game.Runtime
             HideMap();
             Info($"UIManager started. Found {_trainStations.Count} stations and {_stationPathLines.Count} lines.");
 
-
             RouteManager.Instance.OnTrainStationDiscovered += OnTrainStationDiscovered;
             RouteManager.Instance.OnDiscoveredTrainStationsUpdated += () =>
             {
@@ -148,13 +148,13 @@ namespace Game.Runtime
             //     }
             // };
             // Subscribe to clock event
-            ClockManager.Instance.m_OnTimeUpdated += UpdateClockTime;
-            UpdateClockTime(ClockManager.Instance.m_CurrentTime);
+            ClockManager.Instance.OnTimeUpdated += UpdateClockTime;
+            UpdateClockTime(ClockManager.Instance.CurrentTime);
         }
 
         private void OnDestroy()
         {
-            ClockManager.Instance.m_OnTimeUpdated -= UpdateClockTime;
+            ClockManager.Instance.OnTimeUpdated -= UpdateClockTime;
             RouteManager.Instance.OnTrainStationDiscovered -= OnTrainStationDiscovered;
             
             RouteManager.Instance.OnDiscoveredTrainStationsUpdated -= () =>
@@ -241,6 +241,7 @@ namespace Game.Runtime
                 
             Info($"Started progress tracking for segment {segmentIndex}");
         }
+
         private void UpdateCurrentMapProgress(float progress)
         {
             // Update current segment progress (0 -> 1)
@@ -266,21 +267,13 @@ namespace Game.Runtime
             {
                 if (i < _segmentsToLoad.Count)
                 {
-                    // _segmentsToLoad[i].GetComponent<Image>().fillAmount = 1f;
-                    
-                    //SaveDiscoveredPathLinesToFacts(_segmentsToLoad[i].name);
-                    
                     _segmentVisuals[i].Image.fillAmount = 1f;
-                    
-                    // var currentStation = _segments[_currentSegmentIndex];
-                    // _currentStationLabel = $"{currentStation.LinePrefix}{currentStation.Id}"; 
-                    // _trainStations.FirstOrDefault(x => x.name.Contains(_currentStationLabel))
-                    //     .gameObject.SetActive(true);
+                    _segmentVisuals[i].Image.fillOrigin = _segmentVisuals[i].OriginalFillOrigin;
                 }
             }
         }
         
-        public void ResetInternalState()
+        public void ResetTravelUiState()
         {
             _currentSegmentIndex = -1;
             
@@ -289,6 +282,13 @@ namespace Game.Runtime
                 _currentTimer.OnTimerTick -= UpdateCurrentMapProgress;
                 _currentTimer.Stop();
                 _currentTimer = null;
+            }
+
+            foreach (var segmentVisual in _segmentVisuals.Where(segmentVisual => segmentVisual.Image != null))
+            {
+                segmentVisual.Image.fillAmount = 1f;
+                segmentVisual.Image.fillOrigin = segmentVisual.OriginalFillOrigin;
+                segmentVisual.Image.fillClockwise = segmentVisual.OriginalFillClockwise;
             }
             
             // _currentTimer = null;
@@ -303,6 +303,36 @@ namespace Game.Runtime
 
         #endregion
         
+        #region Transition Animations
+        
+        public void StartFadeIn()
+        {
+            // _fadeIn.SetActive(true);
+            // var anim = _fadeIn.GetComponentInChildren<Animator>();
+            TransitionAnimationController.Instance.StartFadeIn();
+        }
+        public void StartFadeOut()
+        {
+            // _fadeOut.SetActive(true);
+            // var anim = _fadeOut.GetComponentInChildren<Animator>();
+            TransitionAnimationController.Instance.StartFadeOut();
+
+        }
+        public void StartSleep()
+        {
+            // _sleep.SetActive(true);
+            // var anim = _sleep.GetComponentInChildren<Animator>();
+            TransitionAnimationController.Instance.StartSleep();
+
+        }
+        public void StartWait()
+        {
+            // _wait.SetActive(true);
+            // var anim = _wait.GetComponentInChildren<Animator>();
+            TransitionAnimationController.Instance.StartWait();
+        }
+        
+        #endregion
         #region Game UI Menus
         // Set (invert) pause state
         public void PauseGame()
@@ -438,16 +468,19 @@ namespace Game.Runtime
             {
                 case Image.FillMethod.Horizontal:
                     // Start from Left when forward, Right when inverted
-                    vis.Image.fillOrigin = vis.Inverted
-                        ? (int)Image.OriginHorizontal.Right
-                        : (int)Image.OriginHorizontal.Left;
+                    // vis.Image.fillOrigin = vis.Inverted
+                    //     ? (int)Image.OriginHorizontal.Right
+                    //     : (int)Image.OriginHorizontal.Left;
+                    if (vis.Inverted)
+                        vis.Image.fillOrigin = vis.OriginalFillOrigin == (int)Image.OriginHorizontal.Left ? 
+                            (int)Image.OriginHorizontal.Right : (int)Image.OriginHorizontal.Left;
                     vis.Image.fillClockwise = true;
                     break;
                 case Image.FillMethod.Vertical:
                     // Start from Bottom when forward, Top when inverted
                     if (vis.Inverted)
                     {
-                        vis.Image.fillOrigin = vis.Image.fillOrigin == (int)Image.OriginVertical.Top 
+                        vis.Image.fillOrigin = vis.OriginalFillOrigin == (int)Image.OriginVertical.Top 
                             ? (int)Image.OriginVertical.Bottom : (int)Image.OriginVertical.Top;
                     }
                     // vis.Image.fillOrigin = vis.Inverted
@@ -459,14 +492,17 @@ namespace Game.Runtime
                     // Keep the asset's corner origin; flip clockwise when inverted so it fills from the opposite end.
                     vis.Image.fillOrigin = vis.OriginalFillOrigin;
                     if(vis.Inverted)
-                        vis.Image.fillClockwise = vis.Image.fillClockwise ? !vis.OriginalFillClockwise : vis.OriginalFillClockwise;
+                        vis.Image.fillClockwise = vis.OriginalFillClockwise ? !vis.OriginalFillClockwise : vis.OriginalFillClockwise;
                     // vis.Image.fillClockwise = vis.Inverted ? !vis.OriginalFillClockwise : vis.OriginalFillClockwise;
                     break;
                 default:
                     // Fallback: preserve origin, flip clockwise when inverted
                     // vis.Image.fillOrigin = vis.OriginalFillOrigin;
+                    // if(vis.Inverted)
+                    //     vis.Image.fillClockwise = vis.Image.fillClockwise ? !vis.Image.fillClockwise : vis.Image.fillClockwise;
                     if(vis.Inverted)
-                        vis.Image.fillClockwise = vis.Image.fillClockwise ? !vis.Image.fillClockwise : vis.Image.fillClockwise;;
+                        vis.Image.fillClockwise = !vis.OriginalFillClockwise;
+                        // vis.Image.fillClockwise = vis.OriginalFillClockwise ? !vis.OriginalFillClockwise : vis.OriginalFillClockwise; 
                     // vis.Image.fillClockwise = vis.Inverted ? vis.OriginalFillClockwise : !vis.OriginalFillClockwise;
                     break;
             }
@@ -533,13 +569,22 @@ namespace Game.Runtime
 
         private void RefreshDiscoveredPathLinesVisibility()
         {
-            if(_stationPathLines == null) return;
+            if (_stationPathLines == null)
+            {
+                Warning("No path lines found. Skipping.");
+                return;
+            }
 
             foreach (var line in _discoveredPathLines)
             {
                 var pathLine = _stationPathLines.FirstOrDefault(x => x.name.Contains(line));
-                
-                if (pathLine != null) pathLine.gameObject.SetActive(true);
+                Info($"Found path line: {pathLine} in discovered path lines.");
+
+                if (pathLine != null)
+                {
+                    pathLine.gameObject.SetActive(true);
+                    pathLine.GetComponent<Image>().fillAmount = 1f;
+                }
             }
         }
         
@@ -626,7 +671,11 @@ namespace Game.Runtime
             }
 
             // Fallback: rely on numeric Id ordering
-            return fromId > toId;
+            var fromStation = _trainStations.FirstOrDefault(x => x.name.Contains(fromLabel));
+            var toStation = _trainStations.FirstOrDefault(x => x.name.Contains(toLabel));
+            
+            return fromStation.transform.position.x > toStation.transform.position.x;
+            // return fromId > toId;
         }
 
         // Extract labels like "A12", "D5" from an arbitrary string.
@@ -679,11 +728,11 @@ namespace Game.Runtime
         private void InitializeForNewRoute(List<Station_Data> segments)
         {
             _segments = segments;
-            ResetInternalState();
+            ResetTravelUiState();
 
             // At this point, discovered stations should be visible again.
-            Assert.IsTrue(_segmentVisuals.Count == 0, "Segment visuals should be cleared during ResetInternalState.");
-            Assert.IsTrue(_segmentsToLoad.Count == 0, "SegmentsToLoad should be cleared during ResetInternalState.");
+            Assert.IsTrue(_segmentVisuals.Count == 0, "Segment visuals should be cleared during ResetTravelUiState.");
+            Assert.IsTrue(_segmentsToLoad.Count == 0, "SegmentsToLoad should be cleared during ResetTravelUiState.");
         }
 
         // 3) Prepare a segment (find transform, compute direction, set up image) and register it

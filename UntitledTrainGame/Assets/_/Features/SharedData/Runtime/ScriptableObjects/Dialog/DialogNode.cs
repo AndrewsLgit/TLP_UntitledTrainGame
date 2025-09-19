@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using JetBrains.Annotations;
 using UnityEngine;
@@ -5,6 +6,7 @@ using UnityEngine;
 namespace SharedData.Runtime
 {
     [CreateAssetMenu(fileName = "SO_DialogNodeData", menuName = "Dialog/DialogNodeData", order = 0)]
+    [Serializable]
     public class DialogNode : ScriptableObject
     {
         public string Id;
@@ -17,24 +19,22 @@ namespace SharedData.Runtime
         [Tooltip("(Optional) Overrides the character's nameplate sprite")]
         [CanBeNull] public Sprite NamePlateSpriteOverride;
         
-        [Tooltip("(Optional) Player can choose from these responses. Leave empty if this is the end of the dialog or if this dialog leads to another dialog.")]
-        public List<Response> Responses = new List<Response>();
+        [Tooltip("(Optional) Player can choose from these responses. Leave empty if this is the end of the dialog or if this dialog leads to another dialog.")] 
+        [CanBeNull] public List<Response> Responses = new List<Response>();
         
-        [Tooltip("(Optional) Next node to go to after this dialog is over. Leave empty if this is the end of the dialog or if the player needs to choose a response.")]
-        public DialogNode NextNode;
+        [Tooltip("(Optional) Next node to go to after this dialog is over. Leave empty if this is the end of the dialog or if the player needs to choose a response.")] 
+        [CanBeNull] public List<DialogNode> NextNodes;
 
-        [Tooltip("(Optional) Flags that will be set when this dialog is shown.")]
-        public List<string> FlagsToSet = new List<string>();
-        [Tooltip("(Optional) Flags that will be cleared when this dialog is shown.")]
-        public List<string> FlagsToClear = new List<string>();
+        [Tooltip("Flags whose value will be set when choosing this response.")] 
+        [CanBeNull] public List<FlagChange> FlagsToChange;
         
-        [Tooltip("Conditions needed for this response to be available. Leave empty if this response is always available.")]
-        public List<Condition> Conditions = new List<Condition>();
+        [Tooltip("Conditions needed for this response to be available. Leave empty if this response is always available.")] 
+        [CanBeNull] public List<Condition> Conditions = new List<Condition>();
 
         [Tooltip("(Optional) Designer notes. Not used by the game.")]
         public string Notes;
 
         [Tooltip("Determines if this is an end node. DO NOT TOUCH! This is handled automatically.")]
-        public bool IsEndNode => (Responses == null || Responses.Count == 0) && (NextNode == null);
+        public bool IsEndNode => (Responses is {Count: <= 0} or null) && (NextNodes is {Count: <= 0} or null); 
     }
 }

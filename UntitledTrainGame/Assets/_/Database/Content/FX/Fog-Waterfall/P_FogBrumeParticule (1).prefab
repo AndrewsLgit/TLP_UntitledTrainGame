@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 4690393626934686411}
   - component: {fileID: 8890486186699008838}
   - component: {fileID: 4817904028183422037}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: P_FogBrumeParticule (1)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -4780,7 +4780,7 @@ ParticleSystemRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 0c1dbf8d485707e4699aff81fe5aba95, type: 2}
+  - {fileID: 2100000, guid: 29d6b7804bbde08459b7ed4209bc55a9, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0

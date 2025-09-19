@@ -42,10 +42,12 @@ namespace Tools.Runtime
 
         #region Main Methods
 
-        public void Open(int optionCount, int initialIndex = 0)
+        public void Open(int optionCount, int initialIndex = -1)
         {
             OptionCount = Mathf.Max(0, optionCount);
-            SelectedIndex = Mathf.Clamp(initialIndex, 0, Mathf.Max(OptionCount - 1));
+            // SelectedIndex = Mathf.Clamp(initialIndex, 0, Mathf.Max(OptionCount - 1));
+            SelectedIndex = Mathf.Clamp(initialIndex, initialIndex, Mathf.Max(OptionCount - 1));
+            if (optionCount <= 0) SelectedIndex = 0;
             IsOpen = true;
             _navRepeatTimer = 0f;
             OnSelectionChanged?.Invoke(SelectedIndex);
@@ -60,6 +62,7 @@ namespace Tools.Runtime
 
         public void HandleNavigate(Vector2 dir, float axisDeadzone = 0.05f, bool verticalOnly = true)
         {
+            if (OptionCount <= 0) SelectedIndex = 0;
             if(!IsOpen || OptionCount <= 0) return;
             if(verticalOnly && Mathf.Abs(dir.y) < axisDeadzone) return;
             
@@ -99,7 +102,7 @@ namespace Tools.Runtime
 
         public void Submit()
         {
-            if(!IsOpen || OptionCount <= 0) return;
+            if(!IsOpen || SelectedIndex < 0) return;
             OnSubmit?.Invoke(SelectedIndex);
         }
 
@@ -116,14 +119,18 @@ namespace Tools.Runtime
         private void MovePrev()
         {
             if(!IsOpen || OptionCount <= 0) return;
-            SelectedIndex = (SelectedIndex - 1 + OptionCount) % OptionCount;
+            if (SelectedIndex >= 0)
+                SelectedIndex = (SelectedIndex - 1 + OptionCount) % OptionCount;
+            else SelectedIndex = 0;
             OnSelectionChanged?.Invoke(SelectedIndex);
         }
 
         private void MoveNext()
         {
             if(!IsOpen || OptionCount <= 0) return;
-            SelectedIndex = (SelectedIndex + 1) % OptionCount;
+            if (SelectedIndex >= 0)
+                SelectedIndex = (SelectedIndex + 1) % OptionCount;
+            else SelectedIndex = OptionCount - 1;
             OnSelectionChanged?.Invoke(SelectedIndex);
         }
         

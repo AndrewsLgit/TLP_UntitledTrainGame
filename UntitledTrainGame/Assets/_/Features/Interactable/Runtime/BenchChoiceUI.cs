@@ -1,6 +1,8 @@
 using System;
 using Foundation.Runtime;
 using Player.Runtime;
+using ServiceInterfaces.Runtime;
+using Services.Runtime;
 using SharedData.Runtime;
 using Tools.Runtime;
 using UnityEngine;
@@ -29,6 +31,9 @@ namespace Interactable.Runtime
         // If not set, we’ll find one in the scene at runtime.
         [Header("Input")]
         [SerializeField] private PlayerInputRouter _inputRouter;
+        
+        private IClockService _clockService;
+        private bool _isNextEventNull;
 
         // State
         private IBenchChoiceUI.BenchChoiceModel _model;
@@ -69,6 +74,8 @@ namespace Interactable.Runtime
         private void Start()
         {
             _inputRouter = FindAnyObjectByType<PlayerInputRouter>();
+            _clockService = ServiceRegistry.Resolve<IClockService>();
+            _isNextEventNull = _clockService.GetNextEvent() == null;
         }
 
         private void OnDisable()
@@ -89,6 +96,7 @@ namespace Interactable.Runtime
         // Open is called by PlayerInteraction after switching to UI action map.
         public void Open(IBenchChoiceUI.BenchChoiceModel model)
         {
+            
             // Cache/validate model
             _model = model ?? new IBenchChoiceUI.BenchChoiceModel()
             {
@@ -102,6 +110,8 @@ namespace Interactable.Runtime
             if (_inputRouter == null)
                 _inputRouter = FindAnyObjectByType<PlayerInputRouter>();
             
+            
+            
             // Subscribe to UI action map events: Navigate/Submit/Cancel
             SubscribeInput();
             
@@ -109,14 +119,32 @@ namespace Interactable.Runtime
             if(_rootPanel != null)
                 _rootPanel.SetActive(true);
             
-            _selector.Open(_model.Options.Length);
+            _isNextEventNull = _clockService.GetNextEvent() == null;
 
-            // UpdateVisuals();
-            // Start with all options Unselected
-            _sleepSelected.SetActive(false);
-            _waitSelected.SetActive(false);
-            _sleepUnselected.SetActive(true);
-            _waitUnselected.SetActive(true);
+            if (!_isNextEventNull)
+            {
+                _selector.Open(_model.Options.Length);
+                // Info($"Found event {_clockService.GetNextEvent().m_EventName}");
+
+                // UpdateVisuals();
+                // Start with all options Unselected
+                _sleepSelected.SetActive(false);
+                _waitSelected.SetActive(false);
+                _sleepUnselected.SetActive(true);
+                _waitUnselected.SetActive(true);
+            }
+            else
+            {
+                _selector.Open(0);
+                
+                // UpdateVisuals();
+                // Start with all options Unselected
+                _sleepSelected.SetActive(true);
+                _waitSelected.SetActive(false);
+                _sleepUnselected.SetActive(false);
+                _waitUnselected.SetActive(false);
+            }
+            
         }
 
         // Close is called by PlayerInteraction after selection/cancel.
@@ -186,6 +214,7 @@ namespace Interactable.Runtime
         private void HandleUISubmit()
         {
             if (!_selector.IsOpen) return;
+            // if (_selector.SelectedIndex < 0) return;
             
             // Notify PlayerInteraction of selection (Close() and switch action maps)
             _selector.Submit();
@@ -208,15 +237,29 @@ namespace Interactable.Runtime
         {
             
             int selectedIndex = _selector.SelectedIndex;
+            // if(selectedIndex < 0) return;
+            
             Info($"Selected index: {selectedIndex}");
             bool sleepSelected = selectedIndex == 0;
             bool waitSelected = selectedIndex == 1;
+
+            if (!_isNextEventNull)
+            {
+                if(_sleepSelected != null) _sleepSelected.SetActive(sleepSelected);
+                if(_sleepUnselected != null) _sleepUnselected.SetActive(!sleepSelected);
             
-            if(_sleepSelected != null) _sleepSelected.SetActive(sleepSelected);
-            if(_sleepUnselected != null) _sleepUnselected.SetActive(!sleepSelected);
+                if(_waitSelected != null) _waitSelected.SetActive(waitSelected);
+                if(_waitUnselected != null) _waitUnselected.SetActive(!waitSelected); 
+            }
+            else
+            {
+                if(_sleepSelected != null) _sleepSelected.SetActive(sleepSelected);
+                if(_sleepUnselected != null) _sleepUnselected.SetActive(!sleepSelected);
             
-            if(_waitSelected != null) _waitSelected.SetActive(waitSelected);
-            if(_waitUnselected != null) _waitUnselected.SetActive(!waitSelected);
+                if(_waitSelected != null) _waitSelected.SetActive(false);
+                if(_waitUnselected != null) _waitUnselected.SetActive(false); 
+            }
+            
         }
         #endregion
     }

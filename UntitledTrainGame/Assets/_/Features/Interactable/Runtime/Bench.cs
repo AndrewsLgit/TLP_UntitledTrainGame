@@ -1,5 +1,6 @@
 using Foundation.Runtime;
-using Manager.Runtime;
+using ServiceInterfaces.Runtime;
+using Services.Runtime;
 using SharedData.Runtime;
 using SharedData.Runtime.Events;
 using UnityEngine.Assertions;
@@ -11,7 +12,7 @@ namespace Interactable.Runtime
         #region Variables
         
         #region Private
-        private ClockManager _clockManager;
+        private IClockService _clockManager;
         private GameTime _timeToInteract;
         
         #endregion
@@ -30,8 +31,8 @@ namespace Interactable.Runtime
         // Start is called once before the first execution of Update after the MonoBehaviour is created
         void Start()
         {
-            _clockManager = ClockManager.Instance;
-            
+            _clockManager = ServiceRegistry.Resolve<IClockService>();
+
         }
         #endregion
 
@@ -50,7 +51,8 @@ namespace Interactable.Runtime
             GetClockManager();
             Info($"Bench sleep selected");
             // Add clock manager sleep event (reset loop)
-            _clockManager.FindNextEventWithTag("Sleep");
+            // _clockManager.JumpToNextEventWithTag("Sleep");
+            _clockManager.SleepToLoopEnd();
         }
 
         public void Wait()
@@ -61,7 +63,7 @@ namespace Interactable.Runtime
             TimeEvent foundEvent = null;
             Info("Interacting with Bench");
             
-            foundEvent = _clockManager.FindNextEventWithTag("Train");
+            foundEvent = _clockManager.JumpToNextEventWithTag("Train");
 
             if (foundEvent != null)
             {
@@ -82,7 +84,7 @@ namespace Interactable.Runtime
         private void GetClockManager()
         {
             if (_clockManager == null)
-                _clockManager = ClockManager.Instance;
+                _clockManager = ServiceRegistry.Resolve<IClockService>();
             Assert.IsNotNull(_clockManager, "ClockManager not found!");
         }
         

@@ -1,5 +1,7 @@
 using Foundation.Runtime;
 using Player.Runtime;
+using ServiceInterfaces.Runtime;
+using Services.Runtime;
 using SharedData.Runtime;
 using Tools.Runtime;
 using UnityEngine;
@@ -25,6 +27,10 @@ namespace DialogSystem.Runtime
         [SerializeField] private PlayerInputRouter _inputRouter;
         [SerializeField, Tooltip("Cooldown between repeated nav steps when holding string/keys")]
         private float _navRepeatCooldown = 0.2f;
+        private IInputService _customInputService;
+        
+        [Header("Test")]
+        [SerializeField] private DialogNode _testRootNode;
         
         private ChoiceSelectionController _choiceController;
         private bool _uiOpen;
@@ -32,6 +38,12 @@ namespace DialogSystem.Runtime
         // Event subscription flags
         private bool _subscribedToNodeManager = false;
         private bool _subscribedToUiManager = false;
+
+        // Track when text is fully rendered to allow advance/end
+        private bool _textComplete;
+
+        // Debounce submit right after choosing a response and entering a new node
+        private float _blockSubmitUntil = 0f;
 
         // --- End of Private Variables --- 
 
@@ -55,6 +67,8 @@ namespace DialogSystem.Runtime
         [Header("Typewriter Settings")]
         public float CharactersPerSecond = 30f;
         
+        public static DialogController Instance { get; private set; }
+        
         // --- End of Public Variables --- 
 
         #endregion
@@ -68,20 +82,33 @@ namespace DialogSystem.Runtime
             if(NodeManager == null)
                 NodeManager = NodeManager.Instance;
             
-            
+            // Find instance of this class, if existent -> destroy that instance
+            if (Instance is not null && Instance != this)
+            {
+                Destroy(gameObject);
+                Error("There is already an instance of this class! Destroying this one!");
+                return;
+            }
+
+            // Assign instance as this current object
+            Instance = this;
+            DontDestroyOnLoad(gameObject);
             
             // Choice navigation controller
-            _choiceController = new ChoiceSelectionController(_navRepeatCooldown);
-            _choiceController.OnSubmit += HandleChoiceSubmit;
-            _choiceController.OnCancel += HandleChoiceCancel;
+            // Selection highlight is handled via UiManager.HighlightResponse(index)
+
             // SelectionChanged can be used to update highlight if/when UI supports it
             // _choiceController.OnSelectionChanged += HandleChoiceSelectionChanged;
 
-            EnsureEventSubscriptions();
+            //EnsureEventSubscriptions();
         }
 
         private void Start()
         {
+            NodeManager = NodeManager.Instance;
+            _choiceController = new ChoiceSelectionController(_navRepeatCooldown);
+            _inputRouter = FindFirstObjectByType<PlayerInputRouter>();
+            _customInputService = ServiceRegistry.Resolve<IInputService>();
         }
 
         private void Update()
@@ -90,55 +117,14 @@ namespace DialogSystem.Runtime
             _choiceController.Tick(Time.deltaTime);
         }
 
-        private void FixedUpdate()
-        {
-        }
-
         private void OnEnable()
-        {
-            if (_inputRouter != null)
-            {
-                _inputRouter.OnUINavigate += OnUINavigate;
-                _inputRouter.OnUISubmit += OnUISubmit;
-                _inputRouter.OnUICancel += OnUICancel;
-            }
-            
+        { 
             EnsureEventSubscriptions();
         }
 
         private void OnDisable()
         {
-            if (_inputRouter != null)
-            {
-                _inputRouter.OnUINavigate -= OnUINavigate;
-                _inputRouter.OnUISubmit -= OnUISubmit;
-                _inputRouter.OnUICancel -= OnUICancel;
-            }
-        }
-
-        private void OnDestroy()
-        {
-            if (NodeManager != null && _subscribedToNodeManager)
-            {
-                NodeManager.OnNodeEntered -= HandleNodeEntered;
-                NodeManager.OnNodeExited -= HandleNodeExited;
-                NodeManager.OnConversationEnded -= HandleConversationEnd;
-            }
-
-            if (UiManager != null && _subscribedToUiManager)
-            {
-                UiManager.OnResponseChosen -= HandleResponseChosen;
-                UiManager.OnTextComplete -= HandleTextComplete;
-                UiManager.OnAdvanceRequested -= HandleAdvanceRequested;
-            }
-
-            if (_choiceController != null)
-            {
-                _choiceController.OnSubmit -= HandleChoiceSubmit;
-                _choiceController.OnCancel -= HandleChoiceCancel;
-                // _choiceController.OnSelectionChanged -= HandleChoiceSelectionChanged;
-            }
-
+            EnsureEventUnsub();
         }
 
         #endregion
@@ -150,6 +136,9 @@ namespace DialogSystem.Runtime
         /// </summary>
         public void StartConversation(DialogNode root, string npcId)
         {
+            NodeManager ??= NodeManager.Instance;
+            _customInputService.SwitchToUI();
+            
             Assert.IsNotNull(UiManager);
             Assert.IsNotNull(NodeManager);
             
@@ -160,13 +149,22 @@ namespace DialogSystem.Runtime
             _uiOpen = true;
             NodeManager.StartConversation(root, npcId);
         }
+
+        [ContextMenu("Test Conversation")]
+        public void TestConversation()
+        {
+            StartConversation(_testRootNode, _testRootNode.Character.Id);
+        }
         
         #region NodeManager Event Handlers
 
         private void HandleNodeEntered(DialogNode node)
         {
+            _inputRouter = FindFirstObjectByType<PlayerInputRouter>();
             Assert.IsNotNull(UiManager);
+            Assert.IsNotNull(_inputRouter);
             // Render node text with typewriter effect
+            _textComplete = false;
             UiManager.SetTypewriterSpeed(CharactersPerSecond);
             UiManager.RenderNode(node);
             
@@ -184,6 +182,8 @@ namespace DialogSystem.Runtime
             _choiceController?.Close();
             _uiOpen = false;
             UiManager?.Close();
+            _customInputService.SwitchToPlayer();
+            EnsureEventUnsub();
         }
 
         #endregion
@@ -192,11 +192,22 @@ namespace DialogSystem.Runtime
 
         private void HandleTextComplete()
         {
-            Assert.IsNotNull(UiManager);
-            Assert.IsNotNull(NodeManager);
+            EnsureEventSubscriptions();
+            Assert.IsNotNull(_inputRouter);
+            // Assert.IsNotNull(UiManager);
+            // Assert.IsNotNull(NodeManager);
+            
+            // Only act if a conversation is active and NodeManager is ready
+            if (!_uiOpen || NodeManager is null)
+            {
+                // Ignore spurious UI events that can occur before/after conversations
+                return;
+            }
+
+            _textComplete = true;
 
             var node = NodeManager.CurrentNode;
-            if (node == null)
+            if (node is null)
             {
                 Warning($"Node is null!");
                 return;
@@ -208,7 +219,8 @@ namespace DialogSystem.Runtime
             {
                 UiManager.RenderResponses(node);
                 // Open choice navigation over responses; default to first
-                _choiceController?.Open(responses.Count, 0);
+                _choiceController?.Open(responses.Count, -1);
+                // UiManager.HighlightResponse(0);
             }
             else
             {
@@ -226,12 +238,16 @@ namespace DialogSystem.Runtime
             NodeManager.SelectResponse(index);
             // Close choice navigation
             _choiceController?.Close();
+            
+            // Prevent the same Submit press from immediately skipping the next node
+            _blockSubmitUntil = Time.unscaledTime + 0.2f;
         }
 
         private void HandleAdvanceRequested()
         {
             // Player submitted choice, advance to next node
-            NodeManager.AdvanceToNextNode();
+            // NodeManager.AdvanceToNextNode();
+            TryAdvanceOrEnd();
         }
 
         #endregion
@@ -240,26 +256,7 @@ namespace DialogSystem.Runtime
 
         #region Helpers/Utils
 
-        private void EnsureEventSubscriptions()
-        {
-            // Subscribe to NodeManager events
-            if (NodeManager != null && !_subscribedToNodeManager)
-            {
-                NodeManager.OnNodeEntered += HandleNodeEntered;
-                NodeManager.OnNodeExited += HandleNodeExited;
-                NodeManager.OnConversationEnded += HandleConversationEnd;
-                _subscribedToNodeManager = true;
-            }
-
-            // Subscribe to UIManager events
-            if (UiManager != null && !_subscribedToUiManager)
-            {
-                UiManager.OnResponseChosen += HandleResponseChosen;
-                UiManager.OnTextComplete += HandleTextComplete;
-                UiManager.OnAdvanceRequested += HandleAdvanceRequested;
-                _subscribedToUiManager = true;
-            }
-        }
+        
 
         // Input routing to ChoiceSelectionController
         private void OnUINavigate(Vector2 dir)
@@ -269,12 +266,17 @@ namespace DialogSystem.Runtime
             
             if(_choiceController.IsOpen)
                 _choiceController.HandleNavigate(dir);
+            
+            UiManager.HighlightResponse(_choiceController.SelectedIndex);
         }
         
         private void OnUISubmit()
         {
             Assert.IsNotNull(_choiceController);
             if(!_uiOpen) return;
+            
+            // Debounce to avoid double-activating on the node after a choice selection
+            if (Time.unscaledTime < _blockSubmitUntil) return;
 
             if (_choiceController.IsOpen)
             {
@@ -283,8 +285,12 @@ namespace DialogSystem.Runtime
             }
             else
             {
-                // No open choices -> treat submit as advance
-                NodeManager?.AdvanceToNextNode();
+                // Only allow advance/end after text is complete
+                if (!_textComplete) return;
+                
+                // No open choices -> advance if possible, otherwise end conversation
+                TryAdvanceOrEnd();
+                // NodeManager?.AdvanceToNextNode();
             }
         }
         
@@ -317,11 +323,109 @@ namespace DialogSystem.Runtime
         }
         
         // If you later add visual highlighting support in DialogUIManager, hook it here.
-        // private void HandleChoiceSelectionChanged(int index)
-        // {
-        //     UiManager?.HighlightResponse(index);
-        // }
+        private void HandleChoiceSelectionChanged(int index)
+        {
+            UiManager?.HighlightResponse(index);
+        }
 
+        // Submit/Advance helper: if there's a valid next node, advance; otherwise end conversation
+        private void TryAdvanceOrEnd()
+        {
+            if (NodeManager is null) return;
+            
+            var node = NodeManager.CurrentNode;
+            if (node is null)
+            {
+                NodeManager.EndConversation();
+                return;
+            }
+            
+            // If choices exist, this path shouldn't be used (submit should be handled by choice controller)
+            var hasResponses = node.Responses is {Count: > 0};
+            if (hasResponses) return;
+            
+            // Require text to be complete before advancing/ending
+            if (!_textComplete) return;
+            
+            var eligibleNext = NodeManager.GetNextEligibleNodes();
+            if (eligibleNext is { Count: > 0 })
+            {
+                NodeManager.AdvanceToNextNode();
+                _textComplete = false;
+            }
+            else NodeManager.EndConversation();
+        }
+
+        #region Event Subscription Helpers
+        private void EnsureEventSubscriptions()
+        {
+            if (_choiceController is not null)
+            {
+                _choiceController.OnSubmit += HandleChoiceSubmit;
+                _choiceController.OnCancel += HandleChoiceCancel;
+            }
+
+            // Subscribe to NodeManager events
+            if (NodeManager is not null && !_subscribedToNodeManager)
+            {
+                NodeManager.OnNodeEntered += HandleNodeEntered;
+                NodeManager.OnNodeExited += HandleNodeExited;
+                NodeManager.OnConversationEnded += HandleConversationEnd;
+                _subscribedToNodeManager = true;
+            }
+
+            // Subscribe to UIManager events
+            if (UiManager is not null && !_subscribedToUiManager)
+            {
+                UiManager.OnResponseChosen += HandleResponseChosen;
+                UiManager.OnTextComplete += HandleTextComplete;
+                UiManager.OnAdvanceRequested += HandleAdvanceRequested;
+                _subscribedToUiManager = true;
+            }
+            if (_inputRouter == null)
+                _inputRouter = FindAnyObjectByType<PlayerInputRouter>();
+            if (_inputRouter != null)
+            {
+                _inputRouter.OnUINavigate += OnUINavigate;
+                _inputRouter.OnUISubmit += OnUISubmit;
+                _inputRouter.OnUICancel += OnUICancel;
+            }
+        }
+        private void EnsureEventUnsub()
+        {
+            if (NodeManager != null && _subscribedToNodeManager)
+            {
+                NodeManager.OnNodeEntered -= HandleNodeEntered;
+                NodeManager.OnNodeExited -= HandleNodeExited;
+                NodeManager.OnConversationEnded -= HandleConversationEnd;
+                _subscribedToNodeManager = false;
+            }
+
+            if (UiManager != null && _subscribedToUiManager)
+            {
+                UiManager.OnResponseChosen -= HandleResponseChosen;
+                UiManager.OnTextComplete -= HandleTextComplete;
+                UiManager.OnAdvanceRequested -= HandleAdvanceRequested;
+                _subscribedToUiManager = false;
+            }
+
+            if (_choiceController != null)
+            {
+                _choiceController.OnSubmit -= HandleChoiceSubmit;
+                _choiceController.OnCancel -= HandleChoiceCancel;
+                // _choiceController.OnSelectionChanged -= HandleChoiceSelectionChanged;
+            }
+            if (_inputRouter == null)
+                _inputRouter = FindAnyObjectByType<PlayerInputRouter>();
+            if (_inputRouter != null)
+            {
+                _inputRouter.OnUINavigate -= OnUINavigate;
+                _inputRouter.OnUISubmit -= OnUISubmit;
+                _inputRouter.OnUICancel -= OnUICancel;
+            }
+        }
+        #endregion
+        
         #endregion
         
         

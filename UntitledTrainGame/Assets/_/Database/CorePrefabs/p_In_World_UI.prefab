@@ -123,6 +123,18 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 5133277196420360079}
     m_Modifications:
+    - target: {fileID: 3803065547429189882, guid: e537dacf720574df2a208bda25773d8d, type: 3}
+      propertyPath: m_Sprite
+      value: 
+      objectReference: {fileID: -507491535, guid: 505f500f1fc58e74b94e141b80cae6c2, type: 3}
+    - target: {fileID: 5000099134208416313, guid: e537dacf720574df2a208bda25773d8d, type: 3}
+      propertyPath: m_PresetInfoIsWorld
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5697971093527831908, guid: e537dacf720574df2a208bda25773d8d, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 7014132658185209235, guid: e537dacf720574df2a208bda25773d8d, type: 3}
       propertyPath: m_Name
       value: p_PopUpCanvas

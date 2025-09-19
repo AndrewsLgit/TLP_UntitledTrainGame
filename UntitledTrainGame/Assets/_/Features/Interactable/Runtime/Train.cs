@@ -1,5 +1,7 @@
 using Foundation.Runtime;
-using Manager.Runtime;
+using GameStateManager.Runtime;
+using ServiceInterfaces.Runtime;
+using Services.Runtime;
 using SharedData.Runtime;
 using UnityEngine;
 using UnityEngine.Assertions;
@@ -14,7 +16,8 @@ namespace Interactable.Runtime
         // Private Variables
         
         private GameTime _timeToInteract;
-        private RouteManager _routeManager;
+        private IRouteService _routeManager;
+        private GameStateMachine _gameStateManager;
         [SerializeField] private TrainRoute_Data _trainRoute;
         [SerializeField] private GameObject _regularTrainModel;
         [SerializeField] private GameObject _expressTrainModel;
@@ -31,6 +34,7 @@ namespace Interactable.Runtime
         
         public GameTime TimeToInteract => _timeToInteract;
         public InteractionType InteractionType => InteractionType.Train;
+        public bool IsPendingTrain => _isPendingTrain;
         
         // Public Variables
         #endregion
@@ -41,7 +45,8 @@ namespace Interactable.Runtime
 
         private void Start()
         {
-            _routeManager = RouteManager.Instance;
+            _routeManager = ServiceRegistry.Resolve<IRouteService>();
+            _gameStateManager = GameStateMachine.Instance;
 
             // _isExpress = _trainRoute.IsExpress;
             _isExpress = _trainRoute != null && _trainRoute.IsExpress;
@@ -50,7 +55,7 @@ namespace Interactable.Runtime
             // enable train model based on express train flag
             SetModel();
             
-            _routeManager.m_onPausedRouteRemoved += DisableModel;
+            // _routeManager.OnPausedRouteRemoved += DisableModel;
             // _regularTrainModel.SetActive(!_isExpress || _isPendingTrain);
             // _expressTrainModel.SetActive(_isExpress && !_isPendingTrain);
             
@@ -72,21 +77,27 @@ namespace Interactable.Runtime
         private void OnEnable()
         {
             if(_routeManager == null)
-                _routeManager = RouteManager.Instance;
+                _routeManager = ServiceRegistry.Resolve<IRouteService>();
             
             Assert.IsNotNull(_routeManager);
             
             _isExpress = _trainRoute != null && _trainRoute.IsExpress;
+            _routeManager.OnPausedRouteRemoved += DisableModel;
+
             //_isPendingExists = _routeManager.HasPendingTrainAtActiveScene();
             // enable train model based on express train flag
             SetModel();
             // _regularTrainModel.SetActive(!_isExpress || _isPendingTrain);
             // _expressTrainModel.SetActive(_isExpress && !_isPendingTrain);
         }
+        private void OnDisable()
+        {
+            _routeManager.OnPausedRouteRemoved -= DisableModel;
+        }
 
         private void OnDestroy()
         {
-            _routeManager.m_onPausedRouteRemoved -= DisableModel;
+            // _routeManager.OnPausedRouteRemoved -= DisableModel;
         }
 
         #endregion
@@ -96,13 +107,14 @@ namespace Interactable.Runtime
         {
             if (_routeManager.HasPendingTrainAtActiveScene())
             {
-                _routeManager.ResumeJourneyFromPausedStation();
+                // _routeManager.ResumeJourneyFromPausedStation();
+                _gameStateManager.RequestResumeJourney();
                 return;
             }
             
             Assert.IsNotNull(_trainRoute);
-            _routeManager.StartJourney(_trainRoute, _trainRoute.Network);
-            
+            // _routeManager.StartJourney(_trainRoute, _trainRoute.Network);
+            _gameStateManager.RequestStartJourney(_trainRoute, _trainRoute.Network);
             // if (!_isPendingTrain)
             // {
             //     Assert.IsNotNull(_trainRoute);
@@ -130,7 +142,7 @@ namespace Interactable.Runtime
         }
         private void SetModel()
         {
-            _routeManager = RouteManager.Instance;
+            _routeManager = ServiceRegistry.Resolve<IRouteService>();
             if (_routeManager == null)
             {
                 Debug.LogError("RouteManager not found!");

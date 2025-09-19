@@ -1,7 +1,9 @@
 {
     "name": "SharedData.Editor",
     "rootNamespace": "SharedData.Editor",
-    "references": [],
+    "references": [
+        "GUID:0c859d0963fcc454baed7e047bb40422"
+    ],
     "includePlatforms": [
         "Editor"
     ],

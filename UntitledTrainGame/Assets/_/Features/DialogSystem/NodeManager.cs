@@ -49,7 +49,7 @@ namespace DialogSystem.Runtime
         private void Awake()
         {
             // Find instance of this class, if existent -> destroy that instance
-            if (Instance != null && Instance != this)
+            if (Instance is not null && Instance != this)
             {
                 Destroy(gameObject);
                 Error("There is already an instance of this class! Destroying this one!");
@@ -68,14 +68,14 @@ namespace DialogSystem.Runtime
         public void StartConversation(DialogNode root, string speakerId)
         {
             CurrentNode = null;
-            if (root == null) return;
+            if (root is null) return;
             CurrentSpeakerId = speakerId;
             EnterNode(root);
         }
 
         private void EnterNode(DialogNode node)
         {
-            if (node == null)
+            if (node is null)
             {
                 EndConversation();
                 return;
@@ -95,7 +95,7 @@ namespace DialogSystem.Runtime
             _responses.Clear();
             _responses = BuildResponses(CurrentNode);
 
-            if (_responses.Count == 0 && CurrentNode.NextNode != null)
+            if (_responses.Count <= 0 && CurrentNode.NextNodes is {Count: > 0})
             {
                 // todo: wait for player input with UI Map
                 OnNodeExited?.Invoke(CurrentNode);
@@ -105,26 +105,30 @@ namespace DialogSystem.Runtime
 
         public void SelectResponse(int index)
         {
-            if (CurrentNode == null || index < 0 || index >= _responses.Count) return;
+            if (CurrentNode is null || index < 0 || index >= _responses.Count) return;
 
             var response = _responses[index];
             InfoInProgress($"Selecting response: {index} -> {response.Text}");
             HandleFlags(response);
 
-            if (response.NextNode != null)
+            if (response.NextNode is not null)
             {
                 EnterNode(response.NextNode);
             }
-            else if (CurrentNode.NextNode != null)
+            else if (CurrentNode.NextNodes is {Count: > 0})
             {
-                EnterNode(CurrentNode.NextNode);
+                // Choose the first eligible next node base on conditions, or a condition-less node if none pass
+                var eligible = GetNextEligibleNodesInternal(CurrentNode);
+                if (eligible is {Count: > 0})
+                    EnterNode(eligible[0]);
+                else EndConversation();
             }
             else EndConversation();
         }
 
         public void EndConversation()
         {
-            if (CurrentNode != null)
+            if (CurrentNode is not null)
                 OnNodeExited?.Invoke(CurrentNode);
 
             CurrentNode = null;
@@ -134,9 +138,9 @@ namespace DialogSystem.Runtime
 
         private void ResolveFallback(DialogNode node)
         {
-            if (node != null && node.NextNode != null)
+            if (node?.NextNodes is {Count: > 0})
             {
-                EnterNode(node.NextNode);
+                EnterNode(node.NextNodes[0]);
                 return;
             }
             EndConversation();
@@ -145,18 +149,30 @@ namespace DialogSystem.Runtime
         public void ClearScopedFlags(string sceneName)
         {
             // Clear all flags that are scoped to this scene and reset first talked set
-            if (_flagProvider != null)
-            {
-                _flagProvider.ClearFlagsForScene(sceneName);
-            }
+            _flagProvider?.ClearFlagsForScene(sceneName);
 
             _firstTalkSet.RemoveWhere(key => key.StartsWith(sceneName));
         }
 
         public void AdvanceToNextNode()
         {
-            if (CurrentNode != null && _responses.Count == 0 && CurrentNode.NextNode != null)
-                EnterNode(CurrentNode.NextNode);
+            if (CurrentNode?.NextNodes is { Count: > 0 } && _responses.Count == 0)
+            {
+                // Iterate over next nodes, pick the first that passes conditions;
+                var eligible = GetNextEligibleNodesInternal(CurrentNode);
+                if (eligible is { Count: > 0 })
+                {
+                    EnterNode(eligible[0]);
+                }
+                else EndConversation();
+            }
+        }
+        
+        // Allows callers (like UI or Tools) to get all eligible next nodes at this point of the conversation
+        public IReadOnlyList<DialogNode> GetNextEligibleNodes()
+        {
+            if (CurrentNode is null) return Array.Empty<DialogNode>();
+            return GetNextEligibleNodesInternal(CurrentNode);
         }
 
         #endregion
@@ -165,56 +181,32 @@ namespace DialogSystem.Runtime
 
         private void HandleFlags(DialogNode node)
         {
-            if (node.FlagsToSet != null)
+            if (node.FlagsToChange is {Count: <= 0} or null) return;
+            foreach (var f in node.FlagsToChange)
             {
-                foreach (var f in node.FlagsToSet)
-                {
-                    if (_flagProvider != null)
-                        _flagProvider.SetFlag(f, true);
-                    else Warning($"FlagProvider is null! Not setting flag: {f}");
-                }
-            }
-
-            if (node.FlagsToClear != null)
-            {
-                foreach (var f in node.FlagsToClear)
-                {
-                    if (_flagProvider != null)
-                        _flagProvider.SetFlag(f, false);
-                    else Warning($"FlagProvider is null! Not clearing flag: {f}");
-                }
+                if (_flagProvider is not null)
+                    _flagProvider.SetFlag(f.flagKey, f.value);
+                else Warning($"FlagProvider is null! Not setting flag: {f.flagKey}");
             }
         }
 
         private void HandleFlags(Response response)
         {
-            if (response.FlagsToSet != null)
+            if (response.FlagsToChange is {Count: <= 0} or null) return;
+            foreach (var f in response.FlagsToChange)
             {
-                foreach (var f in response.FlagsToSet)
-                {
-                    if (_flagProvider != null)
-                        _flagProvider.SetFlag(f, true);
-                    else Warning($"FlagProvider is null! Not setting flag: {f}");
-                }
-            }
-
-            if (response.FlagsToClear != null)
-            {
-                foreach (var f in response.FlagsToClear)
-                {
-                    if (_flagProvider != null)
-                        _flagProvider.SetFlag(f, false);
-                    else Warning($"FlagProvider is null! Not clearing flag: {f}");
-                }
+                if (_flagProvider is not null)
+                    _flagProvider.SetFlag(f.flagKey, f.value);
+                else Warning($"FlagProvider is null! Not setting flag: {f.flagKey}");
             }
         }
 
         private bool PassedNodeConditions(DialogNode node)
         {
-            if (node.Conditions == null) return true;
+            if (node.Conditions is {Count: <= 0} or null) return true;
             foreach (var condition in node.Conditions)
             {
-                if (_flagProvider != null)
+                if (_flagProvider is not null)
                 {
                     bool value = _flagProvider.GetFlag(condition.flagKey);
                     if (value != condition.requiredValue)
@@ -228,52 +220,78 @@ namespace DialogSystem.Runtime
 
             return true;
         }
+        // Side-effect-free condition eval
+        private bool NodeConditionsMet(DialogNode node)
+        {
+            if (node is null) return false;
+            if (node.Conditions is {Count: <= 0} or null) return true;
+            
+            foreach (var condition in node.Conditions)
+            {
+                if (_flagProvider is not null)
+                {
+                    bool value = _flagProvider.GetFlag(condition.flagKey);
+                    if (value != condition.requiredValue) return false;
+                }
+                else Warning($"FlagProvider is null! Not checking condition: {condition.flagKey}");
+            }
+            return true;
+        }
+        
+        // Returns nodes that pass conditions; if none, returns condition-less nodes.
+        private List<DialogNode> GetNextEligibleNodesInternal(DialogNode fromNode)
+        {
+            var result = new List<DialogNode>();
+            if (fromNode?.NextNodes is not {Count: > 0}) return result;
+            
+            // Nodes whose conditions pass
+            foreach (var next in fromNode.NextNodes)
+            {
+                if (NodeConditionsMet(next)) result.Add(next);
+            }
+            
+            if (result.Count > 0) return result;
+            
+            // fallback: Nodes with no conditions
+            foreach (var next in fromNode.NextNodes)
+            {
+                if(next?.Conditions is {Count: <= 0} or null) result.Add(next);
+            }
+            
+            return result;
+        }
 
         private void ConsumeTimeIfNotRepeat(DialogNode node)
         {
             string key = SceneManager.GetActiveScene().name;
             if (_firstTalkSet.Contains(key)) return;
 
-            bool consumeTime = node.Responses != null && node.Responses.Any(r => r.ConsumeTime);
 
-            if (!consumeTime) return;
             _firstTalkSet.Add(key);
             OnFirstTimeTalk?.Invoke(key); // todo: subscribe ClockManager to this event in order to advance time
         }
-
+        
         private List<Response> BuildResponses(DialogNode node)
         {
             var responses = new List<Response>();
-            if (node.Responses == null) return responses;
-            foreach (var response in node.Responses)
-            {
-                // bool valid = true;
-                bool valid = PassedResponseConditions(response);
-                // foreach (var cond in response.Conditions)
-                // {
-                //     if (_flagProvider != null)
-                //     {
-                //         bool flag = _flagProvider.GetFlag(cond.flagKey);
-                //         if (flag != cond.requiredValue)
-                //         {
-                //             valid = false;
-                //             break;
-                //         }
-                //     }
-                //     else Warning($"FlagProvider is null! Not checking condition: {cond.flagKey}");
-                // }
-                if (valid) responses.Add(response);
-            }
+            if (node.Responses is {Count: <= 0} or null) return responses;
+            
+            // foreach (var response in node.Responses)
+            // {
+            //     bool valid = PassedResponseConditions(response);
+            //     if (valid) responses.Add(response);
+            // }
+            responses.AddRange(from response in node.Responses let valid = PassedResponseConditions(response) where valid select response);
 
             return responses;
         }
 
         private bool PassedResponseConditions(Response response)
         {
-            if (response.Conditions == null) return true;
+            if (response.Conditions is {Count: <= 0} or null) return true;
             foreach (var condition in response.Conditions)
             {
-                if (_flagProvider != null)
+                if (_flagProvider is not null)
                 {
                     bool value = _flagProvider.GetFlag(condition.flagKey);
                     if (value != condition.requiredValue)

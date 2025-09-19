@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Foundation.Runtime;
 using Game.Runtime;
+using ServiceInterfaces.Runtime;
 using SharedData.Runtime;
 using Tools.Runtime;
 using UnityEngine;
@@ -11,7 +12,7 @@ using UnitySceneManager = UnityEngine.SceneManagement.SceneManager;
 
 namespace Manager.Runtime
 {
-    public class RouteManager : FMono
+    public class RouteManager : FMono, IRouteService
     {
         #region Variables
 
@@ -52,7 +53,12 @@ namespace Manager.Runtime
         // Public Variables
         
         public static RouteManager Instance { get; private set; }
-        public event Action m_onPausedRouteRemoved;
+        public event Action<int, CountdownTimer> OnSegmentStarted;
+        public event Action<List<Station_Data>> OnJourneyStarted;
+        public event Action<GameTime> OnSegmentEnded;
+        public event Action<SceneReference> OnDestinationChanged;
+        public event Action OnJourneyEnded;
+        public event Action OnPausedRouteRemoved;
         public event Action<Station_Data> OnTrainStationDiscovered;
         public event Action OnDiscoveredTrainStationsUpdated;
         
@@ -86,17 +92,8 @@ namespace Manager.Runtime
         void Start()
         {
             _controlPanel = GDControlPanel.Instance;
-            // _sceneManager = SceneManager.Instance;
             _currentStationIndex = 0;
             
-            Assert.IsNotNull(_controlPanel, "ControlPanel not found! Please add it to the GameManager object!");
-            GDControlPanel.OnValuesUpdated += OnControlPanelUpdated;
-            ClockManager.Instance.m_OnLoopEnd += () =>
-            {
-                _sceneToLoad = _sceneManager.StartScene;
-                _reloaded = true;
-                // EndJourneyNoLoad();
-            };
             // if (!FactExists(_stationFacts, out _discoveredStations))
             // {
             //     _discoveredStations = new HashSet<Station_Data>();
@@ -105,15 +102,17 @@ namespace Manager.Runtime
 
         }
 
-        private void OnDestroy()
+        private void OnEnable()
+        {
+            if (_controlPanel == null) _controlPanel = GDControlPanel.Instance;
+            
+            // Assert.IsNotNull(_controlPanel, "ControlPanel not found! Please add it to the GameManager object!");
+            GDControlPanel.OnValuesUpdated += OnControlPanelUpdated;
+        }
+
+        private void OnDisable()
         {
             GDControlPanel.OnValuesUpdated -= OnControlPanelUpdated;
-            ClockManager.Instance.m_OnLoopEnd -= () =>
-            {
-                _sceneToLoad = _sceneManager.StartScene;
-                _reloaded = true;
-                // EndJourneyNoLoad();
-            };
         }
 
         // Update is called once per frame
@@ -148,8 +147,6 @@ namespace Manager.Runtime
             _segments = _stationNetwork.CalculatePath(trainRoute.StartStation, trainRoute.EndStation);
             _segments[0].IsDiscovered = true;
             
-            // _discoveredStations.Add(_segments[0]);
-
             foreach (var stationData in _segments.FindAll(x => x.IsDiscovered)
                          .Where(x => !_discoveredStations.Contains(x)))
                 _discoveredStations.Add(stationData);
@@ -165,17 +162,16 @@ namespace Manager.Runtime
                 return;
             }
             Info($"Preloading Scene: {trainRoute.EndStation.StationScene}");
-            _sceneToLoad = trainRoute.EndStation.StationScene;
-            _sceneManager = GetSceneLoader();
-            //_sceneManager.PreloadScene(_sceneToLoad);
             
             Info($"Starting journey from {_segments[0].GetStationName()} to {_segments[^1].GetStationName()}");
             
             // test
             // UIManager.Instance?.CreateProgressBarsForRoute(_segments, _stationNetwork, _compressionFactor);
-            UIManager.Instance?.CreateProgressBarsForRoute(_segments);
-            UIManager.Instance?.ShowMap();
-            CustomInputManager.Instance.SwitchToUI();
+            OnJourneyStarted?.Invoke(_segments);
+            
+            // UIManager.Instance?.CreateProgressBarsForRoute(_segments);
+            // UIManager.Instance?.ShowMap();
+            // CustomInputManager.Instance.SwitchToUI();
             //test
             
             _isExpress = trainRoute.IsExpress;
@@ -202,15 +198,16 @@ namespace Manager.Runtime
                 return;
             }
 
-            _sceneToLoad = end.StationScene;
-            _sceneManager = GetSceneLoader();
+            // _sceneToLoad = end.StationScene;
+            // _sceneManager = GetSceneLoader();
 
             Info($"Starting journey from {_segments[0].GetStationName()} to {_segments[^1].GetStationName()}");
+            OnJourneyStarted?.Invoke(_segments);
             // UIManager.Instance?.CreateProgressBarsForRoute(_segments, _stationNetwork, _compressionFactor);
-            UIManager.Instance?.CreateProgressBarsForRoute(_segments);
-            UIManager.Instance?.ShowMap();
-            CustomInputManager.Instance.SwitchToUI();
-
+            // UIManager.Instance?.CreateProgressBarsForRoute(_segments);
+            // UIManager.Instance?.ShowMap();
+            // CustomInputManager.Instance.SwitchToUI();
+            //
             _isExpress = false;
             StartSegment(_currentStationIndex);
         }
@@ -245,7 +242,8 @@ namespace Manager.Runtime
             _currentSegmentTimer.OnTimerStop += EndSegment;
             
             // UIManager.Instance?.StartSegmentProgress(index, _currentSegmentTimer);
-            UIManager.Instance?.StartMapSegmentProgress(index, _currentSegmentTimer);
+            // UIManager.Instance?.StartMapSegmentProgress(index, _currentSegmentTimer);
+            OnSegmentStarted?.Invoke(index, _currentSegmentTimer);
             
             _currentSegmentTimer.Start();
             //test
@@ -256,25 +254,29 @@ namespace Manager.Runtime
         private void EndSegment()
         {
             _currentStationIndex++;
-            if(!_reloaded)
-                ClockManager.Instance.AdvanceTime(_segmentTime);
+            // if(!_reloaded)
+                // ClockManager.Instance.AdvanceTime(_segmentTime);
+            
+            OnSegmentEnded?.Invoke(_segmentTime);
+                
             if (!_isExpress && _stopEarly && !_reloaded)
             {
                 ChangeDestination(_currentStationIndex);
                 _stopEarly = false;
                 return;
             }
-            if (!_reloaded)
+            // if (!_reloaded)
                 StartSegment(_currentStationIndex);
             
-            if(_reloaded)
-                EndJourney();
+            // if(_reloaded)
+                // EndJourney();
         }
 
         private void ChangeDestination(int index)
         {
             // _sceneManager.UnloadScene(_sceneToLoad);
             _sceneToLoad = _segments[index].StationScene;
+            OnDestinationChanged?.Invoke(_sceneToLoad);
             // _sceneManager.PreloadScene(_sceneToLoad);
             
             ArriveAndPauseAtStation(index);
@@ -300,13 +302,14 @@ namespace Manager.Runtime
                 _currentSegmentTimer = null;
             }
             // UIManager.Instance?.ResetInternalState();
-            UIManager.Instance?.HideMap();
-            CustomInputManager.Instance?.SwitchToPlayer();
+            // UIManager.Instance?.HideMap();
+            // CustomInputManager.Instance?.SwitchToPlayer();
             
             // Load and activate the scene
-            _sceneManager = GetSceneLoader();
-            _sceneManager.PreloadScene(_sceneToLoad);
-            _sceneManager.ActivateScene();
+            // _sceneManager = GetSceneLoader();
+            // _sceneManager.PreloadScene(_sceneToLoad);
+            // _sceneManager.ActivateScene();
+            OnJourneyEnded?.Invoke();
             
             InfoDone($"Journey paused at station {_segments[stationIndex].GetStationName()}");
         }
@@ -314,8 +317,8 @@ namespace Manager.Runtime
         private void EndJourney()
         {
             InfoDone($"Journey ended.");
-            if(!_reloaded)
-                _sceneManager.PreloadScene(_sceneToLoad);
+            // if(!_reloaded)
+            //     _sceneManager.PreloadScene(_sceneToLoad);
             //todo: make the Station_Data.isDiscovered = true;
             // once we arrive at the destination
             _segments[_currentStationIndex].IsDiscovered = true;
@@ -331,16 +334,17 @@ namespace Manager.Runtime
             
             OnTrainStationDiscovered?.Invoke(_segments[_currentStationIndex]);
             //test
-            UIManager.Instance?.ResetInternalState();
-            UIManager.Instance?.HideMap();
-            CustomInputManager.Instance?.SwitchToPlayer();
+            // UIManager.Instance?.ResetTravelUiState();
+            // UIManager.Instance?.HideMap();
+            // CustomInputManager.Instance?.SwitchToPlayer();
             // _currentSegmentTimer.Stop();
             // timer stop is done in the uiManager
             _currentSegmentTimer = null;
             _isExpress = false;
             //test
-            if(!_reloaded)
-                _sceneManager.ActivateScene();
+            // if(!_reloaded)
+            //     _sceneManager.ActivateScene();
+            OnJourneyEnded?.Invoke();
             
             RemovePausedRoute();
         }
@@ -353,7 +357,7 @@ namespace Manager.Runtime
             {
                 SetFact(_stationFacts, _discoveredStations, false);
             }
-            UIManager.Instance?.ResetInternalState();
+            UIManager.Instance?.ResetTravelUiState();
             UIManager.Instance?.HideMap();
             CustomInputManager.Instance?.SwitchToPlayer();
             _currentSegmentTimer = null;
@@ -381,8 +385,10 @@ namespace Manager.Runtime
             var activeSceneName = UnitySceneManager.GetActiveScene().name;
             var pausedSceneName = _segments[_routePausedIndex].StationScene?.SceneName;
             Info($"pausedSceneName: {pausedSceneName}, activeSceneName: {activeSceneName}");
-            return !string.IsNullOrEmpty(pausedSceneName) && string.Equals(activeSceneName, pausedSceneName, StringComparison.Ordinal);
+            // return !string.IsNullOrEmpty(pausedSceneName) && string.Equals(activeSceneName, pausedSceneName, StringComparison.Ordinal);
+            return _routePaused;
         }
+        
         // Resume the route from the paused station, continuing to the next station if available
         public void ResumeJourneyFromPausedStation()
         {
@@ -425,10 +431,8 @@ namespace Manager.Runtime
             _routePaused = false;
             _routePausedIndex = -1;
             _reloaded = false;
-            
-            
 
-            m_onPausedRouteRemoved?.Invoke();
+            OnPausedRouteRemoved?.Invoke();
         }
 
         private SceneManager GetSceneLoader()
@@ -450,7 +454,7 @@ namespace Manager.Runtime
                 _currentSegmentTimer = null;
             }
             
-            UIManager.Instance?.ResetInternalState();
+            // UIManager.Instance?.ResetTravelUiState();
             
             _segments.Clear();
             _currentStationIndex = 0;
@@ -467,7 +471,7 @@ namespace Manager.Runtime
         #region Debug
 
         [ContextMenu("Remove all visibility (except for A3)")]
-        private void RemoveAllVisibility()
+        public void RemoveAllVisibility()
         {
             foreach (var stationNetwork in _allStationNetworks)
             {

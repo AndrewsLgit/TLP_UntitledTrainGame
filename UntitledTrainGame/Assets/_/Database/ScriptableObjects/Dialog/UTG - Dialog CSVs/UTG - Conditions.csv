@@ -1,0 +1,8 @@
+Type,ID,Key,Condition,Default Value,Scope
+Dialogue,s_a3_ta_intro,if_start_game,TRUE,TRUE,Global
+Dialogue,s_a3_ta_01,is_first_loop,TRUE,TRUE,Global
+,,is_first_talk_a,,,
+Dialogue,s_a5_a_02bis,if_express_train,TRUE,FALSE,Global
+,,if_item_held_a,,,
+,,first_time_asking,TRUE,TRUE,Global
+,,first_time_item_a,,,

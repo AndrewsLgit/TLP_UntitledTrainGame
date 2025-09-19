@@ -1,0 +1,20 @@
+{
+    "name": "GameStateManager.Runtime",
+    "rootNamespace": "GameStateManager.Runtime",
+    "references": [
+        "GUID:70ee7783ecf9646f99ae250415f2a80b",
+        "GUID:67a4cc0bd894c4a15843a8d00269673d",
+        "GUID:0c859d0963fcc454baed7e047bb40422",
+        "GUID:577c75116d4eb4c95bf41123614d4d28",
+        "GUID:bbd911f326f31479ab1335907c7bdfb2"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

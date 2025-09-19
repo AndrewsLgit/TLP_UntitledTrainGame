@@ -1,0 +1,3 @@
+TargetType,TargetId,flagKey,Needed value,default value,scope,
+Dialog,s_a3_ta_intro,if_start_game,TRUE,TRUE,Global
+Dialog,s_a3_ta_01,is_first_loop,TRUE,TRUE,Global
