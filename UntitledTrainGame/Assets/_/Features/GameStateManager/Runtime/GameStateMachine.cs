@@ -335,6 +335,7 @@ namespace GameStateManager.Runtime
         {
             ChangeState(GameState.Transitioning);
             Assert.IsNotNull(_clockService, "Clock service not found!");
+            _uiService.StartSleep();
             _clockService.SleepToLoopEnd();
         }
 
@@ -343,6 +344,7 @@ namespace GameStateManager.Runtime
             Assert.IsNotNull(_clockService, "Clock service not found!");
             
             _clockService.JumpToNextEventWithTag(tag ?? string.Empty);
+            _uiService.StartWait();
             _routeService.RemovePausedRoute();
         }
 

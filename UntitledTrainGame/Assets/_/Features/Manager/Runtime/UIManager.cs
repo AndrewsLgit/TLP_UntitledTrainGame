@@ -303,6 +303,36 @@ namespace Game.Runtime
 
         #endregion
         
+        #region Transition Animations
+        
+        public void StartFadeIn()
+        {
+            // _fadeIn.SetActive(true);
+            // var anim = _fadeIn.GetComponentInChildren<Animator>();
+            TransitionAnimationController.Instance.StartFadeIn();
+        }
+        public void StartFadeOut()
+        {
+            // _fadeOut.SetActive(true);
+            // var anim = _fadeOut.GetComponentInChildren<Animator>();
+            TransitionAnimationController.Instance.StartFadeOut();
+
+        }
+        public void StartSleep()
+        {
+            // _sleep.SetActive(true);
+            // var anim = _sleep.GetComponentInChildren<Animator>();
+            TransitionAnimationController.Instance.StartSleep();
+
+        }
+        public void StartWait()
+        {
+            // _wait.SetActive(true);
+            // var anim = _wait.GetComponentInChildren<Animator>();
+            TransitionAnimationController.Instance.StartWait();
+        }
+        
+        #endregion
         #region Game UI Menus
         // Set (invert) pause state
         public void PauseGame()
