@@ -14,6 +14,15 @@ namespace ToServiceInterfacesols.Runtime
         void StartMapSegmentProgress(int segmentIndex, CountdownTimer timer);
         void ResetTravelUiState();
 
+        // Transition Animations
+        public void StartFadeIn();
+
+        public void StartFadeOut();
+
+        public void StartSleep();
+
+        public void StartWait();
+        
         // Game menus (optional – keep what you need)
         void PauseGame();
         void ResumeGame();
