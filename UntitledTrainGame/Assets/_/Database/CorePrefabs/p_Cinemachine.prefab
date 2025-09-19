@@ -32,7 +32,8 @@ Transform:
   m_LocalPosition: {x: 0.09490356, y: -4.550665, z: 1.9149413}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
-  m_Children: []
+  m_Children:
+  - {fileID: 3699958489376894410}
   m_Father: {fileID: 3410369350799889330}
   m_LocalEulerAnglesHint: {x: 10.209, y: -35.305, z: 0}
 --- !u!20 &2708633476261738006
@@ -110,7 +111,8 @@ MonoBehaviour:
   m_RequiresDepthTextureOption: 2
   m_RequiresOpaqueTextureOption: 2
   m_CameraType: 0
-  m_Cameras: []
+  m_Cameras:
+  - {fileID: 3373361772938116867}
   m_RendererIndex: -1
   m_VolumeLayerMask:
     serializedVersion: 2
@@ -197,12 +199,12 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5066395951552460598}
   serializedVersion: 2
-  m_LocalRotation: {x: -0.16019344, y: -0.025053382, z: 0.011265613, w: 0.98670334}
-  m_LocalPosition: {x: 0.094904095, y: -4.550665, z: 1.914942}
+  m_LocalRotation: {x: 0.000000014901161, y: -0.000000024214387, z: 4.656613e-10, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 3410369350799889330}
+  m_Father: {fileID: 1143421920731791110}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!20 &3373361772938116867
 Camera:
@@ -337,7 +339,6 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1473515850565564644}
-  - {fileID: 3699958489376894410}
   - {fileID: 1143421920731791110}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
