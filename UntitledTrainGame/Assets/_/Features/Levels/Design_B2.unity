@@ -1431,18 +1431,6 @@ PrefabInstance:
       propertyPath: m_LocalPosition.z
       value: 0.37
       objectReference: {fileID: 0}
-    - target: {fileID: 4183591130633569132, guid: e17302e8239d14d8facdb270cb35d404, type: 3}
-      propertyPath: m_BackGroundColor.b
-      value: 0.8431373
-      objectReference: {fileID: 0}
-    - target: {fileID: 4183591130633569132, guid: e17302e8239d14d8facdb270cb35d404, type: 3}
-      propertyPath: m_BackGroundColor.g
-      value: 0.9960785
-      objectReference: {fileID: 0}
-    - target: {fileID: 4183591130633569132, guid: e17302e8239d14d8facdb270cb35d404, type: 3}
-      propertyPath: m_BackGroundColor.r
-      value: 0.96470594
-      objectReference: {fileID: 0}
     - target: {fileID: 4539751600456499358, guid: e17302e8239d14d8facdb270cb35d404, type: 3}
       propertyPath: m_Layer
       value: 0
@@ -1499,6 +1487,18 @@ PrefabInstance:
       propertyPath: m_Layer
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 7010012984622621799, guid: e17302e8239d14d8facdb270cb35d404, type: 3}
+      propertyPath: m_Cameras.Array.size
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7010012984622621799, guid: e17302e8239d14d8facdb270cb35d404, type: 3}
+      propertyPath: 'm_Cameras.Array.data[0]'
+      value: 
+      objectReference: {fileID: 442942556}
+    - target: {fileID: 7010012984622621799, guid: e17302e8239d14d8facdb270cb35d404, type: 3}
+      propertyPath: m_VolumeLayerMask.m_Bits
+      value: 4294967295
+      objectReference: {fileID: 0}
     - target: {fileID: 7227251282503685941, guid: e17302e8239d14d8facdb270cb35d404, type: 3}
       propertyPath: _sceneToLoad
       value: 
@@ -1547,7 +1547,8 @@ PrefabInstance:
       propertyPath: m_Layer
       value: 0
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    m_RemovedComponents:
+    - {fileID: 5869581501163098132, guid: e17302e8239d14d8facdb270cb35d404, type: 3}
     m_RemovedGameObjects:
     - {fileID: 3209930930952358121, guid: e17302e8239d14d8facdb270cb35d404, type: 3}
     - {fileID: 3474897993902299212, guid: e17302e8239d14d8facdb270cb35d404, type: 3}
@@ -2390,6 +2391,11 @@ PrefabInstance:
 Transform:
   m_CorrespondingSourceObject: {fileID: 1731749694576427731, guid: 5dcc1f1c755a947a5835d994b3f3b5ed, type: 3}
   m_PrefabInstance: {fileID: 435908806}
+  m_PrefabAsset: {fileID: 0}
+--- !u!20 &442942556 stripped
+Camera:
+  m_CorrespondingSourceObject: {fileID: 3551493565730769529, guid: e17302e8239d14d8facdb270cb35d404, type: 3}
+  m_PrefabInstance: {fileID: 237989338}
   m_PrefabAsset: {fileID: 0}
 --- !u!1001 &493743506
 PrefabInstance:
