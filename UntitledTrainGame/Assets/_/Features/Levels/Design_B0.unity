@@ -129,7 +129,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 2573707399215912069, guid: e17302e8239d14d8facdb270cb35d404, type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 3474897993902299212, guid: e17302e8239d14d8facdb270cb35d404, type: 3}
       propertyPath: m_IsActive
@@ -9223,7 +9223,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6329061466236294378, guid: 5dcc1f1c755a947a5835d994b3f3b5ed, type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 8363469493765800719, guid: 5dcc1f1c755a947a5835d994b3f3b5ed, type: 3}
       propertyPath: _trainRoute
