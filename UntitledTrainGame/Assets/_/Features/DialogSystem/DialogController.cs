@@ -39,6 +39,12 @@ namespace DialogSystem.Runtime
         private bool _subscribedToNodeManager = false;
         private bool _subscribedToUiManager = false;
 
+        // Track when text is fully rendered to allow advance/end
+        private bool _textComplete;
+
+        // Debounce submit right after choosing a response and entering a new node
+        private float _blockSubmitUntil = 0f;
+
         // --- End of Private Variables --- 
 
         #endregion
@@ -111,30 +117,14 @@ namespace DialogSystem.Runtime
             _choiceController.Tick(Time.deltaTime);
         }
 
-        private void FixedUpdate()
-        {
-        }
-
         private void OnEnable()
-        
         { 
-
-            
-            
             EnsureEventSubscriptions();
         }
 
         private void OnDisable()
         {
-            
-
             EnsureEventUnsub();
-        }
-
-        
-
-        private void OnDestroy()
-        {
         }
 
         #endregion
@@ -174,6 +164,7 @@ namespace DialogSystem.Runtime
             Assert.IsNotNull(UiManager);
             Assert.IsNotNull(_inputRouter);
             // Render node text with typewriter effect
+            _textComplete = false;
             UiManager.SetTypewriterSpeed(CharactersPerSecond);
             UiManager.RenderNode(node);
             
@@ -213,6 +204,7 @@ namespace DialogSystem.Runtime
                 return;
             }
 
+            _textComplete = true;
 
             var node = NodeManager.CurrentNode;
             if (node is null)
@@ -246,12 +238,16 @@ namespace DialogSystem.Runtime
             NodeManager.SelectResponse(index);
             // Close choice navigation
             _choiceController?.Close();
+            
+            // Prevent the same Submit press from immediately skipping the next node
+            _blockSubmitUntil = Time.unscaledTime + 0.2f;
         }
 
         private void HandleAdvanceRequested()
         {
             // Player submitted choice, advance to next node
-            NodeManager.AdvanceToNextNode();
+            // NodeManager.AdvanceToNextNode();
+            TryAdvanceOrEnd();
         }
 
         #endregion
@@ -278,6 +274,9 @@ namespace DialogSystem.Runtime
         {
             Assert.IsNotNull(_choiceController);
             if(!_uiOpen) return;
+            
+            // Debounce to avoid double-activating on the node after a choice selection
+            if (Time.unscaledTime < _blockSubmitUntil) return;
 
             if (_choiceController.IsOpen)
             {
@@ -286,8 +285,12 @@ namespace DialogSystem.Runtime
             }
             else
             {
-                // No open choices -> treat submit as advance
-                NodeManager?.AdvanceToNextNode();
+                // Only allow advance/end after text is complete
+                if (!_textComplete) return;
+                
+                // No open choices -> advance if possible, otherwise end conversation
+                TryAdvanceOrEnd();
+                // NodeManager?.AdvanceToNextNode();
             }
         }
         
@@ -325,6 +328,35 @@ namespace DialogSystem.Runtime
             UiManager?.HighlightResponse(index);
         }
 
+        // Submit/Advance helper: if there's a valid next node, advance; otherwise end conversation
+        private void TryAdvanceOrEnd()
+        {
+            if (NodeManager is null) return;
+            
+            var node = NodeManager.CurrentNode;
+            if (node is null)
+            {
+                NodeManager.EndConversation();
+                return;
+            }
+            
+            // If choices exist, this path shouldn't be used (submit should be handled by choice controller)
+            var hasResponses = node.Responses is {Count: > 0};
+            if (hasResponses) return;
+            
+            // Require text to be complete before advancing/ending
+            if (!_textComplete) return;
+            
+            var eligibleNext = NodeManager.GetNextEligibleNodes();
+            if (eligibleNext is { Count: > 0 })
+            {
+                NodeManager.AdvanceToNextNode();
+                _textComplete = false;
+            }
+            else NodeManager.EndConversation();
+        }
+
+        #region Event Subscription Helpers
         private void EnsureEventSubscriptions()
         {
             if (_choiceController is not null)
@@ -392,6 +424,8 @@ namespace DialogSystem.Runtime
                 _inputRouter.OnUICancel -= OnUICancel;
             }
         }
+        #endregion
+        
         #endregion
         
         
