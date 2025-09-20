@@ -335,17 +335,25 @@ namespace GameStateManager.Runtime
         {
             ChangeState(GameState.Transitioning);
             Assert.IsNotNull(_clockService, "Clock service not found!");
-            _uiService.StartSleep();
-            _clockService.SleepToLoopEnd();
+            // _uiService.StartSleep();
+            _uiService.StartSleep(_clockService.SleepToLoopEnd);
+            // _clockService.SleepToLoopEnd();
+            return;
+            
+            void NextAction() => _clockService.SleepToLoopEnd();
         }
 
         public void RequestWaitUntilNextEvent(string tag)
         {
             Assert.IsNotNull(_clockService, "Clock service not found!");
-            
-            _clockService.JumpToNextEventWithTag(tag ?? string.Empty);
-            _uiService.StartWait();
-            _routeService.RemovePausedRoute();
+
+            _uiService.StartWait(NextAction);
+            return;
+            // var timeEvent = _clockService.JumpToNextEventWithTag(tag ?? string.Empty);
+            // Info($"Jumped to next event {timeEvent.m_EventName} at {timeEvent.m_Start}");
+            // _routeService.RemovePausedRoute();
+
+            void NextAction() => _clockService.JumpToNextEventWithTag(tag);
         }
 
         public void RequestPreloadAndActivateScene()
@@ -435,6 +443,7 @@ namespace GameStateManager.Runtime
             _uiService.HideMap();
             _inputService.SwitchToPlayer();
             _sceneToLoad = _sceneService.StartScene.name;
+            // _uiService.StartSleep();
             RequestPreloadAndActivateScene();
         }
 

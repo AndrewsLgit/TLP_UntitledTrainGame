@@ -81,6 +81,8 @@ namespace Game.Runtime
 
         private Transform[] _UIMapChildrenCache;
 
+        private TransitionAnimationController _transitionAnimator;
+
         // Private variables
         #endregion
         
@@ -150,6 +152,8 @@ namespace Game.Runtime
             // Subscribe to clock event
             ClockManager.Instance.OnTimeUpdated += UpdateClockTime;
             UpdateClockTime(ClockManager.Instance.CurrentTime);
+            
+            _transitionAnimator = TransitionAnimationController.Instance;
         }
 
         private void OnDestroy()
@@ -305,31 +309,31 @@ namespace Game.Runtime
         
         #region Transition Animations
         
-        public void StartFadeIn()
+        public void StartFadeIn(Action onComplete = null)
         {
             // _fadeIn.SetActive(true);
             // var anim = _fadeIn.GetComponentInChildren<Animator>();
-            TransitionAnimationController.Instance.StartFadeIn();
+            _transitionAnimator.PlayTransition(TransitionAnimationController.TransitionType.FadeIn, onComplete);
         }
-        public void StartFadeOut()
+        public void StartFadeOut(Action onComplete = null)
         {
             // _fadeOut.SetActive(true);
             // var anim = _fadeOut.GetComponentInChildren<Animator>();
-            TransitionAnimationController.Instance.StartFadeOut();
+            _transitionAnimator.PlayTransition(TransitionAnimationController.TransitionType.FadeOut, onComplete);
 
         }
-        public void StartSleep()
+        public void StartSleep(Action onComplete = null)
         {
             // _sleep.SetActive(true);
             // var anim = _sleep.GetComponentInChildren<Animator>();
-            TransitionAnimationController.Instance.StartSleep();
+            _transitionAnimator.PlayTransition(TransitionAnimationController.TransitionType.Sleep, onComplete);
 
         }
-        public void StartWait()
+        public void StartWait(Action onComplete = null)
         {
             // _wait.SetActive(true);
             // var anim = _wait.GetComponentInChildren<Animator>();
-            TransitionAnimationController.Instance.StartWait();
+            _transitionAnimator.PlayTransition(TransitionAnimationController.TransitionType.Wait, onComplete);
         }
         
         #endregion

@@ -1,4 +1,5 @@
 using Foundation.Runtime;
+using GameStateManager.Runtime;
 using ServiceInterfaces.Runtime;
 using Services.Runtime;
 using SharedData.Runtime;
@@ -52,7 +53,8 @@ namespace Interactable.Runtime
             Info($"Bench sleep selected");
             // Add clock manager sleep event (reset loop)
             // _clockManager.JumpToNextEventWithTag("Sleep");
-            _clockManager.SleepToLoopEnd();
+            // _clockManager.SleepToLoopEnd();
+            GameStateMachine.Instance.RequestSleepToLoopEnd();
         }
 
         public void Wait()
@@ -63,13 +65,15 @@ namespace Interactable.Runtime
             TimeEvent foundEvent = null;
             Info("Interacting with Bench");
             
-            foundEvent = _clockManager.JumpToNextEventWithTag("Train");
+            // foundEvent = _clockManager.JumpToNextEventWithTag("Train");
+            //
+            // if (foundEvent != null)
+            // {
+            //     Info($"Event found: {foundEvent}. Advancing time to {foundEvent.m_Start}");
+            // }
+            // else Warning("No event found!");
 
-            if (foundEvent != null)
-            {
-                Info($"Event found: {foundEvent}. Advancing time to {foundEvent.m_Start}");
-            }
-            else Warning("No event found!");
+            GameStateMachine.Instance.RequestWaitUntilNextEvent("Train");
         }
 
         public void AdvanceTime(GameTime time)

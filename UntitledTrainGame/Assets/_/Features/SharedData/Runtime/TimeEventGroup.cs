@@ -40,12 +40,14 @@ namespace SharedData.Runtime
                 // event should become active
                 if (!timeEvent.m_IsActive && now >= start && now < end)
                 {
+                    Info($"Activating event {timeEvent.m_EventName} at {timeEvent.m_Start}");
                     timeEvent.m_IsActive = true;
                     timeEvent.m_OnStart?.Invoke();
                 }
                 // event should become inactive
                 else if (timeEvent.m_IsActive && now >= end)
                 {
+                    Info($"Deactivating event {timeEvent.m_EventName} at {timeEvent.m_End}");
                     timeEvent.m_IsActive = false;
                     timeEvent.m_OnEnd?.Invoke();
                 }

@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using SharedData.Runtime;
 using Tools.Runtime;
@@ -15,13 +16,13 @@ namespace ToServiceInterfacesols.Runtime
         void ResetTravelUiState();
 
         // Transition Animations
-        public void StartFadeIn();
+        public void StartFadeIn(Action onComplete = null);
 
-        public void StartFadeOut();
+        public void StartFadeOut(Action onComplete = null);
 
-        public void StartSleep();
+        public void StartSleep(Action onComplete = null);
 
-        public void StartWait();
+        public void StartWait(Action onComplete = null);
         
         // Game menus (optional – keep what you need)
         void PauseGame();

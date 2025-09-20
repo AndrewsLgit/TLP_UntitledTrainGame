@@ -113,11 +113,11 @@ namespace Manager.Runtime
         {
             int minTime = m_TimeConfig.m_LoopStart.ToTotalMinutes();
             int maxTime = m_TimeConfig.m_LoopEnd.ToTotalMinutes();
-            int newTimeToMinues = newTime.ToTotalMinutes();
+            int newTimeToMinutes = newTime.ToTotalMinutes();
             
-            if (newTimeToMinues < minTime || newTimeToMinues >= maxTime)
+            if (newTimeToMinutes < minTime || newTimeToMinutes >= maxTime)
             {
-                if(newTimeToMinues >= maxTime)
+                if(newTimeToMinutes >= maxTime)
                     OnLoopEnd?.Invoke();
                 
                 // If new time is outside of loop range, reset to loop start
@@ -132,6 +132,7 @@ namespace Manager.Runtime
             }
             else CurrentTime = newTime;
 
+            RefreshEventGroups();
             CheckAllEvents();
             OnTimeUpdated?.Invoke(CurrentTime);
         }
@@ -261,7 +262,7 @@ namespace Manager.Runtime
                 return nextEvent;
             }
             RouteManager.Instance.RemovePausedRoute();
-            GetNextEvent();
+            // GetNextEvent();
             SetTime(nextEvent.m_Start);
             return nextEvent;
         }
