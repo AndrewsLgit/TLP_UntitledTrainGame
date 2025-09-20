@@ -1711,7 +1711,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3142523672051620745, guid: 3bc13afc101fc29448416a32966d3924, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 3.2069998
+      value: 4.122
       objectReference: {fileID: 0}
     - target: {fileID: 3142523672051620745, guid: 3bc13afc101fc29448416a32966d3924, type: 3}
       propertyPath: m_LocalRotation.w
@@ -1797,6 +1797,10 @@ PrefabInstance:
     - target: {fileID: 1484273605380699347, guid: 69e299e30a0c9404ea2344218a55fd14, type: 3}
       propertyPath: m_Name
       value: P_FogBrumeParticule (7)
+      objectReference: {fileID: 0}
+    - target: {fileID: 1484273605380699347, guid: 69e299e30a0c9404ea2344218a55fd14, type: 3}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 4690393626934686411, guid: 69e299e30a0c9404ea2344218a55fd14, type: 3}
       propertyPath: m_LocalScale.x
@@ -3381,7 +3385,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6329061466236294378, guid: 7694d04ffee374c5d9c06a969acc27eb, type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 8363469493765800719, guid: 7694d04ffee374c5d9c06a969acc27eb, type: 3}
       propertyPath: _trainRoute
@@ -3773,7 +3777,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4169665015968083224, guid: e17302e8239d14d8facdb270cb35d404, type: 3}
       propertyPath: m_LocalPosition.z
-      value: -3.67
+      value: -5.83
       objectReference: {fileID: 0}
     - target: {fileID: 4169665015968083224, guid: e17302e8239d14d8facdb270cb35d404, type: 3}
       propertyPath: m_LocalRotation.w
@@ -6678,7 +6682,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6329061466236294378, guid: 3e04f8d9292c340bcb441dea671e7147, type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 8363469493765800719, guid: 3e04f8d9292c340bcb441dea671e7147, type: 3}
       propertyPath: _trainRoute
@@ -7499,7 +7503,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8705579746204529267, guid: 33f7c1cd0de9585458bd372130e38d74, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 1.7349997
+      value: 2.65
       objectReference: {fileID: 0}
     - target: {fileID: 8705579746204529267, guid: 33f7c1cd0de9585458bd372130e38d74, type: 3}
       propertyPath: m_LocalRotation.w
@@ -7654,6 +7658,10 @@ PrefabInstance:
     - target: {fileID: 1484273605380699347, guid: 69e299e30a0c9404ea2344218a55fd14, type: 3}
       propertyPath: m_Name
       value: P_FogBrumeParticule (1)
+      objectReference: {fileID: 0}
+    - target: {fileID: 1484273605380699347, guid: 69e299e30a0c9404ea2344218a55fd14, type: 3}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 4690393626934686411, guid: 69e299e30a0c9404ea2344218a55fd14, type: 3}
       propertyPath: m_LocalScale.x
@@ -9810,6 +9818,67 @@ Transform:
   m_Children: []
   m_Father: {fileID: 439851800}
   m_LocalEulerAnglesHint: {x: 2.297, y: -99.296, z: 0.645}
+--- !u!1001 &2172746710923126070
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 168541442533896180, guid: 13ece78ccbb97f548b6d42add509e81c, type: 3}
+      propertyPath: m_Name
+      value: CINE_ply_MC
+      objectReference: {fileID: 0}
+    - target: {fileID: 168541442533896180, guid: 13ece78ccbb97f548b6d42add509e81c, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 656706547251574094, guid: 13ece78ccbb97f548b6d42add509e81c, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -8.017
+      objectReference: {fileID: 0}
+    - target: {fileID: 656706547251574094, guid: 13ece78ccbb97f548b6d42add509e81c, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0.367
+      objectReference: {fileID: 0}
+    - target: {fileID: 656706547251574094, guid: 13ece78ccbb97f548b6d42add509e81c, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 1.649
+      objectReference: {fileID: 0}
+    - target: {fileID: 656706547251574094, guid: 13ece78ccbb97f548b6d42add509e81c, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 0.7071068
+      objectReference: {fileID: 0}
+    - target: {fileID: 656706547251574094, guid: 13ece78ccbb97f548b6d42add509e81c, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 656706547251574094, guid: 13ece78ccbb97f548b6d42add509e81c, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: -0.7071068
+      objectReference: {fileID: 0}
+    - target: {fileID: 656706547251574094, guid: 13ece78ccbb97f548b6d42add509e81c, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 656706547251574094, guid: 13ece78ccbb97f548b6d42add509e81c, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 656706547251574094, guid: 13ece78ccbb97f548b6d42add509e81c, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: -90
+      objectReference: {fileID: 0}
+    - target: {fileID: 656706547251574094, guid: 13ece78ccbb97f548b6d42add509e81c, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 13ece78ccbb97f548b6d42add509e81c, type: 3}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
@@ -9827,3 +9896,4 @@ SceneRoots:
   - {fileID: 428258179}
   - {fileID: 1623090422}
   - {fileID: 309749090}
+  - {fileID: 2172746710923126070}
