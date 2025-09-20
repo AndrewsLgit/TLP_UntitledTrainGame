@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using CodiceApp;
 using Foundation.Runtime;
 using JetBrains.Annotations;
 using SharedData.Runtime;
@@ -33,6 +34,11 @@ namespace DialogSystem.Runtime
         [SerializeField] private const string _dialogCharacterPortraitTag = "DialogCharacter";
         [SerializeField] private const string _dialogCharacterNameTag = "DialogName";
 
+        [Header("Response Text Colors")]
+        [SerializeField] private Color _classicUnselectedColor;
+        [SerializeField] private Color _classicSelectedColor;
+        [SerializeField] private Color _actionUnselectedColor;
+        [SerializeField] private Color _actionSelectedColor;
         
         private float _cps = 30f;
         private Coroutine _typewriterCoroutine;
@@ -83,6 +89,12 @@ namespace DialogSystem.Runtime
                 _dialogUI.SetActive(false);
                 AssignUIReferences();
             }
+
+            ColorUtility.TryParseHtmlString("#2C1E09", out _classicUnselectedColor);
+            ColorUtility.TryParseHtmlString("#FFFFFC", out _classicSelectedColor);
+            
+            ColorUtility.TryParseHtmlString("#5C7189", out _actionUnselectedColor);
+            ColorUtility.TryParseHtmlString("#FFFFFC", out _actionSelectedColor);
         }
 
         #endregion
@@ -191,6 +203,7 @@ namespace DialogSystem.Runtime
             for (int i = 0; i < node.Responses.Count; i++)
             {
                 var prefab = _classicResponsePrefab ?? _actionResponsePrefab;
+                var isAction = (prefab == _actionResponsePrefab);
                 if (prefab is null)
                 {
                     Warning($"No response prefab set on DialogUIManager.");
@@ -222,8 +235,6 @@ namespace DialogSystem.Runtime
                 //var label = go.GetComponentInChildren<TextMeshProUGUI>();
                 if (label is not null) label.text = node.Responses[i].Text;
                 
-                
-                
                 // Optional: allow clicking a response to select (controller remains source of truth)
                 int idx = i;
                 var btn = go.GetComponentInChildren<Button>();
@@ -251,6 +262,7 @@ namespace DialogSystem.Runtime
                     // child(0) -> unselected, child(1) -> selected
                     go.transform.GetChild(0).gameObject.SetActive(!isSelected);
                     go.transform.GetChild(1).gameObject.SetActive(isSelected);
+                    go.transform.GetChild(2).GetComponent<TextMeshProUGUI>().color = isSelected ? _classicSelectedColor : _classicUnselectedColor;
                 }
             }
         }
@@ -261,9 +273,8 @@ namespace DialogSystem.Runtime
             // RaiseResponseChosen(index, _dialogResponsesContainer.transform.GetChild(index));
             // OnResponseChosen?.Invoke(index, _dialogResponsesContainer.transform.GetChild(index).GetComponent<Response>());
             // === END DEPRECATED ===
-            
-            if (_currentNode is null) return;
-            if (_currentNode.Responses is not {Count: > 0}) return;
+
+            if (_currentNode?.Responses is not {Count: > 0}) return;
             if (index < 0 || index >= _currentNode.Responses.Count) return;
             
             RaiseResponseChosen(index, _currentNode.Responses[index]);;
